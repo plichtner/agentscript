@@ -1,0 +1,49 @@
+<html>
+  <head>
+    <title>Pref-Attach Model</title>
+    <script src="../lib/agentscript.js"></script>
+    <script src="../tools/coffee-script.js"></script>
+    <script type="text/coffeescript">
+    
+    u = ABM.util # ABM.util alias, u.s is also ABM.shape accessor.
+    class MyModel extends ABM.Model
+      setup: ->
+        @refreshPatches = false # for static patches
+        
+        # globals
+        @circleLayout = true
+        @hist = []
+        @stopTick = 400
+        
+        # defaults
+        @agents.setDefault "shape", "circle"
+        @links.setDefault "thickness", .75 # Easier to see thiner link
+        
+        @agents.create 1; @makeNode @agents[0]
+      step: ->
+        @makeNode @findPartner()
+        a.size = Math.sqrt a.linkNeighbors().length for a in @agents
+        @links.layoutCircle @agents, @patches.maxX * 0.9
+        @hist = u.histOf @agents, 1, (a) -> a.linkNeighbors().length
+        console.log "Tick: #{@anim.ticks} Histogram: [#{@hist}]" if @anim.ticks % 25 is 0
+        (console.log "Stopping at stopTick: #{@anim.ticks}"; @stop()) if @anim.ticks is @stopTick
+
+      makeNode: (toNode) ->
+        @agents.create 1, (a) =>
+          @links.create a, toNode
+          a.moveTo toNode; a.forward 8
+      findPartner: ->
+        u.oneOf @links.oneOf().bothEnds() # or @links.allEnds().oneOf()
+
+    # div, patchSize, minX, maxX, minY, maxY, isTorus, hasNeighbors
+    #   Defaults: 13, -16, 16, -16, 16, false, true
+    model = new MyModel "layers", 5, -45, 45, -45, 45, false, false
+    model.debug() # Debug: Put Model vars in global name space
+    model.start() # Run model immediately after startup initialization
+
+    </script>
+  </head>
+  <body>
+    <div id="layers" style="padding:20"></div>
+  </body>
+</html>
