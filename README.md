@@ -30,7 +30,7 @@ The extras/ directory contains libraries that are too specialized to be in the c
 
 #### Sample Models
 
-The models/ directory contains tiny models used to test the system and offer examples to get started with.  These also are our our GitHub pages.  They usually print to the console.log, so opening the developer's javascript console will show model information.
+The models/ directory contains tiny models used to test the system and offer examples to get started with.  These also are our our GitHub pages.  They usually print to the console.log, so opening the developer's JavaScript console will show model information.
 
 [**ants.html**](models/ants.html) Ant foraging with nest and food pheromone diffusion. 
 
@@ -77,7 +77,7 @@ Our example models use CoffeeScript directly within the browser via `text/coffee
 
 You may see this by running a sample model, then use the browser's View Page Source.
 
-Often the models will print to the "javascript console" while they run.
+Often the models will print to the "JavaScript console" while they run.
 
 #### Building a Model
 
@@ -87,7 +87,7 @@ Class Model is an "abstract class" with three abscract methods:
     setup()   Called during startup and by Model.reset()
     step()    Called by animator to advance the model one step
 
-CoffeeScript modelers simply subclass ABM.Model, supplying the three abstract methods.  All the samole models use this, as does the docs/ template example.
+CoffeeScript modelers simply subclass ABM.Model, supplying the three abstract methods.  All the sample models do this, as does the docs/ template example.
 
 JavaScript modelers can simply replace the empty ABM.Model abstract methods:
 
@@ -153,7 +153,7 @@ The typical workflow looks like:
 * cake git:commit - in master, commit locally and push to github
 * cake git:pages - checkout gh-pages branch, merge master, push to github, change back to master.
 
-The git:pages task should be run with no watch task running, otherwise unintential compiles will occur with changing to the gh-pages branch.  Similarly, be careful your editor isn't confused by the gh-pages change .. it completely changes your working directory.  The cake git:commit task will warn you to be careful, prompting for a go-ahead.
+The git:pages task should be run with no watch task running, otherwise unintential compiles will occur with changing to the gh-pages branch.  Similarly, be careful your editor isn't confused by the gh-pages change .. it completely changes your working directory.  The cake git:pages task will warn you to be careful, prompting for a go-ahead.
 
 
 #### License
