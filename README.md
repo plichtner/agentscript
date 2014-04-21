@@ -28,15 +28,17 @@ The extras/ directory contains libraries that are too specialized to be in the c
 
 [**data.coffee**](docs/data.html) A 2D DataSet library for data best expressed as an array of numbers.  It includes the ability to treat Images as data, to parse GIS elevation .asc files, to create datasets from patch variables etc.  It includes analytic abilities like nearest neighbor and bilinear sampling, convolution with 3x3 kernels, and resampling datasets to different resolutions.
 
+[**data.tile.js**](docs/data.tile.html) An addon to the DataSet library for creating datasets from data tiles. It includes methods for embedding a [Leaflet](http://leafletjs.com) map, and for binding a dataset to tiles loaded by a Leaflet layer. See the [tiledroplets model](models/tiledroplets.html) for an example.
+
 [**fbui.coffee**](docs/fbui.html) A simple start at a User Interface abstraction, with JSON representing buttons, sliders, switches and menus.  Each item in the JSON tree modifies the state of the model, either directly by setting Model variables or indirectly by calling a method in class Model.
 
-[**as.dat.gui**](docs/as.dat.gui.html) A [dat.GUI](https://code.google.com/p/dat-gui/) based UI using the JSON tree mentioned above to specify the UI. This gives AgentScript a sophisticated HTML/CSS/JavaScript as well as the distributed fbui above.
+[**as.dat.gui.js**](docs/as.dat.gui.html) A [dat.GUI](https://code.google.com/p/dat-gui/) based UI using the JSON tree mentioned above to specify the UI. This gives AgentScript a sophisticated HTML/CSS/JavaScript as well as the distributed fbui above. See the [flock model](models/flock.html) for an example.
 
-[**mouse.coffee**](docs/mouse.html) A trivial event based interface to the mouse, mainly for direct interaction with the model's graphic layers.  It converts the mouse raw coordinates into patch coordinates.
+[**mouse.coffee**](docs/mouse.html) A trivial event based interface to the mouse, mainly for direct interaction with the model's graphic layers.  It converts raw mouse coordinates into patch coordinates.
 
 #### Sample Models
 
-The models/ directory contains tiny models used to test the system and offer examples to get started with.  These also are our our GitHub pages.  They usually print to the console.log, so opening the developer's JavaScript console will show model information.
+The models/ directory contains tiny models used both as unit tests and as examples to get started with.  They usually print to the console.log, so opening the developer's JavaScript console will show model information.
 
 [**ants.html**](models/ants.html) Ant foraging with nest and food pheromone diffusion. 
 
@@ -46,9 +48,11 @@ The models/ directory contains tiny models used to test the system and offer exa
 
 [**fire.html**](models/fire.html) A CA based spread of fire showing burn behavior.
 
-[**flock.html**](models/flock.html) The classic "boids" model where agents use three simple rules resulting in realistic flocking.
+[**flock.html**](models/flock.html) The classic "boids" model where agents use three simple rules resulting in realistic flocking. Uses the as.dat.gui.js extra.
 
-[**gridpath.html**](models/gridpath.html) One of Knuth's great puzzles on the probability of all Manhattan  traversals diagonally traversing a grid.
+[**headlessflock.html**](models/headlessflock.html) The same classic "boids" model as above, only this time agents are rendered as DOM elements instead of being drawn to a canvas.
+
+[**gridpath.html**](models/gridpath.html) One of Knuth's great puzzles on the probability of all Manhattan traversals diagonally traversing a grid.
 
 [**linktravel.html**](models/linktravel.html) Agents traversing a graph of nodes and links.
 
@@ -58,7 +62,9 @@ The models/ directory contains tiny models used to test the system and offer exa
 
 [**tspga.html**](models/tspga.html) A Traveling Sales Person solution via a Genetic Algorithm showing the rapid conversion of stochastic methods.
 
-[**droplets.html**](models/droplets.html) A simple GIS model based on ESRI asc elevation file with droplets agents which seek lowest elevation. Uses the data.js extension.
+[**droplets.html**](models/droplets.html) A simple GIS model based on an ESRI asc elevation file, where droplet agents seek lowest elevation patches. Uses the data.js extra.
+
+[**tiledroplets.html**](models/tiledroplets.html) Like droplets.html, but here the droplets move on top of a Leaflet map, and elevation data is loaded from a tileserver as the map is panned. Uses data.js, data.tile.js, and as.dat.gui.js extras.
 
 #### Sample Models Format
 
@@ -132,22 +138,21 @@ Cake is used to build agentscript.coffee from individual source files, and to co
 
 The "extras" are libraries that augment agentscript and are individually compiled into lib/ as .js, .min.js, and .map files by Cake.  Here are the primary cake tasks:
 
-    cake watch         # Watch for source file updates, invoke builds
-    cake all           # Compile coffee, minify js, create docs
-    cake git:diff      # git diff the core and extras .coffee files
-    cake git:prep      # cake all; git add/status
-    cake git:commit    # commit locally, push to github
-    cake git:pages     # checkout gh-pages, merge master, push to gh-pages, checkout master
+    watch         # Watch for source file updates, invoke builds
+    all           # Compile coffee, minify js, create docs
+    git:diff      # git diff the core and extras .coffee files
+    git:prep      # cake all; git add/status
+    git:commit    # commit locally, push to github
+    git:pages     # checkout gh-pages, merge master, push to gh-pages, checkout master
 
 
 If you are forking/pulling agentscript, install the dev dependencies with
 
-    sudo npm install -g coffee-script   # for cake
-    npm install                         # for everything else
+    npm install
 
 and build with
 
-    cake all
+    node build.js all
 
 We're currently using [coffeescript](http://jashkenas.github.io/coffee-script/extras/coffee-script.js), [shelljs](https://github.com/arturadib/shelljs), [uglifyjs](https://github.com/mishoo/UglifyJS), and optionally [docco](http://jashkenas.github.io/docco/).
 
