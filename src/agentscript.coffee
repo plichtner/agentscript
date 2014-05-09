@@ -926,11 +926,11 @@ ABM.shapes = ABM.util.s = do ->
 # ABM contains three agentsets created by class Model:
 #
 # * `ABM.patches`: the model's "world" grid
-# * `ABM.agents`: the model's agents living on the patchs
+# * `ABM.agents`: the model's agents living on the patches
 # * `ABM.links`: the network links connecting agent pairs
 #
 # See NetLogo [documentation](http://ccl.northwestern.edu/netlogo/docs/)
-# for explanation on the overall semantics of Agent Based Modeling
+# for explanation of the overall semantics of Agent Based Modeling
 # used by AgentSets as well as Patches, Agents, and Links.
 #
 # Note: subclassing `Array` can be dangerous and we may have to convert
@@ -1001,7 +1001,7 @@ class ABM.AgentSet extends Array
     u.removeItem @, o
     @
 
-  # Set the default value of a agent class, return agetnset
+  # Set the default value of an agent class, return agentset
   setDefault: (name, value) -> @agentClass::[name] = value; @
   # Declare variables of an agent class. 
   # Vars = a string of space separated names or an array of name strings
@@ -1030,27 +1030,32 @@ class ABM.AgentSet extends Array
     breeds = breeds.split(" ")
     @asSet (o for o in @ when o.breed.name not in breeds)
 
-  # Recursive floodfill:
-  # Arguments:
+  # Floodfill arguments:
   #
-  # * aset: Initial array of agents, often a single agent: [a]
-  # * fCandidate(a) -> true if a is elegible to be added to the set.
-  # * fJoin(a, lastSet) -> adds a to the agentset, usually by setting a variable
+  # * aset: initial array of agents, often a single agent: [a]
+  # * fCandidate(a, asetLast) -> true if a is elegible to be added to the set
+  # * fJoin(a, asetLast) -> adds a to the agentset, usually by setting a variable
+  # * fCallback(asetLast, asetNext) -> optional function to be called each iteration of floodfill;
+  # if fCallback returns true, the flood is aborted
   # * fNeighbors(a) -> returns the neighbors of this agent
-  # * asetLast: the array of the last set of agents to join the set.
-  #
-  # asetLast generally [] but can used if the join function uses the prior
-  # agents for a distance calculation, for example.
-  #
-  floodFill: (aset, fCandidate, fJoin, fNeighbors, asetLast=[]) ->
+  # * asetLast: the array of the last set of agents to join the flood;
+  # gets passed into fJoin, fCandidate, and fCallback
+  floodFill: (aset, fCandidate, fJoin, fCallback, fNeighbors, asetLast=[]) ->
+    floodFunc = @floodFillOnce(aset, fCandidate, fJoin, fCallback, fNeighbors, asetLast)
+    floodFunc = floodFunc() while floodFunc
+
+  # Move one step forward in a floodfill. floodFillOnce() returns a function that performs the next step of the flood.
+  # This is useful if you want to watch your flood progress as an animation.
+  floodFillOnce: (aset, fCandidate, fJoin, fCallback, fNeighbors, asetLast=[]) ->
     fJoin p, asetLast for p in aset
     asetNext = []
     for p in aset
-      for n in fNeighbors(p) when fCandidate n
+      for n in fNeighbors(p) when fCandidate n, aset
         asetNext.push n if asetNext.indexOf(n) < 0
-    @floodFill asetNext, fCandidate, fJoin, fNeighbors, aset if asetNext.length > 0
-
-    
+    stopEarly = fCallback and fCallback(aset, asetNext)
+    if stopEarly or asetNext.length is 0 then return null
+    else return () =>
+      @floodFillOnce asetNext, fCandidate, fJoin, fCallback, fNeighbors, aset
   
   # Remove adjacent duplicates, by reference, in a sorted agentset.
   # Use `sortById` first if agentset not sorted.
@@ -1247,14 +1252,12 @@ class ABM.AgentSet extends Array
 #
 #     AS.add new XY(pt...) for pt in [[0,1],[8,0],[6,4],[1,3],[1,1]]
 
-# ### Patch and Patches
+# ### Patch & Patches
   
-# Class Patch instances represent a rectangle on a grid.  It holds variables\
+# Class Patch instances represent a rectangle on a grid.  They hold variables
 # that are in the patches the agents live on.  The set of all patches (ABM.patches)
 # is the world on which the agents live and the model runs.
 class ABM.Patch
-  # Constructor & Class Variables:
-  #
   # Constructor & Class Variables:
   # * id:         unique identifier, promoted by agentset create() factory method
   # * breed:      the agentset this agent belongs to
@@ -1542,8 +1545,8 @@ class ABM.Patches extends ABM.AgentSet
     return if @size is 1
     ctx.drawImage @pixelsCtx.canvas, 0, 0, ctx.canvas.width, ctx.canvas.height
 
-  floodFill: (aset, fCandidate, fJoin, fNeighbors=((p)->p.n), asetLast=[]) ->
-    super aset, fCandidate, fJoin, fNeighbors, asetLast
+  floodFillOnce: (aset, fCandidate, fJoin, fCallback, fNeighbors=((p)->p.n), asetLast=[]) ->
+    super aset, fCandidate, fJoin, fCallback, fNeighbors, asetLast
 
   # Diffuse the value of patch variable `p.v` by distributing `rate` percent
   # of each patch's value of `v` to its neighbors. If a color `c` is given,
@@ -1827,7 +1830,7 @@ class ABM.Agents extends ABM.AgentSet
     as = @inRect a, radius, radius, true
     super a, radius, meToo # as.inRadius a, radius, meToo
 
-# ### Link and Links
+# ### Link & Links
   
 # Class Link connects two agent endpoints for graph modeling.
 class ABM.Link
@@ -2241,7 +2244,7 @@ class ABM.Model
 #     @embers and @fires
 #     @spokes and @rims 
 #
-# These agentset's `create` method create subclasses of Agent/Link.
+# These agentsets' `create` methods create subclasses of Agent/Link.
 # Use of <breed>.setDefault methods work as for agents/links, creating default
 # values for the breed set:
 #

@@ -10,11 +10,11 @@
 # ABM contains three agentsets created by class Model:
 #
 # * `ABM.patches`: the model's "world" grid
-# * `ABM.agents`: the model's agents living on the patchs
+# * `ABM.agents`: the model's agents living on the patches
 # * `ABM.links`: the network links connecting agent pairs
 #
 # See NetLogo [documentation](http://ccl.northwestern.edu/netlogo/docs/)
-# for explanation on the overall semantics of Agent Based Modeling
+# for explanation of the overall semantics of Agent Based Modeling
 # used by AgentSets as well as Patches, Agents, and Links.
 #
 # Note: subclassing `Array` can be dangerous and we may have to convert
@@ -85,7 +85,7 @@ class ABM.AgentSet extends Array
     u.removeItem @, o
     @
 
-  # Set the default value of a agent class, return agetnset
+  # Set the default value of an agent class, return agentset
   setDefault: (name, value) -> @agentClass::[name] = value; @
   # Declare variables of an agent class. 
   # Vars = a string of space separated names or an array of name strings
@@ -114,27 +114,32 @@ class ABM.AgentSet extends Array
     breeds = breeds.split(" ")
     @asSet (o for o in @ when o.breed.name not in breeds)
 
-  # Recursive floodfill:
-  # Arguments:
+  # Floodfill arguments:
   #
-  # * aset: Initial array of agents, often a single agent: [a]
-  # * fCandidate(a) -> true if a is elegible to be added to the set.
-  # * fJoin(a, lastSet) -> adds a to the agentset, usually by setting a variable
+  # * aset: initial array of agents, often a single agent: [a]
+  # * fCandidate(a, asetLast) -> true if a is elegible to be added to the set
+  # * fJoin(a, asetLast) -> adds a to the agentset, usually by setting a variable
+  # * fCallback(asetLast, asetNext) -> optional function to be called each iteration of floodfill;
+  # if fCallback returns true, the flood is aborted
   # * fNeighbors(a) -> returns the neighbors of this agent
-  # * asetLast: the array of the last set of agents to join the set.
-  #
-  # asetLast generally [] but can used if the join function uses the prior
-  # agents for a distance calculation, for example.
-  #
-  floodFill: (aset, fCandidate, fJoin, fNeighbors, asetLast=[]) ->
+  # * asetLast: the array of the last set of agents to join the flood;
+  # gets passed into fJoin, fCandidate, and fCallback
+  floodFill: (aset, fCandidate, fJoin, fCallback, fNeighbors, asetLast=[]) ->
+    floodFunc = @floodFillOnce(aset, fCandidate, fJoin, fCallback, fNeighbors, asetLast)
+    floodFunc = floodFunc() while floodFunc
+
+  # Move one step forward in a floodfill. floodFillOnce() returns a function that performs the next step of the flood.
+  # This is useful if you want to watch your flood progress as an animation.
+  floodFillOnce: (aset, fCandidate, fJoin, fCallback, fNeighbors, asetLast=[]) ->
     fJoin p, asetLast for p in aset
     asetNext = []
     for p in aset
-      for n in fNeighbors(p) when fCandidate n
+      for n in fNeighbors(p) when fCandidate n, aset
         asetNext.push n if asetNext.indexOf(n) < 0
-    @floodFill asetNext, fCandidate, fJoin, fNeighbors, aset if asetNext.length > 0
-
-    
+    stopEarly = fCallback and fCallback(aset, asetNext)
+    if stopEarly or asetNext.length is 0 then return null
+    else return () =>
+      @floodFillOnce asetNext, fCandidate, fJoin, fCallback, fNeighbors, aset
   
   # Remove adjacent duplicates, by reference, in a sorted agentset.
   # Use `sortById` first if agentset not sorted.
