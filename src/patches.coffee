@@ -1,11 +1,9 @@
-# ### Patch and Patches
+# ### Patch & Patches
   
-# Class Patch instances represent a rectangle on a grid.  It holds variables\
+# Class Patch instances represent a rectangle on a grid.  They hold variables
 # that are in the patches the agents live on.  The set of all patches (ABM.patches)
 # is the world on which the agents live and the model runs.
 class ABM.Patch
-  # Constructor & Class Variables:
-  #
   # Constructor & Class Variables:
   # * id:         unique identifier, promoted by agentset create() factory method
   # * breed:      the agentset this agent belongs to
@@ -293,8 +291,8 @@ class ABM.Patches extends ABM.AgentSet
     return if @size is 1
     ctx.drawImage @pixelsCtx.canvas, 0, 0, ctx.canvas.width, ctx.canvas.height
 
-  floodFill: (aset, fCandidate, fJoin, fNeighbors=((p)->p.n), asetLast=[]) ->
-    super aset, fCandidate, fJoin, fNeighbors, asetLast
+  floodFillOnce: (aset, fCandidate, fJoin, fCallback, fNeighbors=((p)->p.n), asetLast=[]) ->
+    super aset, fCandidate, fJoin, fCallback, fNeighbors, asetLast
 
   # Diffuse the value of patch variable `p.v` by distributing `rate` percent
   # of each patch's value of `v` to its neighbors. If a color `c` is given,

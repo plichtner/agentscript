@@ -111,7 +111,7 @@ class ABM.Model
     @contexts = ABM.contexts = {}
     unless isHeadless
       (@div=document.getElementById(div)).setAttribute 'style',
-        "position:relative; width=#{@world.pxWidth}; height={@world.pxHeight}"
+        "position:relative; width:#{@world.pxWidth}px; height:#{@world.pxHeight}px"
 
       # * Create 2D canvas contexts layered on top of each other.
       # * Initialize a patch coord transform for each layer.
@@ -125,6 +125,7 @@ class ABM.Model
       for own k,v of @contextsInit
         @contexts[k] = ctx = u.createLayer @div, @world.pxWidth, @world.pxHeight, v.z, v.ctx
         @setCtxTransform ctx if ctx.canvas?
+        if ctx.canvas? then ctx.canvas.style.pointerEvents = 'none'
         u.elementTextParams ctx, "10px sans-serif", "center", "middle"
 
       # One of the layers is used for drawing only, not an agentset:
@@ -291,7 +292,7 @@ class ABM.Model
 #     @embers and @fires
 #     @spokes and @rims 
 #
-# These agentset's `create` method create subclasses of Agent/Link.
+# These agentsets' `create` methods create subclasses of Agent/Link.
 # Use of <breed>.setDefault methods work as for agents/links, creating default
 # values for the breed set:
 #
