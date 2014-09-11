@@ -5,8 +5,8 @@
 # ### Class Model
 
 ABM.models = {} # user space, put your models here
-class ABM.Model
-
+class ABM.Model extends ABM.Evented
+  
   # Class variable for layers parameters.
   # Can be added to by programmer to modify/create layers, **before** starting your own model.
   # Example:
@@ -30,6 +30,7 @@ class ABM.Model
     divOrOpts, size=13, minX=-16, maxX=16, minY=-16, maxY=16,
     isTorus=false, hasNeighbors=true, isHeadless=false
   ) ->
+    super()
     if typeof divOrOpts is 'string'
       div = divOrOpts
       @setWorldDeprecated size, minX, maxX, minY, maxY, isTorus, hasNeighbors, isHeadless
@@ -198,6 +199,7 @@ class ABM.Model
     @links.draw   @contexts.links    if force or @refreshLinks   or @anim.draws is 1
     @agents.draw  @contexts.agents   if force or @refreshAgents  or @anim.draws is 1
     @drawSpotlight @spotlightAgent, @contexts.spotlight  if @spotlightAgent?
+    @emit('draw')
 
 # Creates a spotlight effect on an agent, so we can follow it throughout the model.
 # Use:
