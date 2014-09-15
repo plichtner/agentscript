@@ -336,8 +336,8 @@ inside of the Agentscript wrapper</p>
                 
                 <span class="hljs-keyword">var</span> tile = ABM.util.imageToCtx(e.tile, <span class="hljs-keyword">this</span>.tileSize, <span class="hljs-keyword">this</span>.tileSize);
 
-        		<span class="hljs-keyword">this</span>.addTile(tilePoint, tile);
-        	}.bind(<span class="hljs-keyword">this</span>));</pre></div></div>
+                <span class="hljs-keyword">this</span>.addTile(tilePoint, tile);
+            }.bind(<span class="hljs-keyword">this</span>));</pre></div></div>
             
         </li>
         
@@ -352,9 +352,9 @@ inside of the Agentscript wrapper</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        	leafletMap.on(<span class="hljs-string">'zoomstart'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
-        		<span class="hljs-keyword">this</span>.tiles = {};
-        	}.bind(<span class="hljs-keyword">this</span>));</pre></div></div>
+            <div class="content"><div class='highlight'><pre>            leafletMap.on(<span class="hljs-string">'zoomstart'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+                <span class="hljs-keyword">this</span>.tiles = {};
+            }.bind(<span class="hljs-keyword">this</span>));</pre></div></div>
             
         </li>
         
@@ -369,9 +369,9 @@ inside of the Agentscript wrapper</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        	leafletMap.on(<span class="hljs-string">'moveend'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
-        		<span class="hljs-keyword">this</span>.origin = <span class="hljs-keyword">this</span>.leafletMap.getPixelBounds().min;
-        	}.bind(<span class="hljs-keyword">this</span>));</pre></div></div>
+            <div class="content"><div class='highlight'><pre>            leafletMap.on(<span class="hljs-string">'moveend'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+                <span class="hljs-keyword">this</span>.origin = <span class="hljs-keyword">this</span>.leafletMap.getPixelBounds().min;
+            }.bind(<span class="hljs-keyword">this</span>));</pre></div></div>
             
         </li>
         
@@ -386,9 +386,9 @@ inside of the Agentscript wrapper</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        	leafletMap.on(<span class="hljs-string">'zoomend'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
-        		<span class="hljs-keyword">this</span>.zoom = <span class="hljs-keyword">this</span>.leafletMap.getZoom();
-        	}.bind(<span class="hljs-keyword">this</span>));</pre></div></div>
+            <div class="content"><div class='highlight'><pre>            leafletMap.on(<span class="hljs-string">'zoomend'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+                <span class="hljs-keyword">this</span>.zoom = <span class="hljs-keyword">this</span>.leafletMap.getZoom();
+            }.bind(<span class="hljs-keyword">this</span>));</pre></div></div>
             
         </li>
         
@@ -404,15 +404,15 @@ by wrapping the leafletLayer’s event listener</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        	<span class="hljs-keyword">this</span>.on = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(name, fn)</span> </span>{
-        		<span class="hljs-keyword">var</span> leafletLayer = <span class="hljs-keyword">this</span>.leafletLayer;
-        		
-        		<span class="hljs-keyword">if</span> (!leafletLayer) {
-        			<span class="hljs-keyword">return</span>;
-        		}
+            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">this</span>.on = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(name, fn)</span> </span>{
+                <span class="hljs-keyword">var</span> leafletLayer = <span class="hljs-keyword">this</span>.leafletLayer;
+                
+                <span class="hljs-keyword">if</span> (!leafletLayer) {
+                    <span class="hljs-keyword">return</span>;
+                }
 
-        		leafletLayer.on(name, fn);
-        	}
+                leafletLayer.on(name, fn);
+            }
 
             <span class="hljs-keyword">this</span>.off = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(name, fn)</span> </span>{
                 <span class="hljs-keyword">var</span> leafletLayer = <span class="hljs-keyword">this</span>.leafletLayer;
@@ -439,40 +439,40 @@ finished loading</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>        	<span class="hljs-keyword">var</span> mapReady = <span class="hljs-literal">true</span>,
-        		tilesReady = <span class="hljs-literal">false</span>;
+            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">var</span> mapReady = <span class="hljs-literal">true</span>,
+                tilesReady = <span class="hljs-literal">false</span>;
 
-        	leafletLayer.on(<span class="hljs-string">'loading'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
-        		tilesReady = <span class="hljs-literal">false</span>;
-        	});
+            leafletLayer.on(<span class="hljs-string">'loading'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+                tilesReady = <span class="hljs-literal">false</span>;
+            });
 
-        	leafletMap.on(<span class="hljs-string">'movestart'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
-        		mapReady = <span class="hljs-literal">false</span>;
-        	});
+            leafletMap.on(<span class="hljs-string">'movestart'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+                mapReady = <span class="hljs-literal">false</span>;
+            });
 
-        	leafletLayer.on(<span class="hljs-string">'load'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
-        		tilesReady = <span class="hljs-literal">true</span>;
-        		<span class="hljs-keyword">if</span> (mapReady) {
-        			<span class="hljs-keyword">this</span>.leafletLayer.fire(<span class="hljs-string">'tilesready'</span>);
-        		}
-        	}.bind(<span class="hljs-keyword">this</span>));
+            leafletLayer.on(<span class="hljs-string">'load'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+                tilesReady = <span class="hljs-literal">true</span>;
+                <span class="hljs-keyword">if</span> (mapReady) {
+                    <span class="hljs-keyword">this</span>.leafletLayer.fire(<span class="hljs-string">'tilesready'</span>);
+                }
+            }.bind(<span class="hljs-keyword">this</span>));
 
-        	leafletMap.on(<span class="hljs-string">'moveend'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
-        		mapReady = <span class="hljs-literal">true</span>;
-        		<span class="hljs-keyword">if</span> (tilesReady) {
-        			<span class="hljs-keyword">this</span>.leafletLayer.fire(<span class="hljs-string">'tilesready'</span>);
-        		}
-        	}.bind(<span class="hljs-keyword">this</span>));
+            leafletMap.on(<span class="hljs-string">'moveend'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+                mapReady = <span class="hljs-literal">true</span>;
+                <span class="hljs-keyword">if</span> (tilesReady) {
+                    <span class="hljs-keyword">this</span>.leafletLayer.fire(<span class="hljs-string">'tilesready'</span>);
+                }
+            }.bind(<span class="hljs-keyword">this</span>));
 
-        	<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">urlToTileCoords</span><span class="hljs-params">(url)</span> </span>{
-        		<span class="hljs-keyword">var</span> coordRegex = <span class="hljs-regexp">/.*\/(\d+)\/(\d+)\/(\d+)\.png$/</span>;
-        		<span class="hljs-keyword">var</span> coords = coordRegex.exec(url);
-        		<span class="hljs-keyword">return</span> coords &amp;&amp; {
-        			z: coords[<span class="hljs-number">1</span>],
-        			x: coords[<span class="hljs-number">2</span>],
-        			y: coords[<span class="hljs-number">3</span>]
-        		};
-        	}
+            <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">urlToTileCoords</span><span class="hljs-params">(url)</span> </span>{
+                <span class="hljs-keyword">var</span> coordRegex = <span class="hljs-regexp">/.*\/(\d+)\/(\d+)\/(\d+)\.png$/</span>;
+                <span class="hljs-keyword">var</span> coords = coordRegex.exec(url);
+                <span class="hljs-keyword">return</span> coords &amp;&amp; {
+                    z: coords[<span class="hljs-number">1</span>],
+                    x: coords[<span class="hljs-number">2</span>],
+                    y: coords[<span class="hljs-number">3</span>]
+                };
+            }
         }
 
         TileDataSet.prototype.embedLeaflet = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
