@@ -12,14 +12,14 @@ root = @ # Keep a private copy of global object
 # Global shim for not-yet-standard requestAnimationFrame.
 # See: [Paul Irish Shim](https://gist.github.com/paulirish/1579671)
 do -> 
-  @requestAnimFrame = @requestAnimationFrame or null
-  @cancelAnimFrame = @cancelAnimationFrame or null
-  for vendor in ['ms', 'moz', 'webkit', 'o'] when not @requestAnimFrame
-    @requestAnimFrame or= @[vendor+'RequestAnimationFrame']
-    @cancelAnimFrame or= @[vendor+'CancelAnimationFrame']
-    @cancelAnimFrame or= @[vendor+'CancelRequestAnimationFrame']
-  @requestAnimFrame or= (callback) -> @setTimeout(callback, 1000 / 60)
-  @cancelAnimFrame or= (id) -> @clearTimeout(id)
+  window.requestAnimFrame = window.requestAnimationFrame or null
+  window.cancelAnimFrame = window.cancelAnimationFrame or null
+  for vendor in ['ms', 'moz', 'webkit', 'o'] when not window.requestAnimFrame
+    window.requestAnimFrame or= window[vendor+'RequestAnimationFrame']
+    window.cancelAnimFrame or= window[vendor+'CancelAnimationFrame']
+    window.cancelAnimFrame or= window[vendor+'CancelRequestAnimationFrame']
+  window.requestAnimFrame or= (callback) -> window.setTimeout(callback, 1000 / 60)
+  window.cancelAnimFrame or= (id) -> window.clearTimeout(id)
 
 # Shim for `Array.indexOf` if not implemented.
 # Use [es5-shim](https://github.com/kriskowal/es5-shim) if additional shims needed.
@@ -689,15 +689,15 @@ ABM.util = u =
     ctx.drawImage img, sx, sy, sw, sh, 0, 0, sw, sh
     ctx
   imageToCtxDownStepped: (img, tw, th) -> # http://goo.gl/UnLJSZ
-    ctx1 = u.createCtx tw, th
+    ctx1 = @createCtx tw, th
     w = img.width; h = img.height; ihalf = (n) -> Math.ceil n/2
-    steps = Math.ceil(u.log2( if (w/tw)>(h/th) then (w/tw) else (h/th)) )
+    steps = Math.ceil(@log2( if (w/tw)>(h/th) then (w/tw) else (h/th)) )
     console.log "steps", steps
     if steps <= 1
       ctx1.drawImage img, 0, 0, tw, th
     else
       console.log "img w/h", w, h, "->", ihalf(w), ihalf(h)
-      ctx = u.createCtx w = ihalf(w), h = ihalf(h); can = ctx.canvas
+      ctx = @createCtx w = ihalf(w), h = ihalf(h); can = ctx.canvas
       ctx.drawImage img, 0, 0, w, h
       for step in [steps...2] # 2 not 1 due to initial halving above
         console.log "can w/h", w, h, "->", ihalf(w), ihalf(h)
