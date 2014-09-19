@@ -27,7 +27,7 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-1">&#182;</a>
               </div>
-              <h3 id="patch-patches">Patch &amp; Patches</h3>
+              <h3 id="patches">Patches</h3>
 
             </div>
             
@@ -39,187 +39,6 @@
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-2">&#182;</a>
-              </div>
-              <p>Class Patch instances represent a rectangle on a grid.  They hold variables
-that are in the patches the agents live on.  The set of all patches (@model.patches)
-is the world on which the agents live and the model runs.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ABM</span>.<span class="hljs-title">Patch</span></span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-3">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-3">&#182;</a>
-              </div>
-              <p>Constructor &amp; Class Variables:</p>
-<ul>
-<li>id:         unique identifier, promoted by agentset create() factory method</li>
-<li>breed:      the agentset this agent belongs to</li>
-<li>x,y:        position on the patch grid, in patch coordinates</li>
-<li>color:      the color of the patch as an RGBA array, A optional.</li>
-<li>hidden:     whether or not to draw this patch</li>
-<li>label:      text for the patch</li>
-<li>labelColor: the color of my label text</li>
-<li>labelOffset:the x,y offset of my label from my x,y location</li>
-<li>n,n4:       adjacent neighbors: n: 8 patches, n4: N,E,S,W patches.</li>
-<li>pRect:      cached rect for performance</li>
-</ul>
-<p>Patches may not need their neighbors, thus we use a default
-of none.  n and n4 are promoted by the Patches agent set 
-if world.neighbors is true, the default.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>
-  <span class="hljs-attribute">id</span>: <span class="hljs-literal">null</span>            <span class="hljs-comment"># unique id, promoted by agentset create factory method</span>
-  <span class="hljs-attribute">breed</span>: <span class="hljs-literal">null</span>         <span class="hljs-comment"># set by the agentSet owning this patch</span>
-  <span class="hljs-attribute">x</span>:<span class="hljs-literal">null</span>; <span class="hljs-attribute">y</span>:<span class="hljs-literal">null</span>      <span class="hljs-comment"># The patch position in the patch grid</span>
-  <span class="hljs-attribute">n</span>:<span class="hljs-literal">null</span>; <span class="hljs-attribute">n4</span>:<span class="hljs-literal">null</span>     <span class="hljs-comment"># The neighbors, n: 8, n4: 4. null OK if model doesn't need them.</span>
-  <span class="hljs-attribute">color</span>: [<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>]      <span class="hljs-comment"># The patch color</span>
-  <span class="hljs-attribute">hidden</span>: <span class="hljs-literal">false</span>       <span class="hljs-comment"># draw me?</span>
-  <span class="hljs-attribute">label</span>: <span class="hljs-literal">null</span>         <span class="hljs-comment"># text for the patch</span>
-  <span class="hljs-attribute">labelColor</span>: [<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>] <span class="hljs-comment"># text color</span>
-  <span class="hljs-attribute">labelOffset</span>: [<span class="hljs-number">0</span>,<span class="hljs-number">0</span>]  <span class="hljs-comment"># text offset from the patch center</span>
-  <span class="hljs-attribute">pRect</span>: <span class="hljs-literal">null</span>         <span class="hljs-comment"># Performance: cached rect of neighborhood larger than n.</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-4">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-4">&#182;</a>
-              </div>
-              <p>New Patch: Just set x,y. Neighbors set by Patches constructor if needed.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">constructor</span>: <span class="hljs-function"><span class="hljs-params">(<span class="hljs-property">@x</span>, <span class="hljs-property">@y</span>)</span> -&gt;</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-5">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-5">&#182;</a>
-              </div>
-              <p>Return a string representation of the patch.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">toString</span>:<span class="hljs-function"> -&gt;</span> <span class="hljs-string">"{id:<span class="hljs-subst">#{<span class="hljs-property">@id</span>}</span> xy:<span class="hljs-subst">#{[<span class="hljs-property">@x</span>,<span class="hljs-property">@y</span>]}</span> c:<span class="hljs-subst">#{<span class="hljs-property">@color</span>}</span>}"</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-6">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-6">&#182;</a>
-              </div>
-              <p>Set patch color to <code>c</code> scaled by <code>s</code>. Usage:</p>
-<pre><code>p.scaleColor p.color, <span class="hljs-number">.8</span> <span class="hljs-comment"># reduce patch color by .8</span>
-p.scaleColor <span class="hljs-property">@foodColor</span>, p.foodPheromone <span class="hljs-comment"># ants model</span>
-</code></pre><p>Promotes color if currently using the default.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">scaleColor</span>: <span class="hljs-function"><span class="hljs-params">(c, s)</span> -&gt;</span> 
-    <span class="hljs-property">@color</span> = u.clone <span class="hljs-property">@color</span> <span class="hljs-keyword">unless</span> @.hasOwnProperty(<span class="hljs-string">"color"</span>)
-    u.scaleColor c, s, <span class="hljs-property">@color</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-7">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-7">&#182;</a>
-              </div>
-              <p>Draw the patch and its text label if there is one.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">draw</span>: <span class="hljs-function"><span class="hljs-params">(ctx)</span> -&gt;</span>
-    ctx.fillStyle = u.colorStr <span class="hljs-property">@color</span>
-    ctx.fillRect <span class="hljs-property">@x</span>-<span class="hljs-number">.5</span>, <span class="hljs-property">@y</span>-<span class="hljs-number">.5</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>
-    <span class="hljs-keyword">if</span> <span class="hljs-property">@label</span>? <span class="hljs-comment"># REMIND: should be 2nd pass.</span>
-      [x,y] = <span class="hljs-property">@breed</span>.patchXYtoPixelXY <span class="hljs-property">@x</span>, <span class="hljs-property">@y</span>
-      u.ctxDrawText ctx, <span class="hljs-property">@label</span>, x+<span class="hljs-property">@labelOffset</span>[<span class="hljs-number">0</span>], y+<span class="hljs-property">@labelOffset</span>[<span class="hljs-number">1</span>], <span class="hljs-property">@labelColor</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-8">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-8">&#182;</a>
-              </div>
-              <p>Return an array of the agents on this patch.
-If patches.cacheAgentsHere has created an @agents instance
-variable for the patches, agents will add/remove themselves
-as they move from patch to patch.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">agentsHere</span>:<span class="hljs-function"> -&gt;</span>
-    <span class="hljs-property">@agents</span> ? (a <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> <span class="hljs-property">@model</span>.agents <span class="hljs-keyword">when</span> a.p <span class="hljs-keyword">is</span> @)</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-9">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-9">&#182;</a>
-              </div>
-              <p>Returns true if this patch is on the edge of the grid.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">isOnEdge</span>:<span class="hljs-function"> -&gt;</span>
-    <span class="hljs-property">@x</span> <span class="hljs-keyword">is</span> <span class="hljs-property">@breed</span>.minX <span class="hljs-keyword">or</span> <span class="hljs-property">@x</span> <span class="hljs-keyword">is</span> <span class="hljs-property">@breed</span>.maxX <span class="hljs-keyword">or</span> \
-    <span class="hljs-property">@y</span> <span class="hljs-keyword">is</span> <span class="hljs-property">@breed</span>.minY <span class="hljs-keyword">or</span> <span class="hljs-property">@y</span> <span class="hljs-keyword">is</span> <span class="hljs-property">@breed</span>.maxY</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-10">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-10">&#182;</a>
-              </div>
-              <p>Factory: Create num new agents on this patch. The optional init
-proc is called on the new agent after inserting in its agentSet.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">sprout</span>: <span class="hljs-function"><span class="hljs-params">(num = <span class="hljs-number">1</span>, breed = <span class="hljs-property">@model</span>.agents, init = -&gt;)</span> -&gt;</span>
-    breed.create num, <span class="hljs-function"><span class="hljs-params">(a)</span> =&gt;</span> <span class="hljs-comment"># fat arrow so that @ = this patch</span>
-      a.setXY <span class="hljs-property">@x</span>, <span class="hljs-property">@y</span>; init(a); a</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-11">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
               <p>Class Patches is a singleton 2D matrix of Patch instances, each patch 
 representing a 1x1 square in patch coordinates (via 2D coord transforms).</p>
@@ -236,18 +55,16 @@ representing a 1x1 square in patch coordinates (via 2D coord transforms).</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>
-
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ABM</span>.<span class="hljs-title">Patches</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ABM</span>.<span class="hljs-title">AgentSet</span></span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ABM</span>.<span class="hljs-title">Patches</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">ABM</span>.<span class="hljs-title">AgentSet</span></span></pre></div></div>
             
         </li>
         
         
-        <li id="section-12">
+        <li id="section-3">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-12">&#182;</a>
+                <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
               <p>Constructor: super creates the empty AgentSet instance and installs
 the agentClass (breed) variable shared by all the Patches in this set.
@@ -264,11 +81,11 @@ Patches are created from top-left to bottom-right to match data sets.</p>
         </li>
         
         
-        <li id="section-13">
+        <li id="section-4">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-13">&#182;</a>
+                <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
               <p>Setup patch world from world parameters.
 Note that this is done as separate method so like other agentsets,
@@ -286,11 +103,11 @@ patches are started up empty and filled by “create” calls.</p>
         </li>
         
         
-        <li id="section-14">
+        <li id="section-5">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-14">&#182;</a>
+                <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
               <p>Have patches cache the agents currently on them.
 Optimizes p.agentsHere method.
@@ -303,11 +120,11 @@ Call before first agent is created.</p>
         </li>
         
         
-        <li id="section-15">
+        <li id="section-6">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-15">&#182;</a>
+                <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
               <p>Draw patches using scaled image of colors. Note anti-aliasing may occur
 if browser does not support smoothing flags.</p>
@@ -321,11 +138,11 @@ if browser does not support smoothing flags.</p>
         </li>
         
         
-        <li id="section-16">
+        <li id="section-7">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-16">&#182;</a>
+                <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
               <p>Optimization: Cache a single set by modeler for use by patchRect,
 inCone, inRect, inRadius.  Ex: flock demo model’s vision rect.</p>
@@ -341,11 +158,11 @@ inCone, inRect, inRadius.  Ex: flock demo model’s vision rect.</p>
         </li>
         
         
-        <li id="section-17">
+        <li id="section-8">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-17">&#182;</a>
+                <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
               <p>Install neighborhoods in patches</p>
 
@@ -359,11 +176,11 @@ inCone, inRect, inRadius.  Ex: flock demo model’s vision rect.</p>
         </li>
         
         
-        <li id="section-18">
+        <li id="section-9">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-18">&#182;</a>
+                <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
               <p>Setup pixels used for <code>drawScaledPixels</code> and <code>importColors</code></p>
 
@@ -382,11 +199,11 @@ inCone, inRect, inRadius.  Ex: flock demo model’s vision rect.</p>
         </li>
         
         
-        <li id="section-19">
+        <li id="section-10">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-19">&#182;</a>
+                <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
               <p>Draw patches.  Three cases:</p>
 <ul>
@@ -404,11 +221,11 @@ inCone, inRect, inRadius.  Ex: flock demo model’s vision rect.</p>
         </li>
         
         
-        <li id="section-20">
+        <li id="section-11">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-20">&#182;</a>
+                <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
               <h4 id="patch-grid-coord-system-utilities-">Patch grid coord system utilities:</h4>
 
@@ -417,11 +234,11 @@ inCone, inRect, inRadius.  Ex: flock demo model’s vision rect.</p>
         </li>
         
         
-        <li id="section-21">
+        <li id="section-12">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
+                <a class="pilcrow" href="#section-12">&#182;</a>
               </div>
               <p>Return the patch id/index given integer x,y in patch coords</p>
 
@@ -432,11 +249,11 @@ inCone, inRect, inRadius.  Ex: flock demo model’s vision rect.</p>
         </li>
         
         
-        <li id="section-22">
+        <li id="section-13">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
               <p>Return the patch at matrix position x,y where 
 x &amp; y are both valid integer patch coordinates.</p>
@@ -448,11 +265,11 @@ x &amp; y are both valid integer patch coordinates.</p>
         </li>
         
         
-        <li id="section-23">
+        <li id="section-14">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
               <p>Return x,y float values to be between min/max patch coord values</p>
 
@@ -463,11 +280,11 @@ x &amp; y are both valid integer patch coordinates.</p>
         </li>
         
         
-        <li id="section-24">
+        <li id="section-15">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
+                <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
               <p>Return x,y float values to be modulo min/max patch coord values.</p>
 
@@ -478,11 +295,11 @@ x &amp; y are both valid integer patch coordinates.</p>
         </li>
         
         
-        <li id="section-25">
+        <li id="section-16">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-25">&#182;</a>
+                <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
               <p>Return x,y float values to be between min/max patch values
 using either clamp/wrap above according to isTorus topology.</p>
@@ -495,11 +312,11 @@ using either clamp/wrap above according to isTorus topology.</p>
         </li>
         
         
-        <li id="section-26">
+        <li id="section-17">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
+                <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
               <p>Return true if on world or torus, false if non-torus and off-world</p>
 
@@ -510,11 +327,11 @@ using either clamp/wrap above according to isTorus topology.</p>
         </li>
         
         
-        <li id="section-27">
+        <li id="section-18">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
+                <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
               <p>Return patch at x,y float values according to topology.</p>
 
@@ -529,11 +346,11 @@ using either clamp/wrap above according to isTorus topology.</p>
         </li>
         
         
-        <li id="section-28">
+        <li id="section-19">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
+                <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
               <p>Return a random valid float x,y point in patch space</p>
 
@@ -544,11 +361,11 @@ using either clamp/wrap above according to isTorus topology.</p>
         </li>
         
         
-        <li id="section-29">
+        <li id="section-20">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
               <h4 id="patch-metrics">Patch metrics</h4>
 
@@ -557,11 +374,11 @@ using either clamp/wrap above according to isTorus topology.</p>
         </li>
         
         
-        <li id="section-30">
+        <li id="section-21">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
+                <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
               <p>Convert patch measure to pixels</p>
 
@@ -572,11 +389,11 @@ using either clamp/wrap above according to isTorus topology.</p>
         </li>
         
         
-        <li id="section-31">
+        <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-31">&#182;</a>
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
               <p>Convert bit measure to patches</p>
 
@@ -587,11 +404,11 @@ using either clamp/wrap above according to isTorus topology.</p>
         </li>
         
         
-        <li id="section-32">
+        <li id="section-23">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-32">&#182;</a>
+                <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
               <h4 id="patch-utilities">Patch utilities</h4>
 
@@ -600,11 +417,11 @@ using either clamp/wrap above according to isTorus topology.</p>
         </li>
         
         
-        <li id="section-33">
+        <li id="section-24">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
+                <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
               <p>Return an array of patches in a rectangle centered on the given 
 patch <code>p</code>, dx, dy units to the right/left and up/down. 
@@ -631,11 +448,11 @@ Exclude <code>p</code> unless meToo is true, default false.</p>
         </li>
         
         
-        <li id="section-34">
+        <li id="section-25">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
               <p>Draws, or “imports” an image URL into the drawing layer.
 The image is scaled to fit the drawing layer.</p>
@@ -654,11 +471,11 @@ soon as the onload callback executes.</p>
         </li>
         
         
-        <li id="section-35">
+        <li id="section-26">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
+                <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
               <p>Direct install image into the given context, not async.</p>
 
@@ -672,11 +489,11 @@ soon as the onload callback executes.</p>
         </li>
         
         
-        <li id="section-36">
+        <li id="section-27">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
+                <a class="pilcrow" href="#section-27">&#182;</a>
               </div>
               <p>Utility function for pixel manipulation.  Given a patch, returns the 
 native canvas index i into the pixel data.
@@ -690,11 +507,11 @@ The top-left order simplifies finding pixels in data sets</p>
         </li>
         
         
-        <li id="section-37">
+        <li id="section-28">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
+                <a class="pilcrow" href="#section-28">&#182;</a>
               </div>
               <p>Convert pixel location (top/left offset i.e. mouse) to patch coords (float)</p>
 
@@ -705,11 +522,11 @@ The top-left order simplifies finding pixels in data sets</p>
         </li>
         
         
-        <li id="section-38">
+        <li id="section-29">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-38">&#182;</a>
+                <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
               <p>Convert patch coords (float) to pixel location (top/left offset i.e. mouse)</p>
 
@@ -720,11 +537,11 @@ The top-left order simplifies finding pixels in data sets</p>
         </li>
         
         
-        <li id="section-39">
+        <li id="section-30">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-39">&#182;</a>
+                <a class="pilcrow" href="#section-30">&#182;</a>
               </div>
               <p>Draws, or “imports” an image URL into the patches as their color property.
 The drawing is scaled to the number of x,y patches, thus one pixel
@@ -741,11 +558,11 @@ Map is a color map, only for gray for now</p>
         </li>
         
         
-        <li id="section-40">
+        <li id="section-31">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-40">&#182;</a>
+                <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
               <p>Direct install image into the patch colors, not async.</p>
 
@@ -761,11 +578,11 @@ Map is a color map, only for gray for now</p>
         </li>
         
         
-        <li id="section-41">
+        <li id="section-32">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-41">&#182;</a>
+                <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
               <p>promote initial default</p>
 
@@ -777,11 +594,11 @@ Map is a color map, only for gray for now</p>
         </li>
         
         
-        <li id="section-42">
+        <li id="section-33">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-42">&#182;</a>
+                <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
               <p>Draw the patches via pixel manipulation rather than 2D drawRect.
 See Mozilla pixel <a href="http://goo.gl/Lxliq">manipulation article</a></p>
@@ -793,11 +610,11 @@ See Mozilla pixel <a href="http://goo.gl/Lxliq">manipulation article</a></p>
         </li>
         
         
-        <li id="section-43">
+        <li id="section-34">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-43">&#182;</a>
+                <a class="pilcrow" href="#section-34">&#182;</a>
               </div>
               <p>u.setIdentity ctx &amp; ctx.restore() only needed if patch size 
 not 1, pixel ops don’t use transform but @size&gt;1 uses
@@ -812,11 +629,11 @@ a drawimage</p>
         </li>
         
         
-        <li id="section-44">
+        <li id="section-35">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-44">&#182;</a>
+                <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
               <p>The 8-bit version for drawScaledPixels.  Used for systems w/o typed arrays</p>
 
@@ -835,11 +652,11 @@ a drawimage</p>
         </li>
         
         
-        <li id="section-45">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-45">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
               <p>The 32-bit version of drawScaledPixels, with both little and big endian hardware.</p>
 
@@ -863,11 +680,11 @@ a drawimage</p>
         </li>
         
         
-        <li id="section-46">
+        <li id="section-37">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-46">&#182;</a>
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
               <p>Diffuse the value of patch variable <code>p.v</code> by distributing <code>rate</code> percent
 of each patch’s value of <code>v</code> to its neighbors. If a color <code>c</code> is given,
@@ -881,11 +698,11 @@ less than 8 neighbors, return the extra to the patch.</p>
         </li>
         
         
-        <li id="section-47">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-47">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
               <p>zero temp variable if not yet set</p>
 
@@ -897,11 +714,11 @@ less than 8 neighbors, return the extra to the patch.</p>
         </li>
         
         
-        <li id="section-48">
+        <li id="section-39">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-48">&#182;</a>
+                <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
               <p>pass 1: calculate contribution of all patches to themselves and neighbors</p>
 
@@ -915,11 +732,11 @@ less than 8 neighbors, return the extra to the patch.</p>
         </li>
         
         
-        <li id="section-49">
+        <li id="section-40">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-49">&#182;</a>
+                <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
               <p>pass 2: set new value for all patches, zero temp, modify color if c given</p>
 
