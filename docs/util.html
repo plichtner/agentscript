@@ -67,14 +67,14 @@ See: <a href="https://gist.github.com/paulirish/1579671">Paul Irish Shim</a></p>
             </div>
             
             <div class="content"><div class='highlight'><pre><span class="hljs-keyword">do</span><span class="hljs-function"> -&gt;</span> 
-  <span class="hljs-property">@requestAnimFrame</span> = <span class="hljs-property">@requestAnimationFrame</span> <span class="hljs-keyword">or</span> <span class="hljs-literal">null</span>
-  <span class="hljs-property">@cancelAnimFrame</span> = <span class="hljs-property">@cancelAnimationFrame</span> <span class="hljs-keyword">or</span> <span class="hljs-literal">null</span>
-  <span class="hljs-keyword">for</span> vendor <span class="hljs-keyword">in</span> [<span class="hljs-string">'ms'</span>, <span class="hljs-string">'moz'</span>, <span class="hljs-string">'webkit'</span>, <span class="hljs-string">'o'</span>] <span class="hljs-keyword">when</span> <span class="hljs-keyword">not</span> <span class="hljs-property">@requestAnimFrame</span>
-    <span class="hljs-property">@requestAnimFrame</span> <span class="hljs-keyword">or</span>= @[vendor+<span class="hljs-string">'RequestAnimationFrame'</span>]
-    <span class="hljs-property">@cancelAnimFrame</span> <span class="hljs-keyword">or</span>= @[vendor+<span class="hljs-string">'CancelAnimationFrame'</span>]
-    <span class="hljs-property">@cancelAnimFrame</span> <span class="hljs-keyword">or</span>= @[vendor+<span class="hljs-string">'CancelRequestAnimationFrame'</span>]
-  <span class="hljs-property">@requestAnimFrame</span> <span class="hljs-function"><span class="hljs-title">or</span>= <span class="hljs-params">(callback)</span> -&gt;</span> <span class="hljs-property">@setTimeout</span>(callback, <span class="hljs-number">1000</span> / <span class="hljs-number">60</span>)
-  <span class="hljs-property">@cancelAnimFrame</span> <span class="hljs-function"><span class="hljs-title">or</span>= <span class="hljs-params">(id)</span> -&gt;</span> <span class="hljs-property">@clearTimeout</span>(id)</pre></div></div>
+  <span class="hljs-built_in">window</span>.requestAnimFrame = <span class="hljs-built_in">window</span>.requestAnimationFrame <span class="hljs-keyword">or</span> <span class="hljs-literal">null</span>
+  <span class="hljs-built_in">window</span>.cancelAnimFrame = <span class="hljs-built_in">window</span>.cancelAnimationFrame <span class="hljs-keyword">or</span> <span class="hljs-literal">null</span>
+  <span class="hljs-keyword">for</span> vendor <span class="hljs-keyword">in</span> [<span class="hljs-string">'ms'</span>, <span class="hljs-string">'moz'</span>, <span class="hljs-string">'webkit'</span>, <span class="hljs-string">'o'</span>] <span class="hljs-keyword">when</span> <span class="hljs-keyword">not</span> <span class="hljs-built_in">window</span>.requestAnimFrame
+    <span class="hljs-built_in">window</span>.requestAnimFrame <span class="hljs-keyword">or</span>= <span class="hljs-built_in">window</span>[vendor+<span class="hljs-string">'RequestAnimationFrame'</span>]
+    <span class="hljs-built_in">window</span>.cancelAnimFrame <span class="hljs-keyword">or</span>= <span class="hljs-built_in">window</span>[vendor+<span class="hljs-string">'CancelAnimationFrame'</span>]
+    <span class="hljs-built_in">window</span>.cancelAnimFrame <span class="hljs-keyword">or</span>= <span class="hljs-built_in">window</span>[vendor+<span class="hljs-string">'CancelRequestAnimationFrame'</span>]
+  <span class="hljs-built_in">window</span>.requestAnimFrame <span class="hljs-function"><span class="hljs-title">or</span>= <span class="hljs-params">(callback)</span> -&gt;</span> <span class="hljs-built_in">window</span>.setTimeout(callback, <span class="hljs-number">1000</span> / <span class="hljs-number">60</span>)
+  <span class="hljs-built_in">window</span>.cancelAnimFrame <span class="hljs-function"><span class="hljs-title">or</span>= <span class="hljs-params">(id)</span> -&gt;</span> <span class="hljs-built_in">window</span>.clearTimeout(id)</pre></div></div>
             
         </li>
         
@@ -1970,15 +1970,15 @@ Note: to convert a ctx to an “image” (drawImage) use ctx.canvas</p>
     ctx.drawImage img, sx, sy, sw, sh, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, sw, sh
     ctx
   <span class="hljs-attribute">imageToCtxDownStepped</span>: <span class="hljs-function"><span class="hljs-params">(img, tw, th)</span> -&gt;</span> <span class="hljs-comment"># http://goo.gl/UnLJSZ</span>
-    ctx1 = u.createCtx tw, th
+    ctx1 = <span class="hljs-property">@createCtx</span> tw, th
     w = img.width; h = img.height; <span class="hljs-function"><span class="hljs-title">ihalf</span> = <span class="hljs-params">(n)</span> -&gt;</span> Math.ceil n/<span class="hljs-number">2</span>
-    steps = Math.ceil(u.log2( <span class="hljs-keyword">if</span> (w/tw)&gt;(h/th) <span class="hljs-keyword">then</span> (w/tw) <span class="hljs-keyword">else</span> (h/th)) )
+    steps = Math.ceil(<span class="hljs-property">@log2</span>( <span class="hljs-keyword">if</span> (w/tw)&gt;(h/th) <span class="hljs-keyword">then</span> (w/tw) <span class="hljs-keyword">else</span> (h/th)) )
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"steps"</span>, steps
     <span class="hljs-keyword">if</span> steps &lt;= <span class="hljs-number">1</span>
       ctx1.drawImage img, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, tw, th
     <span class="hljs-keyword">else</span>
       <span class="hljs-built_in">console</span>.log <span class="hljs-string">"img w/h"</span>, w, h, <span class="hljs-string">"-&gt;"</span>, ihalf(w), ihalf(h)
-      ctx = u.createCtx w = ihalf(w), h = ihalf(h); can = ctx.canvas
+      ctx = <span class="hljs-property">@createCtx</span> w = ihalf(w), h = ihalf(h); can = ctx.canvas
       ctx.drawImage img, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, w, h
       <span class="hljs-keyword">for</span> step <span class="hljs-keyword">in</span> [steps..<span class="hljs-number">.2</span>] <span class="hljs-comment"># 2 not 1 due to initial halving above</span>
         <span class="hljs-built_in">console</span>.log <span class="hljs-string">"can w/h"</span>, w, h, <span class="hljs-string">"-&gt;"</span>, ihalf(w), ihalf(h)
