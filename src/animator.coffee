@@ -1,20 +1,20 @@
 # ### Animator
-  
+
 # Because not all models have the same amimator requirements, we build a class
 # for customization by the programmer.  See these URLs for more info:
 #
 # * [JavaScript timers doc](https://developer.mozilla.org/en-US/docs/JavaScript/Timers)
-# * [Using timers & requestAnimFrame together](http://goo.gl/ymEEX)
+# * [Using timers & requestAnimationFrame together](http://goo.gl/ymEEX)
 # * [John Resig on timers](http://goo.gl/9Q3q)
 # * [jsFiddle setTimeout vs rAF](http://jsfiddle.net/calpo/H7EEE/)
 # * [Timeout tutorial](http://javascript.info/tutorial/settimeout-setinterval)
 # * [Events and timing in depth](http://javascript.info/tutorial/events-and-timing-depth)
-  
+
 class ABM.Animator
   # Create initial animator for the model, specifying default rate (fps) and multiStep.
   # If multiStep, run the draw() and step() methods separately by draw() using
-  # requestAnimFrame and step() using setTimeout.
-  constructor: (@model, @rate=30, @multiStep=model.world.isHeadless) -> 
+  # requestAnimationFrame and step() using setTimeout.
+  constructor: (@model, @rate=30, @multiStep=model.world.isHeadless) ->
     @isHeadless = model.world.isHeadless; @reset()
   # Adjust animator.  Call before model.start()
   # in setup() to change default settings
@@ -27,7 +27,7 @@ class ABM.Animator
     @animate()
   stop: ->
     @stopped = true
-    if @animHandle? then cancelAnimFrame @animHandle
+    if @animHandle? then cancelAnimationFrame @animHandle
     if @timeoutHandle? then clearTimeout @timeoutHandle
     if @intervalHandle? then clearInterval @intervalHandle
     @animHandle = @timerHandle = @intervalHandle = null
@@ -53,7 +53,7 @@ class ABM.Animator
   drawsPerSec: -> if (elapsed = @draws-@startDraw) is 0 then 0 else Math.round elapsed*1000/@ms()
   # Return a status string for debugging and logging performance
   toString: -> "ticks: #{@ticks}, draws: #{@draws}, rate: #{@rate} tps/dps: #{@ticksPerSec()}/#{@drawsPerSec()}"
-  # Animation via setTimeout and requestAnimFrame
+  # Animation via setTimeout and requestAnimationFrame
   animateSteps: =>
     @step()
     @timeoutHandle = setTimeout @animateSteps, 10 unless @stopped
@@ -63,7 +63,7 @@ class ABM.Animator
     else if @drawsPerSec() < @rate # throttle drawing to @rate
       @step() unless @multiStep
       @draw()
-    @animHandle = requestAnimFrame @animateDraws unless @stopped
+    @animHandle = requestAnimationFrame @animateDraws unless @stopped
   animate: ->
     @animateSteps() if @multiStep
     @animateDraws() unless @isHeadless and @multiStep

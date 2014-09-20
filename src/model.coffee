@@ -1,25 +1,25 @@
 # Class Model is the control center for our AgentSets: Patches, Agents and Links.
-# Creating new models is done by subclassing class Model and overriding two 
+# Creating new models is done by subclassing class Model and overriding two
 # virtual/abstract methods: `setup()` and `step()`
 
 # ### Class Model
 
 ABM.models = {} # user space, put your models here
-class ABM.Model  
-  
-  # Class variable for layers parameters. 
+class ABM.Model
+
+  # Class variable for layers parameters.
   # Can be added to by programmer to modify/create layers, **before** starting your own model.
   # Example:
-  # 
+  #
   #     v.z++ for k,v of ABM.Model::contextsInit # increase each z value by one
-  contextsInit: { # Experimental: image:   {z:15,  ctx:"img"} 
+  contextsInit: { # Experimental: image:   {z:15,  ctx:"img"}
     patches:   {z:10, ctx:"2d"}
     drawing:   {z:20, ctx:"2d"}
     links:     {z:30, ctx:"2d"}
     agents:    {z:40, ctx:"2d"}
     spotlight: {z:50, ctx:"2d"}
   }
-  # Constructor: 
+  # Constructor:
   #
   # * create agentsets, install them and ourselves in ABM global namespace
   # * create layers/contexts, install drawing layer in ABM global namespace
@@ -44,7 +44,7 @@ class ABM.Model
 
       # * Create 2D canvas contexts layered on top of each other.
       # * Initialize a patch coord transform for each layer.
-      # 
+      #
       # Note: this transform is permanent .. there isn't the usual ctx.restore().
       # To use the original canvas 2D transform temporarily:
       #
@@ -64,10 +64,10 @@ class ABM.Model
       @contexts.spotlight.globalCompositeOperation = "xor"
 
     # if isHeadless
-    # # Initialize animator to headless default: 30fps, async  
+    # # Initialize animator to headless default: 30fps, async
     # then @anim = new ABM.Animator @, null, true
     # # Initialize animator to default: 30fps, not async
-    # else 
+    # else
     @anim = new ABM.Animator @
     # Set drawing controls.  Default to drawing each agentset.
     # Optimization: If any of these is set to false, the associated
@@ -113,7 +113,7 @@ class ABM.Model
     ctx.scale @world.size, -@world.size
     ctx.translate -(@world.minXcor), -(@world.maxYcor)
   globals: (globalNames) ->
-    if globalNames? 
+    if globalNames?
     then @globalNames = globalNames; @globalNames.set = true
     else @globalNames = u.removeItems u.ownKeys(@), @globalNames
 
@@ -129,7 +129,7 @@ class ABM.Model
     return extendedClass;
 
 #### Optimizations:
-  
+
   # Modelers "tune" their model by adjusting flags:<br>
   # `@refreshLinks, @refreshAgents, @refreshPatches`<br>
   # and by the following helper methods:
@@ -141,24 +141,24 @@ class ABM.Model
   # Patches are all the same static default color, just "clear" entire canvas.
   # Don't use if patch breeds have different colors.
   setMonochromePatches: -> @patches.monochrome = true
-    
+
   # Have patches cache the agents currently on them.
   # Optimizes Patch p.agentsHere method
   setCacheAgentsHere: -> @patches.cacheAgentsHere()
-  
+
   # Have agents cache the links with them as a node.
   # Optimizes Agent a.myLinks method
   setCacheMyLinks: -> @agents.cacheLinks()
-  
+
   # Have patches cache the given patchRect.
   # Optimizes patchRect, inRadius and inCone
   setCachePatchRect:(radius,meToo=false)->@patches.cacheRect radius,meToo
-  
+
 #### User Model Creation
 # A user's model is made by subclassing Model and over-riding these
 # two abstract methods. `super` need not be called.
-  
-  # Initialize model resources (images, files) here.  
+
+  # Initialize model resources (images, files) here.
   # Uses util.waitOn so can be be async.
   startup: -> # called by constructor
   # Initialize your model variables and defaults here.
@@ -176,10 +176,10 @@ class ABM.Model
   stop:  -> @anim.stop()
   # Animate once by `step(); draw()`. For UI and debugging from console.
   # Will advance the ticks/draws counters.
-  once: -> @stop() unless @anim.stopped; @anim.once() 
+  once: -> @stop() unless @anim.stopped; @anim.once()
 
   # Stop and reset the model, restarting if restart is true
-  reset: (restart = false) -> 
+  reset: (restart = false) ->
     console.log "reset: anim"
     @anim.reset() # stop & reset ticks/steps counters
     console.log "reset: contexts"
@@ -196,7 +196,7 @@ class ABM.Model
     @start() if restart
 
 #### Animation.
-  
+
 # Call the agentset draw methods if either the first draw call or
 # their "refresh" flags are set.  The latter are simple optimizations
 # to avoid redrawing the same static scene. Called by animator.
@@ -224,18 +224,18 @@ class ABM.Model
 
 
 # ### Breeds
-  
+
 # Three versions of NL's `breed` commands.
 #
 #     @patchBreeds "streets buildings"
 #     @agentBreeds "embers fires"
 #     @linkBreeds "spokes rims"
 #
-# will create 6 agentSets: 
+# will create 6 agentSets:
 #
 #     @streets and @buildings
 #     @embers and @fires
-#     @spokes and @rims 
+#     @spokes and @rims
 #
 # These agentsets' `create` methods create subclasses of Agent/Link.
 # Use of <breed>.setDefault methods work as for agents/links, creating default
@@ -245,7 +245,7 @@ class ABM.Model
 #
 # ..will set the default color for just the embers. Note: patch breeds are currently
 # not usable due to the patches being prebuilt.  Stay tuned.
-  
+
   createBreeds: (s, agentClass, breedSet) ->
     breeds = []; breeds.classes = {}; breeds.sets = {}
     for b in s.split(" ")
@@ -259,7 +259,7 @@ class ABM.Model
   patchBreeds: (s) -> @patches.breeds = @createBreeds s, @Patch, @Patches
   agentBreeds: (s) -> @agents.breeds  = @createBreeds s, @Agent, @Agents
   linkBreeds:  (s) -> @links.breeds   = @createBreeds s, @Link,  @Links
-  
+
   # Utility for models to create agentsets from arrays.  Ex:
   #
   #     even = @asSet (a for a in @agents when a.id % 2 is 0)
@@ -272,17 +272,17 @@ class ABM.Model
   # See [CoffeeConsole](http://goo.gl/1i7bd) Chrome extension too.
   debug: (@debugging=true)->u.waitOn (=>@modelReady),(=>@setRootVars()); @
   setRootVars: ->
-    root.ps  = @patches
-    root.p0  = @patches[0]
-    root.as  = @agents
-    root.a0  = @agents[0]
-    root.ls  = @links
-    root.l0  = @links[0]
-    root.dr  = @drawing
-    root.u   = ABM.util
-    root.cx  = @contexts
-    root.an  = @anim
-    root.gl  = @globals
-    root.dv  = @div
-    root.root= root
-    root.app = @
+    window.ps  = @patches
+    window.p0  = @patches[0]
+    window.as  = @agents
+    window.a0  = @agents[0]
+    window.ls  = @links
+    window.l0  = @links[0]
+    window.dr  = @drawing
+    window.u   = ABM.util
+    window.cx  = @contexts
+    window.an  = @anim
+    window.gl  = @globals
+    window.dv  = @div
+    window.root= root
+    window.app = @

@@ -44,7 +44,7 @@
 for customization by the programmer.  See these URLs for more info:</p>
 <ul>
 <li><a href="https://developer.mozilla.org/en-US/docs/JavaScript/Timers">JavaScript timers doc</a></li>
-<li><a href="http://goo.gl/ymEEX">Using timers &amp; requestAnimFrame together</a></li>
+<li><a href="http://goo.gl/ymEEX">Using timers &amp; requestAnimationFrame together</a></li>
 <li><a href="http://goo.gl/9Q3q">John Resig on timers</a></li>
 <li><a href="http://jsfiddle.net/calpo/H7EEE/">jsFiddle setTimeout vs rAF</a></li>
 <li><a href="http://javascript.info/tutorial/settimeout-setinterval">Timeout tutorial</a></li>
@@ -53,7 +53,7 @@ for customization by the programmer.  See these URLs for more info:</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  
+            <div class="content"><div class='highlight'><pre>
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ABM</span>.<span class="hljs-title">Animator</span></span></pre></div></div>
             
         </li>
@@ -67,11 +67,11 @@ for customization by the programmer.  See these URLs for more info:</p>
               </div>
               <p>Create initial animator for the model, specifying default rate (fps) and multiStep.
 If multiStep, run the draw() and step() methods separately by draw() using
-requestAnimFrame and step() using setTimeout.</p>
+requestAnimationFrame and step() using setTimeout.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">constructor</span>: <span class="hljs-function"><span class="hljs-params">(<span class="hljs-property">@model</span>, <span class="hljs-property">@rate</span>=<span class="hljs-number">30</span>, <span class="hljs-property">@multiStep</span>=model.world.isHeadless)</span> -&gt;</span> 
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">constructor</span>: <span class="hljs-function"><span class="hljs-params">(<span class="hljs-property">@model</span>, <span class="hljs-property">@rate</span>=<span class="hljs-number">30</span>, <span class="hljs-property">@multiStep</span>=model.world.isHeadless)</span> -&gt;</span>
     <span class="hljs-property">@isHeadless</span> = model.world.isHeadless; <span class="hljs-property">@reset</span>()</pre></div></div>
             
         </li>
@@ -110,7 +110,7 @@ in setup() to change default settings</p>
     <span class="hljs-property">@animate</span>()
   <span class="hljs-attribute">stop</span>:<span class="hljs-function"> -&gt;</span>
     <span class="hljs-property">@stopped</span> = <span class="hljs-literal">true</span>
-    <span class="hljs-keyword">if</span> <span class="hljs-property">@animHandle</span>? <span class="hljs-keyword">then</span> cancelAnimFrame <span class="hljs-property">@animHandle</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-property">@animHandle</span>? <span class="hljs-keyword">then</span> cancelAnimationFrame <span class="hljs-property">@animHandle</span>
     <span class="hljs-keyword">if</span> <span class="hljs-property">@timeoutHandle</span>? <span class="hljs-keyword">then</span> clearTimeout <span class="hljs-property">@timeoutHandle</span>
     <span class="hljs-keyword">if</span> <span class="hljs-property">@intervalHandle</span>? <span class="hljs-keyword">then</span> clearInterval <span class="hljs-property">@intervalHandle</span>
     <span class="hljs-property">@animHandle</span> = <span class="hljs-property">@timerHandle</span> = <span class="hljs-property">@intervalHandle</span> = <span class="hljs-literal">null</span></pre></div></div>
@@ -250,7 +250,7 @@ The “if” is to avoid from ms=0</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
-              <p>Animation via setTimeout and requestAnimFrame</p>
+              <p>Animation via setTimeout and requestAnimationFrame</p>
 
             </div>
             
@@ -263,7 +263,7 @@ The “if” is to avoid from ms=0</p>
     <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> <span class="hljs-property">@drawsPerSec</span>() &lt; <span class="hljs-property">@rate</span> <span class="hljs-comment"># throttle drawing to @rate</span>
       <span class="hljs-property">@step</span>() <span class="hljs-keyword">unless</span> <span class="hljs-property">@multiStep</span>
       <span class="hljs-property">@draw</span>()
-    <span class="hljs-property">@animHandle</span> = requestAnimFrame <span class="hljs-property">@animateDraws</span> <span class="hljs-keyword">unless</span> <span class="hljs-property">@stopped</span>
+    <span class="hljs-property">@animHandle</span> = requestAnimationFrame <span class="hljs-property">@animateDraws</span> <span class="hljs-keyword">unless</span> <span class="hljs-property">@stopped</span>
   <span class="hljs-attribute">animate</span>:<span class="hljs-function"> -&gt;</span>
     <span class="hljs-property">@animateSteps</span>() <span class="hljs-keyword">if</span> <span class="hljs-property">@multiStep</span>
     <span class="hljs-property">@animateDraws</span>() <span class="hljs-keyword">unless</span> <span class="hljs-property">@isHeadless</span> <span class="hljs-keyword">and</span> <span class="hljs-property">@multiStep</span></pre></div></div>
