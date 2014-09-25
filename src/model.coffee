@@ -284,5 +284,4 @@ class ABM.Model
     window.an  = @anim
     window.gl  = @globals
     window.dv  = @div
-    window.root= root
     window.app = @
