@@ -1,5 +1,5 @@
 # ### Agent
-  
+
 # Class Agent instances represent the dynamic, behavioral element of ABM.
 # Each agent knows the patch it is on, and interacts with that and other
 # patches, as well as other agents.
@@ -48,18 +48,18 @@ class ABM.Agent
     @x = @y = 0
     @p = @model.patches.patch @x, @y
     @color = u.randomColor() unless @color? # promote color if default not set
-    @heading = u.randomFloat(Math.PI*2) unless @heading? 
+    @heading = u.randomFloat(Math.PI*2) unless @heading?
     @p.agents.push @ if @p.agents? # @model.patches.cacheAgentsHere
     @links = [] if @cacheLinks
 
   # Set agent color to `c` scaled by `s`. Usage: see patch.scaleColor
-  scaleColor: (c, s) -> 
+  scaleColor: (c, s) ->
     @color = u.clone @color unless @hasOwnProperty "color" # promote color to inst var
     u.scaleColor c, s, @color
-  
+
   # Return a string representation of the agent.
   toString: -> "{id:#{@id} xy:#{u.aToFixed [@x,@y]} c:#{@color} h: #{@heading.toFixed 2}}"
-  
+
   # Place the agent at the given x,y (floats) in patch coords
   # using patch topology (isTorus)
   setXY: (x, y) -> # REMIND GC problem, 2 arrays
@@ -67,7 +67,7 @@ class ABM.Agent
     [@x, @y] = @model.patches.coord x, y
     p = @p
     @p = @model.patches.patch @x, @y
-    if p.agents? and p isnt @p # @model.patches.cacheAgentsHere 
+    if p.agents? and p isnt @p # @model.patches.cacheAgentsHere
       u.removeItem p.agents, @
       @p.agents.push @
     if @penDown
@@ -77,23 +77,26 @@ class ABM.Agent
       drawing.beginPath()
       drawing.moveTo x0, y0; drawing.lineTo x, y # REMIND: euclidean
       drawing.stroke()
-  
+
   # Place the agent at the given patch/agent location
   moveTo: (a) -> @setXY a.x, a.y
-  
+
   # Move forward (along heading) d units (patch coords),
   # using patch topology (isTorus)
   forward: (d) ->
     @setXY @x + d*Math.cos(@heading), @y + d*Math.sin(@heading)
-  
+
   # Change current heading by rad radians which can be + (left) or - (right)
-  rotate: (rad) -> @heading = u.wrap @heading + rad, 0, Math.PI*2 # returns new h
-  
+  # Returns new heading
+  rotate: (rad) -> @heading = u.wrap @heading + rad, 0, Math.PI*2
+  right: (rad) -> @rotate rad
+  left: (rad) -> @rotate -rad
+
   # Draw the agent, instanciating a sprite if required
   draw: (ctx) ->
     shape = ABM.shapes[@shape]
     rad = if shape.rotate then @heading else 0 # radians
-    if @sprite? or @breed.useSprites 
+    if @sprite? or @breed.useSprites
       @setSprite() unless @sprite? # lazy evaluation of useSprites
       ABM.shapes.drawSprite ctx, @sprite, @x, @y, @size, rad
     else
@@ -101,7 +104,7 @@ class ABM.Agent
     if @label?
       [x,y] = @model.patches.patchXYtoPixelXY @x, @y
       u.ctxDrawText ctx, @label, x+@labelOffset[0], y+@labelOffset[1], @labelColor
-  
+
   # Set an individual agent's sprite, synching its color, shape, size
   setSprite: (sprite)->
     if (s=sprite)?
@@ -112,25 +115,25 @@ class ABM.Agent
 
   # Draw the agent on the drawing layer, leaving permanent image.
   stamp: -> @draw @model.drawing
-  
-  # Return distance in patch coords from me to x,y 
+
+  # Return distance in patch coords from me to x,y
   # using patch topology (isTorus)
   distanceXY: (x,y) ->
     if @model.patches.isTorus
     then u.torusDistance @x, @y, x, y, @model.patches.numX, @model.patches.numY
     else u.distance @x, @y, x, y
-  
+
   # Return distance in patch coords from me to given agent/patch using patch topology.
   distance: (o) -> # o any object w/ x,y, patch or agent
     @distanceXY o.x, o.y
-  
+
   # Return the closest torus topology point of given x,y relative to myself.
   # Used internally to determine how to draw links between two agents.
   # See util.torusPt.
   torusPtXY: (x, y) ->
     u.torusPt @x, @y, x, y, @model.patches.numX, @model.patches.numY
 
-  # Return the closest torus topology point of given agent/patch 
+  # Return the closest torus topology point of given agent/patch
   # relative to myself. See util.torusPt.
   torusPt: (o) ->
     @torusPtXY o.x, o.y
@@ -146,19 +149,20 @@ class ABM.Agent
 
   # Return heading towards given agent/patch using patch topology.
   towards: (o) -> @towardsXY o.x, o.y
-  
+
   # Return patch ahead of me by given distance and heading.
   # Returns null if non-torus and off patch world
   patchAtHeadingAndDistance: (h,d) ->
-    [x,y] = u.polarToXY d, h, @x, @y; patchAt x,y
-  patchLeftAndAhead: (dh, d) -> @patchAtHeadingAndDistance @heading+dh, d
-  patchRightAndAhead: (dh, d) -> @patchAtHeadingAndDistance @heading-dh, d
-  patchAhead: (d) -> @patchAtHeadingAndDistance @heading, d
+    [dx,dy] = u.polarToXY d, h
+    @patchAt dx,dy
+  patchLeftAndAhead: (dh, d) -> @patchAtHeadingAndDistance dh, d
+  patchRightAndAhead: (dh, d) -> @patchAtHeadingAndDistance -dh, d
+  patchAhead: (d) -> @patchAtHeadingAndDistance 0, d
   canMove: (d) -> @patchAhead(d)?
   patchAt: (dx,dy) ->
     x=@x+dx; y=@y+dy
     if (ps=@model.patches).isOnWorld x,y then ps.patch x,y else null
-  
+
   # Remove myself from the model.  Includes removing myself from the agents
   # agentset and removing any links I may have.
   die: ->
@@ -172,25 +176,25 @@ class ABM.Agent
   hatch: (num = 1, breed = @model.agents, init = ->) ->
     breed.create num, (a) => # fat arrow so that @ = this agent
       a.setXY @x, @y # for side effects like patches.agentsHere
-      a[k] = v for own k, v of @ when k isnt "id"    
+      a[k] = v for own k, v of @ when k isnt "id"
       init(a); a # Important: init called after object inserted in agent set
 
-  # Return the members of the given agentset that are within radius distance 
+  # Return the members of the given agentset that are within radius distance
   # from me, and within cone radians of my heading using patch topology
-  inCone: (aset, cone, radius, meToo=false) -> 
+  inCone: (aset, cone, radius, meToo=false) ->
     aset.inCone @p, @heading, cone, radius, meToo # REMIND: @p vs @?
-  
+
   # Return other end of link from me
   otherEnd: (l) -> if l.end1 is @ then l.end2 else l.end1
 
   # Return all links linked to me
   myLinks: ->
     @links ? (l for l in @model.links when (l.end1 is @) or (l.end2 is @))
-  
+
   # Return all agents linked to me.
   linkNeighbors: -> # return all agents linked to me
     @otherEnd l for l in @myLinks()
-  
+
   # Return links where I am the "to" agent in links.create
   myInLinks: ->
     l for l in @myLinks() when l.end2 is @
@@ -198,11 +202,11 @@ class ABM.Agent
   # Return other end of myInLinks
   inLinkNeighbors: ->
     l.end1 for l in @myLinks() when l.end2 is @
-    
+
   # Return links where I am the "from" agent in links.create
   myOutLinks: ->
     l for l in @myLinks() when l.end1 is @
-  
+
   # Return other end of myOutinks
   outLinkNeighbors: ->
     l.end2 for l in @myLinks() when l.end1 is @

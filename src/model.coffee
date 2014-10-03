@@ -282,6 +282,6 @@ class ABM.Model
     window.u   = ABM.util
     window.cx  = @contexts
     window.an  = @anim
-    window.gl  = @globals
+    window.gl  = @globals()
     window.dv  = @div
     window.app = @

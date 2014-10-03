@@ -149,18 +149,28 @@ ABM.util = u =
       when 5 then r = v; g = p; b = q
     [Math.round(r*255), Math.round(g*255), Math.round(b*255)]
 
-  # Colormap utilities.  Create an array of colors which are
-  # shared by a set of objects.
-  # Note: Experimental, will change.
+  # Colormap factories, building a colormap of a particular type
+
+  # Create a colormap by rgb values. R, G, B can be either a number,
+  # the number of steps beteen 0-255, or an array of values to use
+  # for the color.  Ex: R = 3, corresponds to [0, 128, 255]
+  # The resulting map permutes the R, G, V values.  Thus if
+  # R=G=B=4, the resulting map has 4*4*4=64 colors.
   rgbMap: (R,G=R,B=R) ->
     R = (Math.round(i*255/(R-1)) for i in [0...R]) if typeof R is "number"
     G = (Math.round(i*255/(G-1)) for i in [0...G]) if typeof G is "number"
     B = (Math.round(i*255/(B-1)) for i in [0...B]) if typeof B is "number"
     map=[]; ((map.push [r,g,b] for b in B) for g in G) for r in R
     map
+  # Create a gray map of all 256 gray values
   grayMap: -> ([i,i,i] for i in [0..255])
+  # Create an hsb map with n hues, with constant saturation
+  # and brightness.
   hsbMap: (n=256, s=255,b=255)->
     (@hsbToRgb [i*255/(n-1),s,b] for i in [0...n])
+  # Use the canvas gradient feature to create nColors.
+  # This is a really sophisticated technique, see:
+  #  https://developer.mozilla.org/en-US/docs/Web/CSS/linear-gradient
   gradientMap: (nColors, stops, locs) ->
     locs = (i/(stops.length-1) for i in [0...stops.length]) if not locs?
     ctx = @createCtx nColors, 1
@@ -440,7 +450,7 @@ ABM.util = u =
   distance: (x1, y1, x2, y2) -> dx = x1-x2; dy = y1-y2; Math.sqrt dx*dx + dy*dy
   sqDistance: (x1, y1, x2, y2) -> dx = x1-x2; dy = y1-y2; dx*dx + dy*dy
 
-  # Convert polar r,theta to cartesian x,y.
+  # Convert polar r,theta, theta in radians, to cartesian x,y.
   # Default to 0,0 origin, optional x,y origin.
   polarToXY: (r, theta, x=0, y=0) -> [x+r*Math.cos(theta), y+r*Math.sin(theta)]
 
