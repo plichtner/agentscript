@@ -58,7 +58,7 @@ class ABM.Agent
     u.scaleColor c, s, @color
 
   # Return a string representation of the agent.
-  toString: -> "{id:#{@id} xy:#{u.aToFixed [@x,@y]} c:#{@color} h: #{@heading.toFixed 2}}"
+  toString: -> "{id:#{@id} xy:#{u.aToFixed [@x,@y]} c:#{@color} h: #{h=@heading.toFixed 2}/#{Math.round(u.radToDeg(h))}}"
 
   # Place the agent at the given x,y (floats) in patch coords
   # using patch topology (isTorus)
@@ -86,11 +86,11 @@ class ABM.Agent
   forward: (d) ->
     @setXY @x + d*Math.cos(@heading), @y + d*Math.sin(@heading)
 
-  # Change current heading by rad radians which can be + (left) or - (right)
-  # Returns new heading
+  # Change current heading by rad radians which can be + (left) or - (right).
+  # Returns new heading.
   rotate: (rad) -> @heading = u.wrap @heading + rad, 0, Math.PI*2
-  right: (rad) -> @rotate rad
-  left: (rad) -> @rotate -rad
+  right: (rad) -> @rotate -rad
+  left: (rad) -> @rotate rad
 
   # Draw the agent, instanciating a sprite if required
   draw: (ctx) ->
@@ -151,9 +151,10 @@ class ABM.Agent
   towards: (o) -> @towardsXY o.x, o.y
 
   # Return patch ahead of me by given distance and heading.
-  # Returns null if non-torus and off patch world
+  # Returns null if non-torus and off patch world.
+  # Heading is + for left, - for right.
   patchAtHeadingAndDistance: (h,d) ->
-    [dx,dy] = u.polarToXY d, h
+    [dx,dy] = u.polarToXY d, h + @heading
     @patchAt dx,dy
   patchLeftAndAhead: (dh, d) -> @patchAtHeadingAndDistance dh, d
   patchRightAndAhead: (dh, d) -> @patchAtHeadingAndDistance -dh, d

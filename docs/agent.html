@@ -138,7 +138,7 @@ This can be a huge savings in memory.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">toString</span>:<span class="hljs-function"> -&gt;</span> <span class="hljs-string">"{id:<span class="hljs-subst">#{<span class="hljs-property">@id</span>}</span> xy:<span class="hljs-subst">#{u.aToFixed [<span class="hljs-property">@x</span>,<span class="hljs-property">@y</span>]}</span> c:<span class="hljs-subst">#{<span class="hljs-property">@color</span>}</span> h: <span class="hljs-subst">#{<span class="hljs-property">@heading</span>.toFixed <span class="hljs-number">2</span>}</span>}"</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">toString</span>:<span class="hljs-function"> -&gt;</span> <span class="hljs-string">"{id:<span class="hljs-subst">#{<span class="hljs-property">@id</span>}</span> xy:<span class="hljs-subst">#{u.aToFixed [<span class="hljs-property">@x</span>,<span class="hljs-property">@y</span>]}</span> c:<span class="hljs-subst">#{<span class="hljs-property">@color</span>}</span> h: <span class="hljs-subst">#{h=<span class="hljs-property">@heading</span>.toFixed <span class="hljs-number">2</span>}</span>/<span class="hljs-subst">#{Math.round(u.radToDeg(h))}</span>}"</span></pre></div></div>
             
         </li>
         
@@ -211,14 +211,14 @@ using patch topology (isTorus)</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
-              <p>Change current heading by rad radians which can be + (left) or - (right)
-Returns new heading</p>
+              <p>Change current heading by rad radians which can be + (left) or - (right).
+Returns new heading.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">rotate</span>: <span class="hljs-function"><span class="hljs-params">(rad)</span> -&gt;</span> <span class="hljs-property">@heading</span> = u.wrap <span class="hljs-property">@heading</span> + rad, <span class="hljs-number">0</span>, Math.PI*<span class="hljs-number">2</span>
-  <span class="hljs-attribute">right</span>: <span class="hljs-function"><span class="hljs-params">(rad)</span> -&gt;</span> <span class="hljs-property">@rotate</span> rad
-  <span class="hljs-attribute">left</span>: <span class="hljs-function"><span class="hljs-params">(rad)</span> -&gt;</span> <span class="hljs-property">@rotate</span> -rad</pre></div></div>
+  <span class="hljs-attribute">right</span>: <span class="hljs-function"><span class="hljs-params">(rad)</span> -&gt;</span> <span class="hljs-property">@rotate</span> -rad
+  <span class="hljs-attribute">left</span>: <span class="hljs-function"><span class="hljs-params">(rad)</span> -&gt;</span> <span class="hljs-property">@rotate</span> rad</pre></div></div>
             
         </li>
         
@@ -408,12 +408,13 @@ relative to myself. See util.torusPt.</p>
                 <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
               <p>Return patch ahead of me by given distance and heading.
-Returns null if non-torus and off patch world</p>
+Returns null if non-torus and off patch world.
+Heading is + for left, - for right.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">patchAtHeadingAndDistance</span>: <span class="hljs-function"><span class="hljs-params">(h,d)</span> -&gt;</span>
-    [dx,dy] = u.polarToXY d, h
+    [dx,dy] = u.polarToXY d, h + <span class="hljs-property">@heading</span>
     <span class="hljs-property">@patchAt</span> dx,dy
   <span class="hljs-attribute">patchLeftAndAhead</span>: <span class="hljs-function"><span class="hljs-params">(dh, d)</span> -&gt;</span> <span class="hljs-property">@patchAtHeadingAndDistance</span> dh, d
   <span class="hljs-attribute">patchRightAndAhead</span>: <span class="hljs-function"><span class="hljs-params">(dh, d)</span> -&gt;</span> <span class="hljs-property">@patchAtHeadingAndDistance</span> -dh, d
