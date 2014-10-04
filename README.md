@@ -46,7 +46,7 @@ The extras/ directory contains libraries that are too specialized to be in the c
 
 #### Sample Models
 
-The models/ directory contains tiny models used both as unit tests and as examples to get started with.  They usually print to the console.log, so opening the developer's JavaScript console will show model information.
+The models/ directory contains tiny models used both as unit tests and as examples to get started with.  They usually print to the console.log, so opening the developer's JavaScript console will show model information. Often they are translations from NetLogo's model library.
 
 [**ants.html**](models/ants.html) A model of ant foraging behavior incorporating a nest location and food pheromone diffusion.
 
@@ -75,6 +75,8 @@ The models/ directory contains tiny models used both as unit tests and as exampl
 [**tiledroplets.html**](models/tiledroplets.html) A model similar to the above droplets.html, but here the droplets move on top of a Leaflet map, and elevation data is loaded from a tileserver as the map is panned. This example uses the data.js, data.tile.js, and as.dat.gui.js extras.
 
 [**life.html**](models/life.html) An implementation of [Conway's Game of Life](http://en.wikipedia.org/wiki/Conway's_Game_of_Life) with a twist. This example demonstrates running multiple models on the same page and uses a small as.dat.gui.js interface.
+
+[**wallfollower.html**](models/wallfollower.html) An interesting wall following model from NetLogo. A set of "buildings" are created on the patches, and agents find them then follow the wall, half of them to the right, the others to the left.
 
 #### Sample Models Format
 
