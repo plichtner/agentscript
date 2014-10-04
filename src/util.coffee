@@ -7,25 +7,6 @@
 # Thus @ABM is placed in the global scope.
 @ABM={}
 
-root = @ # Keep a private copy of global object
-
-# Global shim for not-yet-standard requestAnimationFrame.
-# See: [Paul Irish Shim](https://gist.github.com/paulirish/1579671)
-do -> 
-  @requestAnimFrame = @requestAnimationFrame or null
-  @cancelAnimFrame = @cancelAnimationFrame or null
-  for vendor in ['ms', 'moz', 'webkit', 'o'] when not @requestAnimFrame
-    @requestAnimFrame or= @[vendor+'RequestAnimationFrame']
-    @cancelAnimFrame or= @[vendor+'CancelAnimationFrame']
-    @cancelAnimFrame or= @[vendor+'CancelRequestAnimationFrame']
-  @requestAnimFrame or= (callback) -> @setTimeout(callback, 1000 / 60)
-  @cancelAnimFrame or= (id) -> @clearTimeout(id)
-
-# Shim for `Array.indexOf` if not implemented.
-# Use [es5-shim](https://github.com/kriskowal/es5-shim) if additional shims needed.
-Array::indexOf or= (item) -> return i if x is item for x, i in @; -1
-
-
 # **ABM.util** contains the general utilities for the project. Note that within
 # **util** `@` referrs to ABM.util, *not* the global name space as above.
 # Alias: u is an alias for ABM.util within the agentscript module (not outside)
@@ -39,21 +20,21 @@ ABM.util = u =
   #
   #     error("wtf? foo=#{foo}") if fooProblem
   error: (s) -> throw new Error s
-  
+
   # Two max/min int values. One for 2^53, largest int in float64, other for
   # bitwise ops which are 32 bit. See [discussion](http://goo.gl/WpAzT)
   MaxINT: Math.pow(2,53); MinINT: -Math.pow(2,53) # -@MaxINT fails, @ not defined yet
   MaxINT32: 0|0x7fffffff; MinINT32: 0|0x80000000
-  
+
   # Good replacements for Javascript's badly broken`typeof` and `instanceof`
   # See [underscore.coffee](http://goo.gl/L0umK)
   isArray: Array.isArray or
     (obj) -> !!(obj and obj.concat and obj.unshift and not obj.callee)
-  isFunction: (obj) -> 
+  isFunction: (obj) ->
     !!(obj and obj.constructor and obj.call and obj.apply)
-  isString: (obj) -> 
+  isString: (obj) ->
     !!(obj is '' or (obj and obj.charCodeAt and obj.substr))
-  
+
 # ### Numeric Operations
 
   # Replace Math.random with a simple seedable generator.
@@ -99,14 +80,14 @@ ABM.util = u =
 # ### Color and Angle Operations
 # Our colors are r,g,b,[a] arrays, with an optional color.str HTML
 # color string property. The str value is set on the first call to colorStr
-  
+
   # Return a random RGB or gray color. Array passed to minimize garbage collection
   randomColor: (c = []) ->
     c.str = null if c.str?
     c[i] = @randomInt(256) for i in [0..2]
-    c 
+    c
   # Note: if 2 args passed, assume they're min, max w/ default c
-  randomGray: (c = [], min = 64, max = 192) -> 
+  randomGray: (c = [], min = 64, max = 192) ->
     if arguments.length is 2 then return @randomGray null, c, min
     c.str = null if c.str?
     r=@randomInt2 min,max
@@ -114,7 +95,7 @@ ABM.util = u =
     c
   # Random color from a colormap set of r,g,b values.
   # Default is one of 125 (5^3) colors
-  randomMapColor: (c = [], set = [0,63,127,191,255]) -> 
+  randomMapColor: (c = [], set = [0,63,127,191,255]) ->
     @setColor c, @oneOf(set), @oneOf(set), @oneOf(set)
   randomBrightColor: (c=[]) -> @randomMapColor c, [0,127,255]
   randomHSBColor: (c=[]) ->
@@ -127,7 +108,7 @@ ABM.util = u =
     c
   setGray: (c, g, a) -> @setColor c, g, g, g, a
   # Return new color, c, by scaling each value of the rgb color max.
-  scaleColor: (max, s, c = []) -> 
+  scaleColor: (max, s, c = []) ->
     c.str = null if c.str?
     c[i] = @clamp(Math.round(val*s),0,255) for val, i in max # [r,g,b] must be ints
     c
@@ -167,19 +148,29 @@ ABM.util = u =
       when 4 then r = t; g = p; b = v
       when 5 then r = v; g = p; b = q
     [Math.round(r*255), Math.round(g*255), Math.round(b*255)]
-    
-  # Colormap utilities.  Create an array of colors which are
-  # shared by a set of objects.
-  # Note: Experimental, will change.
+
+  # Colormap factories, building a colormap of a particular type
+
+  # Create a colormap by rgb values. R, G, B can be either a number,
+  # the number of steps beteen 0-255, or an array of values to use
+  # for the color.  Ex: R = 3, corresponds to [0, 128, 255]
+  # The resulting map permutes the R, G, V values.  Thus if
+  # R=G=B=4, the resulting map has 4*4*4=64 colors.
   rgbMap: (R,G=R,B=R) ->
     R = (Math.round(i*255/(R-1)) for i in [0...R]) if typeof R is "number"
     G = (Math.round(i*255/(G-1)) for i in [0...G]) if typeof G is "number"
     B = (Math.round(i*255/(B-1)) for i in [0...B]) if typeof B is "number"
     map=[]; ((map.push [r,g,b] for b in B) for g in G) for r in R
     map
+  # Create a gray map of all 256 gray values
   grayMap: -> ([i,i,i] for i in [0..255])
-  hsbMap: (n=256, s=255,b=255)-> 
+  # Create an hsb map with n hues, with constant saturation
+  # and brightness.
+  hsbMap: (n=256, s=255,b=255)->
     (@hsbToRgb [i*255/(n-1),s,b] for i in [0...n])
+  # Use the canvas gradient feature to create nColors.
+  # This is a really sophisticated technique, see:
+  #  https://developer.mozilla.org/en-US/docs/Web/CSS/linear-gradient
   gradientMap: (nColors, stops, locs) ->
     locs = (i/(stops.length-1) for i in [0...stops.length]) if not locs?
     ctx = @createCtx nColors, 1
@@ -190,7 +181,7 @@ ABM.util = u =
     id = @ctxToImageData(ctx).data
     ([id[i], id[i+1], id[i+2]] for i in [0...id.length] by 4)
 
-  # Return little/big endian-ness of hardware. 
+  # Return little/big endian-ness of hardware.
   # See Mozilla pixel [manipulation article](http://goo.gl/Lxliq)
   isLittleEndian: ->
     # convert 1-int array to typed array
@@ -206,9 +197,9 @@ ABM.util = u =
     dr = rad1-rad2; PI = Math.PI
     dr += 2*PI if dr <= -PI; dr -= 2*PI if dr > PI; dr
 
-  
+
 # ### Object Operations
-  
+
   # Return object's own key or variable values
   ownKeys: (obj) -> (key for own key, value of obj)
   ownVarKeys: (obj) -> (key for own key, value of obj when not @isFunction value)
@@ -230,7 +221,7 @@ ABM.util = u =
 
 
 # ### Array Operations
-  
+
   # Does the array have any elements? Is the array empty?
   any: (array) -> array.length isnt 0
   empty: (array) -> array.length is 0
@@ -242,11 +233,11 @@ ABM.util = u =
     op = if array.slice? then "slice" else "subarray"
     if begin? then array[op] begin, end else array[op] 0
   # Return last element of array.  Error if empty.
-  last: (array) -> 
+  last: (array) ->
     @error "last: empty array" if @empty array
     array[array.length-1]
   # Return random element of array.  Error if empty.
-  oneOf: (array) -> 
+  oneOf: (array) ->
     @error "oneOf: empty array" if @empty array
     array[@randomInt array.length]
   # Return n random elements of array. Error if n > length
@@ -262,7 +253,7 @@ ABM.util = u =
   # Remove an item from an array. Binary search if f isnt null.
   # Error if item not in array.
   removeItem: (array, item, f) ->
-    unless (i = @indexOf array, item, f) < 0 then array.splice i, 1 
+    unless (i = @indexOf array, item, f) < 0 then array.splice i, 1
     else @error "removeItem: item not found" #; array
   # Remove elements in items from an array. Binary search if f isnt null.
   # Error if an item not in array.
@@ -272,7 +263,7 @@ ABM.util = u =
     i = @sortedIndex array, item, f
     error "insertItem: item already in array" if array[i] is item
     array.splice i, 0, item
-    
+
   # Randomize the elements of this array.
   # Clever! See [cookbook](http://goo.gl/TT2SY)
   shuffle: (array) -> array.sort -> 0.5 - Math.random()
@@ -281,7 +272,7 @@ ABM.util = u =
   # If f is a string, return element with max value of that property.
   # If "valueToo" then return a 2-array of the element and the value;
   # used for cases where f is costly function.
-  # 
+  #
   #     array = [{x:1,y:2}, {x:3,y:4}]
   #     # returns {x: 1, y: 2} 5
   #     [min, dist2] = minOneOf array, ((o)->o.x*o.x+o.y*o.y), true
@@ -310,7 +301,7 @@ ABM.util = u =
   #
   #     a = [1,3,4,1,1,10]
   #     h = histOf a, 2, (i) -> i
-  #     
+  #
   #     b = ({id:i} for i in a)
   #     h = histOf b, 2, (o) -> o.id
   #     h = histOf b, 2, "id"
@@ -330,7 +321,7 @@ ABM.util = u =
   #     array = [{i:1},{i:5},{i:-1},{i:2},{i:2}]
   #     sortBy array, "i"
   #     # array now is [{i:-1},{i:1},{i:2},{i:2},{i:5}]
-  sortBy: (array, f) -> 
+  sortBy: (array, f) ->
    f = @propFcn f if @isString f # use item[f] if f is string
    array.sort (a,b) -> f(a) - f(b)
 
@@ -358,12 +349,12 @@ ABM.util = u =
     return array if array.length < 2 # return if empty or singlton
     array.splice i,1 for i in [array.length-1..1] by -1 when array[i-1] is array[i]
     array
-  
+
   # Return a new array composed of the rows of a matrix. I.e. convert
   #
   #     [[1,2,3],[4,5,6]] to [1,2,3,4,5,6]
   flatten: (matrix) -> matrix.reduce( (a,b) -> a.concat b )
-  
+
   # Return array of property values of given array of objects
   aProp: (array, propOrFn) ->
     if typeof propOrFn is 'function'
@@ -383,15 +374,15 @@ ABM.util = u =
   aMin: (array) -> v=array[0]; v=Math.min v,a for a in array; v
   aSum: (array) -> v=0; v += a for a in array; v
   aAvg: (array) -> @aSum(array)/array.length
-  aMid: (array) -> 
+  aMid: (array) ->
     array = if array.sort? then @clone array else @typedToJS array
     @sortNums array
     array[Math.floor(array.length/2)]
 
   aNaNs: (array) -> (i for v,i in array when isNaN v)
-  
+
   # Return array composed of f pairwise on both arrays
-  aPairwise: (a1, a2, f) -> v=0; f(v,a2[i]) for v,i in a1 
+  aPairwise: (a1, a2, f) -> v=0; f(v,a2[i]) for v,i in a1
   aPairSum: (a1, a2) -> @aPairwise a1, a2, (a,b)->a+b
   aPairDif: (a1, a2) -> @aPairwise a1, a2, (a,b)->a-b
   aPairMul: (a1, a2) -> @aPairwise a1, a2, (a,b)->a*b
@@ -399,7 +390,7 @@ ABM.util = u =
   # Return a JS array given a TypedArray.
   # To create TypedArray from JS array: new Uint8Array(jsa) etc
   typedToJS: (typedArray) -> (i for i in typedArray)
-  
+
   # Return a linear interpolation between lo and hi.
   # Scale is in [0-1], and the result is in [lo,hi]
   # [Why the name `lerp`?](http://goo.gl/QrzMc)
@@ -443,7 +434,7 @@ ABM.util = u =
     else array.indexOf item
 
 # ### Topology Operations
-  
+
   # Return angle in [-pi,pi] radians from x1,y1 to x2,y2
   # [See: Math.atan2](http://goo.gl/JS8DF)
   radsToward: (x1, y1, x2, y2) -> Math.atan2 y2-y1, x2-x1
@@ -458,8 +449,8 @@ ABM.util = u =
   # The squared distance is used for comparisons to avoid the Math.sqrt fcn.
   distance: (x1, y1, x2, y2) -> dx = x1-x2; dy = y1-y2; Math.sqrt dx*dx + dy*dy
   sqDistance: (x1, y1, x2, y2) -> dx = x1-x2; dy = y1-y2; dx*dx + dy*dy
-  
-  # Convert polar r,theta to cartesian x,y.
+
+  # Convert polar r,theta, theta in radians, to cartesian x,y.
   # Default to 0,0 origin, optional x,y origin.
   polarToXY: (r, theta, x=0, y=0) -> [x+r*Math.cos(theta), y+r*Math.sin(theta)]
 
@@ -487,7 +478,7 @@ ABM.util = u =
   #     -----+---------------+-----
   #      B3  |           B2  |
   #          |               |
-  torusDistance: (x1, y1, x2, y2, w, h) -> 
+  torusDistance: (x1, y1, x2, y2, w, h) ->
     Math.sqrt @torusSqDistance x1, y1, x2, y2, w, h
   torusSqDistance: (x1, y1, x2, y2, w, h) ->
     dx = Math.abs x2-x1; dy = Math.abs y2-y1
@@ -510,7 +501,7 @@ ABM.util = u =
     y = if Math.abs(y2r-y1) < Math.abs(y2-y1) then y2r else y2
     [x,y]
   # Return the angle from x1,y1 to x2.y2 on torus using shortest reflection.
-  torusRadsToward: (x1, y1, x2, y2, w, h) -> 
+  torusRadsToward: (x1, y1, x2, y2, w, h) ->
     [x2,y2] = @torusPt x1, y1, x2, y2, w, h
     @radsToward x1, y1, x2, y2
   # Return true if x2,y2 is in cone radians around heading radians from x1,x2
@@ -535,7 +526,7 @@ ABM.util = u =
       img.onload = -> f(img); img.isDone = true
       img.src = name
     img
-    
+
   # Use XMLHttpRequest to fetch data of several types. Data Types: text,
   # arraybuffer, blob, json, document, [See specification](http://goo.gl/y3r3h).
   # method is "GET" or "POST". f is function to call onload, default to no-op.
@@ -550,7 +541,7 @@ ABM.util = u =
       xhr.onload = -> f(xhr.response); xhr.isDone = true
       xhr.send()
     xhr
-  
+
   # Return true if all files are loaded.
   filesLoaded: (files = @fileIndex) ->
     array = (v.isDone for v in (@ownValues files))
@@ -602,7 +593,7 @@ ABM.util = u =
   createCtx: (width, height, ctxType="2d") ->
     can = @createCanvas width, height
     if ctxType is "2d"
-    then can.getContext "2d" 
+    then can.getContext "2d"
     else can.getContext("webgl") ? can.getContext("experimental-webgl")
 
   # Return a "layer" 2D/3D rendering context within the specified HTML `<div>`,
@@ -611,7 +602,7 @@ ABM.util = u =
   #
   # The z level gives us the capability of buildng a "stack" of coordinated canvases.
   createLayer: (div, width, height, z, ctx = "2d") -> # a canvas ctx object
-    if ctx is "img" 
+    if ctx is "img"
     then element = ctx = new Image(); ctx.width = width; ctx.height=height
     else element = (ctx=@createCtx(width, height, ctx)).canvas
     @insertLayer div, element, width, height, z
@@ -632,7 +623,7 @@ ABM.util = u =
   setIdentity: (ctx) ->
     ctx.save() # revert to native 2D transform
     ctx.setTransform 1, 0, 0, 1, 0, 0
-  
+
   # Clear the 2D/3D layer to be transparent. Note this [discussion](http://goo.gl/qekXS).
   clearCtx: (ctx) ->
     if ctx.save? # test for 2D ctx
@@ -665,9 +656,9 @@ ABM.util = u =
   # * baseline is top hanging middle alphabetic ideographic bottom
   #
   # See [reference](http://goo.gl/AvEAq) for details.
-  ctxTextParams: (ctx, font, align = "center", baseline = "middle") -> 
+  ctxTextParams: (ctx, font, align = "center", baseline = "middle") ->
     ctx.font = font; ctx.textAlign = align; ctx.textBaseline = baseline
-  elementTextParams: (e, font, align = "center", baseline = "middle") -> 
+  elementTextParams: (e, font, align = "center", baseline = "middle") ->
     e = e.canvas if e.canvas?
     e.style.font = font; e.style.textAlign = align; e.style.textBaseline = baseline
 
@@ -689,15 +680,15 @@ ABM.util = u =
     ctx.drawImage img, sx, sy, sw, sh, 0, 0, sw, sh
     ctx
   imageToCtxDownStepped: (img, tw, th) -> # http://goo.gl/UnLJSZ
-    ctx1 = u.createCtx tw, th
+    ctx1 = @createCtx tw, th
     w = img.width; h = img.height; ihalf = (n) -> Math.ceil n/2
-    steps = Math.ceil(u.log2( if (w/tw)>(h/th) then (w/tw) else (h/th)) )
+    steps = Math.ceil(@log2( if (w/tw)>(h/th) then (w/tw) else (h/th)) )
     console.log "steps", steps
     if steps <= 1
       ctx1.drawImage img, 0, 0, tw, th
     else
       console.log "img w/h", w, h, "->", ihalf(w), ihalf(h)
-      ctx = u.createCtx w = ihalf(w), h = ihalf(h); can = ctx.canvas
+      ctx = @createCtx w = ihalf(w), h = ihalf(h); can = ctx.canvas
       ctx.drawImage img, 0, 0, w, h
       for step in [steps...2] # 2 not 1 due to initial halving above
         console.log "can w/h", w, h, "->", ihalf(w), ihalf(h)
@@ -724,14 +715,14 @@ ABM.util = u =
   # canvasToImage: (canvas) -> ctxToImage(canvas.getContext "2d")
   # canvasToImageData: (canvas) -> ctxToImageData(canvas.getContext "2d")
   # imageToCanvas: (image) -> imageToCtx(image).canvas
-  
+
   # Draw an image centered at x, y w/ image size dx, dy.
   # See [this tutorial](http://goo.gl/VUlhY).
   drawCenteredImage: (ctx, img, rad, x, y, dx, dy) -> # presume save/restore surrounds this
     ctx.translate x, y # translate to center
     ctx.rotate rad
     ctx.drawImage img, -dx/2, -dy/2
-  
+
   # Duplicate a ctx's image.  Returns the new ctx, use ctx.canvas for canvas.
   copyCtx: (ctx0) ->
     ctx = @createCtx ctx0.canvas.width, ctx0.canvas.height
@@ -743,6 +734,3 @@ ABM.util = u =
     copy = @copyCtx ctx
     ctx.canvas.width = width; ctx.canvas.height = height
     ctx.drawImage copy.canvas, 0, 0
-
-    
-  

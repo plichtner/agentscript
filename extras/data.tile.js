@@ -172,35 +172,35 @@
                 
                 var tile = ABM.util.imageToCtx(e.tile, this.tileSize, this.tileSize);
 
-        		this.addTile(tilePoint, tile);
-        	}.bind(this));
+                this.addTile(tilePoint, tile);
+            }.bind(this));
 
-        	// Clear tile storage on zoom
-        	leafletMap.on('zoomstart', function() {
-        		this.tiles = {};
-        	}.bind(this));
+            // Clear tile storage on zoom
+            leafletMap.on('zoomstart', function() {
+                this.tiles = {};
+            }.bind(this));
 
-        	// Keep map top-left corner up to date
-        	leafletMap.on('moveend', function() {
-        		this.origin = this.leafletMap.getPixelBounds().min;
-        	}.bind(this));
+            // Keep map top-left corner up to date
+            leafletMap.on('moveend', function() {
+                this.origin = this.leafletMap.getPixelBounds().min;
+            }.bind(this));
 
-        	// Keep zoom up to date
-        	leafletMap.on('zoomend', function() {
-        		this.zoom = this.leafletMap.getZoom();
-        	}.bind(this));
+            // Keep zoom up to date
+            leafletMap.on('zoomend', function() {
+                this.zoom = this.leafletMap.getZoom();
+            }.bind(this));
 
-        	// Provide a way to listen for 'tilesready' events
-        	// by wrapping the leafletLayer's event listener
-        	this.on = function(name, fn) {
-        		var leafletLayer = this.leafletLayer;
-        		
-        		if (!leafletLayer) {
-        			return;
-        		}
+            // Provide a way to listen for 'tilesready' events
+            // by wrapping the leafletLayer's event listener
+            this.on = function(name, fn) {
+                var leafletLayer = this.leafletLayer;
+                
+                if (!leafletLayer) {
+                    return;
+                }
 
-        		leafletLayer.on(name, fn);
-        	}
+                leafletLayer.on(name, fn);
+            }
 
             this.off = function(name, fn) {
                 var leafletLayer = this.leafletLayer;
@@ -212,43 +212,43 @@
                 leafletLayer.off(name, fn);
             }
 
-        	// Fire 'tilesready' events only when the map
-        	// is finished moving and the current tiles are
-        	// finished loading
-        	var mapReady = true,
-        		tilesReady = false;
+            // Fire 'tilesready' events only when the map
+            // is finished moving and the current tiles are
+            // finished loading
+            var mapReady = true,
+                tilesReady = false;
 
-        	leafletLayer.on('loading', function() {
-        		tilesReady = false;
-        	});
+            leafletLayer.on('loading', function() {
+                tilesReady = false;
+            });
 
-        	leafletMap.on('movestart', function() {
-        		mapReady = false;
-        	});
+            leafletMap.on('movestart', function() {
+                mapReady = false;
+            });
 
-        	leafletLayer.on('load', function() {
-        		tilesReady = true;
-        		if (mapReady) {
-        			this.leafletLayer.fire('tilesready');
-        		}
-        	}.bind(this));
+            leafletLayer.on('load', function() {
+                tilesReady = true;
+                if (mapReady) {
+                    this.leafletLayer.fire('tilesready');
+                }
+            }.bind(this));
 
-        	leafletMap.on('moveend', function() {
-        		mapReady = true;
-        		if (tilesReady) {
-        			this.leafletLayer.fire('tilesready');
-        		}
-        	}.bind(this));
+            leafletMap.on('moveend', function() {
+                mapReady = true;
+                if (tilesReady) {
+                    this.leafletLayer.fire('tilesready');
+                }
+            }.bind(this));
 
-        	function urlToTileCoords(url) {
-        		var coordRegex = /.*\/(\d+)\/(\d+)\/(\d+)\.png$/;
-        		var coords = coordRegex.exec(url);
-        		return coords && {
-        			z: coords[1],
-        			x: coords[2],
-        			y: coords[3]
-        		};
-        	}
+            function urlToTileCoords(url) {
+                var coordRegex = /.*\/(\d+)\/(\d+)\/(\d+)\.png$/;
+                var coords = coordRegex.exec(url);
+                return coords && {
+                    z: coords[1],
+                    x: coords[2],
+                    y: coords[3]
+                };
+            }
         }
 
         TileDataSet.prototype.embedLeaflet = function() {

@@ -6,21 +6,29 @@ AgentScript is a minimalist Agent Based Modeling (ABM) framework based on [NetLo
 
 Currently the documentation is hosted directly on our [GitHub Pages](http://backspaces.github.io/agentscript) or directly from [agentscript.org](http://agentscript.org/) from the docco generated html found in the doc/ directory.
 
-[**util.coffee**](docs/util.html): is the base module for all of the miscellaneous functions used by the rest of the project.
+[**util.coffee**](docs/util.html) The base module for all of the miscellaneous functions used by the rest of the project.
 
-[**shapes.coffee**](docs/shapes.html): is a simple agent shapes module containing the default shapes and a few functions for getting the named shapes and adding your own shapes.
+[**shapes.coffee**](docs/shapes.html) A simple agent shapes module containing the default shapes and a few functions for getting at named shapes and adding your own shapes.
 
-[**agentset.coffee**](docs/agentset.html) AgentSet is the core Array subclass used by patches, agents, and links.
+[**agentset.coffee**](docs/agentset.html) The core Array subclass used by Patches, Agents, and Links.
 
-[**patches.coffee**](docs/patches.html) The Agentset subclass for class Patches and class Patch which it manages.
+[**patch.coffee**](docs/patch.html) The Patch class. Patches represent autonomous regions of space that other agents can read/write to. Patches are commonly treated as grid cells in cellular automata models.
 
-[**agents.coffee**](docs/agents.html) The Agentset subclass for class Agents and class Agent which it manages.
+[**patches.coffee**](docs/patches.html) The Agentset subclass for class Patches.
 
-[**links.coffee**](docs/links.html) The Agentset subclass for class Links and class Link which it manages.
+[**agent.coffee**](docs/agent.html) The Agent class. Agents are autonomous, often mobile entities. In many models, they are the main interacting unit.
 
-[**model.coffee**](docs/model.html) is the top level integration for all the agentsets and is subclassed by all user models.
+[**agents.coffee**](docs/agents.html) The Agentset subclass for class Agents.
 
-[**template.html**](docs/template.html) is a trivial subclass of Model showing the basic structure how you build your own models.  In addition, the models/ directory contains 10 simple models used in teaching NetLogo. You can [run the model here.](models/template.html)
+[**link.coffee**](docs/link.html) The Link class. Links are connections between Agents. They are often used to build models with graph or network structures.
+
+[**links.coffee**](docs/links.html) The Agentset subclass for class Links.
+
+[**model.coffee**](docs/model.html) The top level integration for all the agentsets, subclassed by all user models.
+
+[**animator.coffee**](docs/animator.html) The clock that steps and draws models.
+
+[**template.html**](docs/template.html) A trivial subclass of Model showing the basic structure for how you build your own models.  In addition, the models/ directory contains 10 simple models used in teaching NetLogo. You can [run the template model here.](models/template.html)
 
 #### Add-ons
 
@@ -38,7 +46,7 @@ The extras/ directory contains libraries that are too specialized to be in the c
 
 #### Sample Models
 
-The models/ directory contains tiny models used both as unit tests and as examples to get started with.  They usually print to the console.log, so opening the developer's JavaScript console will show model information.
+The models/ directory contains tiny models used both as unit tests and as examples to get started with.  They usually print to the console.log, so opening the developer's JavaScript console will show model information. Often they are translations from NetLogo's model library.
 
 [**ants.html**](models/ants.html) A model of ant foraging behavior incorporating a nest location and food pheromone diffusion.
 
@@ -67,6 +75,8 @@ The models/ directory contains tiny models used both as unit tests and as exampl
 [**tiledroplets.html**](models/tiledroplets.html) A model similar to the above droplets.html, but here the droplets move on top of a Leaflet map, and elevation data is loaded from a tileserver as the map is panned. This example uses the data.js, data.tile.js, and as.dat.gui.js extras.
 
 [**life.html**](models/life.html) An implementation of [Conway's Game of Life](http://en.wikipedia.org/wiki/Conway's_Game_of_Life) with a twist. This example demonstrates running multiple models on the same page and uses a small as.dat.gui.js interface.
+
+[**wallfollower.html**](models/wallfollower.html) An interesting wall following model from NetLogo. A set of "buildings" are created on the patches, and agents find them then follow the wall, half of them to the right, the others to the left.
 
 #### Sample Models Format
 
