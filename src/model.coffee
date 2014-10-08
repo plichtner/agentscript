@@ -74,15 +74,18 @@ class ABM.Model
     # agentset is drawn only once, remaining static after that.
     @refreshLinks = @refreshAgents = @refreshPatches = true
 
-    # Give class prototypes a 'model' attribute that references this model.
-    @Patches = @extend(ABM.Patches); @Patch = @extend(ABM.Patch)
-    @Agents = @extend(ABM.Agents); @Agent = @extend(ABM.Agent)
-    @Links = @extend(ABM.Links); @Link = @extend(ABM.Link)
+    # Create model-local versions of AgentSets and their
+    # agent class.  Clone the agent classes so that they
+    # can use "defaults" in isolation when multiple
+    # models run on a page.
+    @Patches = ABM.Patches; @Patch = u.cloneClass(ABM.Patch)
+    @Agents = ABM.Agents; @Agent = u.cloneClass(ABM.Agent)
+    @Links = ABM.Links; @Link = u.cloneClass(ABM.Link)
 
     # Initialize agentsets.
-    @patches = new @Patches @Patch, "patches"
-    @agents = new @Agents @Agent, "agents"
-    @links = new @Links @Link, "links"
+    @patches = new @Patches @, @Patch, "patches"
+    @agents = new @Agents @, @Agent, "agents"
+    @links = new @Links @, @Link, "links"
 
     # Initialize model global resources
     @debugging = false
@@ -121,12 +124,15 @@ class ABM.Model
   # the model constructor to create Patch/Patches, Agent/Agents,
   # and Link/Links classes with a built-in reference to their model.
   extend: (aClass) ->
-    model = @
-    class extendedClass extends aClass
-      model: model
-      constructor: ->
-        super
-    return extendedClass;
+    newClass = u.cloneClass aClass
+    newClass.model = @
+    newClass
+    # model = @
+    # class extendedClass extends aClass
+    #   model: model
+    #   constructor: ->
+    #     super
+    # return extendedClass;
 
 #### Optimizations:
 
@@ -182,13 +188,14 @@ class ABM.Model
   reset: (restart = false) ->
     console.log "reset: anim"
     @anim.reset() # stop & reset ticks/steps counters
-    console.log "reset: contexts"
-    (v.restore(); @setCtxTransform v) for k,v of @contexts when v.canvas? # clear/resize b4 agentsets
+    console.log "reset: contexts" # clear/resize canvas xfms b4 agentsets
+    (v.restore(); @setCtxTransform v) for k,v of @contexts when v.canvas?
     console.log "reset: patches"
-    @patches = new @Patches @Patch, "patches"
+    @patches = new @Patches @, @Patch, "patches"
     console.log "reset: agents"
-    @agents = new @Agents @Agent, "agents"
-    @links = new @Links @Link, "links"
+    @agents = new @Agents @, @Agent, "agents"
+    console.log "reset: links"
+    @links = new @Links @, @Link, "links"
     u.s.spriteSheets.length = 0 # possibly null out entries?
     console.log "reset: setup"
     @setup()
@@ -251,7 +258,7 @@ class ABM.Model
     for b in s.split(" ")
       c = class Breed extends agentClass
       breed = @[b] = # add @<breed> to local scope
-        new breedSet c, b, agentClass::breed # create subset agentSet
+        new breedSet @, c, b, agentClass::breed # create subset agentSet
       breeds.push breed
       breeds.sets[b] = breed
       breeds.classes["#{b}Class"] = c
@@ -272,10 +279,16 @@ class ABM.Model
   # See [CoffeeConsole](http://goo.gl/1i7bd) Chrome extension too.
   debug: (@debugging=true)->u.waitOn (=>@modelReady),(=>@setRootVars()); @
   setRootVars: ->
+    window.psc = @Patches
+    window.pc  = @Patch
     window.ps  = @patches
     window.p0  = @patches[0]
+    window.asc = @Agents
+    window.ac  = @Agent
     window.as  = @agents
     window.a0  = @agents[0]
+    window.lsc = @Links
+    window.lc  = @Link
     window.ls  = @links
     window.l0  = @links[0]
     window.dr  = @drawing

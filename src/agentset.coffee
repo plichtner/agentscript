@@ -23,9 +23,9 @@
 #
 # Because we are an array subset, @[i] == this[i] == agentset[i]
 
-class ABM.AgentSet extends Array 
+class ABM.AgentSet extends Array
 # ### Static members
-  
+
   # `asSet` is a static wrapper function converting an array of agents into
   # an `AgentSet` .. except for the ID which only impacts the add method.
   # It is primarily used to turn a comprehension into an AgentSet instance
@@ -36,9 +36,10 @@ class ABM.AgentSet extends Array
   #     randomEven = evens.oneOf()
   @asSet: (a, setType = ABM.AgentSet) ->
     a.__proto__ = setType.prototype ? setType.constructor.prototype # setType.__proto__
+    a.model=a[0].model if a[0]?
     a
 
-  
+
   # In the examples below, we'll use an array of primitive agent objects
   # with three fields: id, x, y.
   #
@@ -49,20 +50,21 @@ class ABM.AgentSet extends Array
   #         {id:4,x:1,y:3}, {id:5,x:1,y:1}]
 
 # ### Constructor and add/remove agents.
-  
+
   # Create an empty `AgentSet` and initialize the `ID` counter for add().
   # If mainSet is supplied, the new agentset is a sub-array of mainSet.
   # This sub-array feature is how breeds are managed, see class `Model`
-  constructor: (@agentClass, @name, @mainSet) ->
+  constructor: (@model, @agentClass, @name, @mainSet) ->
     super(0) # doesn't yield empty array if already instances in the mainSet
     @breeds = [] unless @mainSet?
     @agentClass::breed = @ # let the breed know I'm it's agentSet
+    @agentClass::model = @model # let the breed know its model
     @ownVariables = [] # keep list of user variables
     @ID = 0 unless @mainSet? # Do not set ID if I'm a subset
 
   # Abstract method used by subclasses to create and add their instances.
   create: ->
-    
+
   # Add an agent to the list.  Only used by agentset factory methods. Adds
   # the `id` property to all agents. Increment `ID`.
   # Returns the object for chaining. The set will be sorted by `id`.
@@ -79,7 +81,7 @@ class ABM.AgentSet extends Array
   # array is unsorted, simply call `sortById` first, see `sortById` below.
   #
   #     AS.remove(AS[3]) # [{id:0,x:0,y:1}, {id:1,x:8,y:0},
-  #                         {id:2,x:6,y:4}, {id:4,x:1,y:1}] 
+  #                         {id:2,x:6,y:4}, {id:4,x:1,y:1}]
   remove: (o) ->
     u.removeItem @mainSet, o if @mainSet?
     u.removeItem @, o
@@ -87,7 +89,7 @@ class ABM.AgentSet extends Array
 
   # Set the default value of an agent class, return agentset
   setDefault: (name, value) -> @agentClass::[name] = value; @
-  # Declare variables of an agent class. 
+  # Declare variables of an agent class.
   # Vars = a string of space separated names or an array of name strings
   # Return agentset.
   own: (vars) -> # maybe not set default if val is null?
@@ -140,14 +142,14 @@ class ABM.AgentSet extends Array
     if stopEarly or asetNext.length is 0 then return null
     else return () =>
       @floodFillOnce asetNext, fCandidate, fJoin, fCallback, fNeighbors, aset
-  
+
   # Remove adjacent duplicates, by reference, in a sorted agentset.
   # Use `sortById` first if agentset not sorted.
   #
   #     as = (AS.oneOf() for i in [1..4]) # 4 random agents w/ dups
   #     ABM.AgentSet.asSet as # [{id:1,x:8,y:0}, {id:0,x:0,y:1},
   #                              {id:0,x:0,y:1}, {id:2,x:6,y:4}]
-  #     as.sortById().uniq() # [{id:0,x:0,y:1}, {id:1,x:8,y:0}, 
+  #     as.sortById().uniq() # [{id:0,x:0,y:1}, {id:1,x:8,y:0},
   #                             {id:2,x:6,y:4}]
   uniq: -> u.uniq(@)
 
@@ -163,11 +165,11 @@ class ABM.AgentSet extends Array
 
 # ### Property Utilities
 # Property access, also useful for debugging<br>
-  
+
   # Return an array of a property of the agentset
   #
   #      AS.getProp "x" # [0, 8, 6, 1, 1]
-  getProp: (prop) -> ABM.util.aProp(@, prop)
+  getProp: (prop) -> u.aProp(@, prop)
 
   # Return an array of agents with the property equal to the given value
   #
@@ -188,7 +190,7 @@ class ABM.AgentSet extends Array
     if u.isArray value
     then o[prop] = value[i] for o,i in @; @
     else o[prop] = value for o in @; @
-  
+
   # Get the agent with the min/max prop value in the agentset
   #
   #     min = AS.minProp "y"  # 0
@@ -196,17 +198,17 @@ class ABM.AgentSet extends Array
   maxProp: (prop) -> u.aMax @getProp(prop)
   minProp: (prop) -> u.aMin @getProp(prop)
   histOfProp: (prop, bin=1) -> u.histOf @, bin, prop
-  
+
 # ### Array Utilities, often from ABM.util
 
   # Randomize the agentset
   #
-  #     AS.shuffle(); AS.getProp "id" # [3, 2, 1, 4, 5] 
+  #     AS.shuffle(); AS.getProp "id" # [3, 2, 1, 4, 5]
   shuffle: -> u.shuffle @
 
   # Sort the agentset by the agent's `id`.
   #
-  #     AS.shuffle();  AS.getProp "id"  # [3, 2, 1, 4, 5] 
+  #     AS.shuffle();  AS.getProp "id"  # [3, 2, 1, 4, 5]
   #     AS.sortById(); AS.getProp "id"  # [1, 2, 3, 4, 5]
   sortById: -> u.sortBy @, "id"
 
@@ -235,7 +237,7 @@ class ABM.AgentSet extends Array
   # Return an agentset without given agent a
   #
   #     as = AS.clone().other(AS[0])
-  #     as.getProp "id"  # [1, 2, 3, 4] 
+  #     as.getProp "id"  # [1, 2, 3, 4]
   other: (a) -> @asSet (o for o in @ when o isnt a) # could clone & remove
 
   # Return random agent in agentset
@@ -252,27 +254,27 @@ class ABM.AgentSet extends Array
   # min/max value, return the first. Error if agentset empty.
   # If f is a string, return element with min/max value of that property.
   # If "valueToo" then return an array of the agent and the value.
-  # 
+  #
   #     AS.minOneOf("x") # {id:0,x:0,y:1}
-  #     AS.maxOneOf((a)->a.x+a.y, true) # {id:2,x:6,y:4},10 
+  #     AS.maxOneOf((a)->a.x+a.y, true) # {id:2,x:6,y:4},10
   minOneOf: (f, valueToo=false) -> u.minOneOf @, f, valueToo
   maxOneOf: (f, valueToo=false) -> u.maxOneOf @, f, valueToo
 
 # ### Drawing
-  
+
   # For agentsets who's agents have a `draw` method.
   # Clears the graphics context (transparent), then
   # calls each agent's draw(ctx) method.
-  draw: (ctx) -> 
+  draw: (ctx) ->
     u.clearCtx(ctx); o.draw(ctx) for o in @ when not o.hidden; null
-  
+
   # Show/Hide all of an agentset or breed.
   # To show/hide an individual object, set its prototype: o.hidden = bool
   show: -> o.hidden = false for o in @; @draw(@model.contexts[@name])
   hide: -> o.hidden = true for o in @; @draw(@model.contexts[@name])
 
 # ### Topology
-  
+
   # For patches & agents, which have x,y. See ABM.util doc.
   #
   # Return all agents in agentset within d distance from given object.
@@ -298,13 +300,13 @@ class ABM.AgentSet extends Array
         (a is o and meToo) or u.inTorusCone(heading,cone,radius,x,y,a.x,a.y,w,h))
     else
       @asSet (a for a in rSet when \
-        (a is o and meToo) or u.inCone(heading,cone,radius,x,y,a.x,a.y))    
+        (a is o and meToo) or u.inCone(heading,cone,radius,x,y,a.x,a.y))
 
 # ### Debugging
-  
+
   # Useful in console.
   # Also see [CoffeeConsole](http://goo.gl/1i7bd) Chrome extension.
-  
+
   # Similar to NetLogo ask & with operators.
   # Allows functions as strings. Use:
   #
@@ -313,10 +315,10 @@ class ABM.AgentSet extends Array
   #     AS.getProp("x") # [2, 8, 6, 3, 3]
   #
   #     myModel.agents.with("o.id<100").ask("o.color=[255,0,0]")
-  ask: (f) -> 
+  ask: (f) ->
     eval("f=function(o){return "+f+";}") if u.isString f
     f(o) for o in @; @
-  with: (f) -> 
+  with: (f) ->
     eval("f=function(o){return "+f+";}") if u.isString f
     @asSet (o for o in @ when f(o))
 
@@ -328,7 +330,7 @@ class ABM.AgentSet extends Array
 #       toString: -> "{id:#{@id},x:#{@x},y:#{@y}}"
 #     @AS = new ABM.AgentSet # @ => global name space
 #
-# The result of 
+# The result of
 #
 #     AS.add new XY(u.randomInt(10), u.randomInt(10)) for i in [1..5]
 #

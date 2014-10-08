@@ -8,7 +8,7 @@
 @ABM={}
 
 # **ABM.util** contains the general utilities for the project. Note that within
-# **util** `@` referrs to ABM.util, *not* the global name space as above.
+# a **util** function `@` referrs to ABM.util, *not* the global name space.
 # Alias: u is an alias for ABM.util within the agentscript module (not outside)
 #
 #      u.clearCtx(ctx) is equivalent to
@@ -204,6 +204,25 @@ ABM.util = u =
   ownKeys: (obj) -> (key for own key, value of obj)
   ownVarKeys: (obj) -> (key for own key, value of obj when not @isFunction value)
   ownValues: (obj) -> (value for own key, value of obj)
+
+  # Return a copy of an object, with the prototype also set in the copy
+  # when the object has a prototype other than Object.prototype
+  cloneObject: (obj) ->
+    newObj = {}
+    newObj[key] = obj[key] for own key, value of obj
+    if (obj.__proto__ isnt Object.prototype)
+      console.log "cloneObject, setting proto"
+      newObj.__proto__ = obj.__proto__
+    newObj
+  # Clone a class (a constructor function) including
+  # a copied prototype.  This is used when we have multiple
+  # models in a page when the prototype has global variables.
+  cloneClass: (oldClass) ->
+    eval(oldClass.toString().replace(/^/, "var ctor = "))
+    ctor.prototype = @cloneObject(oldClass.prototype)
+    ctor.constructor = oldClass.constructor
+    ctor.prototype.constructor = oldClass.prototype.constructor
+    ctor
 
   # Parse a string to its JS value.
   # If s isn't a JS expression, return decoded string
