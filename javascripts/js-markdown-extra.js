@@ -149,12 +149,18 @@ Markdown_Parser.prototype.init = function() {
     //    str_repeat('(?>[^()\\s]+|\\(', this.nested_url_parenthesis_depth) +
     //    str_repeat('(?>\\)))*', this.nested_url_parenthesis_depth)
     //);
-    this.nested_brackets_re =
-        this._php_str_repeat('(?:[^\\[\\]]+|\\[', this.nested_brackets_depth) +
-        this._php_str_repeat('\\])*', this.nested_brackets_depth);
-    this.nested_url_parenthesis_re =
-        this._php_str_repeat('(?:[^\\(\\)\\s]+|\\(', this.nested_url_parenthesis_depth) +
-        this._php_str_repeat('(?:\\)))*', this.nested_url_parenthesis_depth);
+
+    // NOTE: Below codes are hopelessly slow.
+    //this.nested_brackets_re =
+    //    this._php_str_repeat('(?:[^\\[\\]]+|\\[', this.nested_brackets_depth) +
+    //    this._php_str_repeat('\\])*', this.nested_brackets_depth);
+    //this.nested_url_parenthesis_re =
+    //    this._php_str_repeat('(?:[^\\(\\)\\s]+|\\(', this.nested_url_parenthesis_depth) +
+    //    this._php_str_repeat('(?:\\)))*', this.nested_url_parenthesis_depth);
+
+    // So, instead:
+    this.nested_brackets_re = '(?:[^\\]]*?)';
+    this.nested_url_parenthesis_re = '(?:[^\\)\\s]*?)';
 
     // Table of hash values for escaped characters:
     var tmp = [];
@@ -1557,9 +1563,9 @@ Markdown_Parser.prototype.parseSpan = function(str) {
                 '<\\?.*?\\?>|<%.*?%>'    + // processing instruction
             '|'                          +
                 '<[/!$]?[-a-zA-Z0-9:_]+' + // regular tags
-                '(?='                    +
+                '(?:'                    +
                     '\\s'                +
-                    '(?=[^"\'>]+|"[^"]*"|\'[^\']*\')*' +
+                    '(?:[^"\'>]+|"[^"]*"|\'[^\']*\')*' +
                 ')?'                     +
                 '>'
         )) +
@@ -2827,7 +2833,7 @@ MarkdownExtra_Parser.prototype.stripAbbreviations = function(text) {
     text = text.replace(new RegExp(
         '^[ ]{0,' + less_than_tab + '}\\*\\[(.+?)\\][ ]?:' + // abbr_id = $1
         '(.*)',   // text = $2 (no blank lines allowed)
-        "m"
+        "mg"
     ), function(match, abbr_word, abbr_desc) {
         if (self.abbr_word_re != '') {
             self.abbr_word_re += '|';
@@ -2852,14 +2858,15 @@ MarkdownExtra_Parser.prototype.doAbbreviations = function(text) {
             '(^|[^\\w\\x1A])'             +
             '(' + this.abbr_word_re + ')' +
             '(?![\\w\\x1A])'
+            , 'g'
         ), function(match, prev, abbr) {
             if (abbr in self.abbr_desciptions) {
                 var desc = self.abbr_desciptions[abbr];
                 if (!desc || desc == "") {
-                    return self.hashPart("<abbr>" + abbr + "</abbr>");
+                    return self.hashPart(prev + "<abbr>" + abbr + "</abbr>");
                 } else {
                     desc = self.encodeAttribute(desc);
-                    return self.hashPart("<abbr title=\"" + desc + "\">" + abbr + "</abbr>");
+                    return self.hashPart(prev + "<abbr title=\"" + desc + "\">" + abbr + "</abbr>");
                 }
             } else {
                 return match;
@@ -2873,7 +2880,8 @@ MarkdownExtra_Parser.prototype.doAbbreviations = function(text) {
 /**
  * Export to Node.js
  */
-this.Markdown = Markdown;
-this.Markdown_Parser = Markdown_Parser;
-this.MarkdownExtra_Parser = MarkdownExtra_Parser;
-
+if (typeof exports != 'undefined') {
+    exports.Markdown = Markdown;
+    exports.Markdown_Parser = Markdown_Parser;
+    exports.MarkdownExtra_Parser = MarkdownExtra_Parser;
+}
