@@ -120,20 +120,6 @@ class ABM.Model
     then @globalNames = globalNames; @globalNames.set = true
     else @globalNames = u.removeItems u.ownKeys(@), @globalNames
 
-  # Add this model to a class's prototype. This is used in
-  # the model constructor to create Patch/Patches, Agent/Agents,
-  # and Link/Links classes with a built-in reference to their model.
-  extend: (aClass) ->
-    newClass = u.cloneClass aClass
-    newClass.model = @
-    newClass
-    # model = @
-    # class extendedClass extends aClass
-    #   model: model
-    #   constructor: ->
-    #     super
-    # return extendedClass;
-
 #### Optimizations:
 
   # Modelers "tune" their model by adjusting flags:<br>
@@ -256,7 +242,8 @@ class ABM.Model
   createBreeds: (s, agentClass, breedSet) ->
     breeds = []; breeds.classes = {}; breeds.sets = {}
     for b in s.split(" ")
-      c = class Breed extends agentClass
+      cname = b.charAt(0).toUpperCase() + b.substr(1)
+      c = u.cloneClass agentClass, cname # c = class Breed extends agentClass
       breed = @[b] = # add @<breed> to local scope
         new breedSet @, c, b, agentClass::breed # create subset agentSet
       breeds.push breed
