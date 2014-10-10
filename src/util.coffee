@@ -217,8 +217,12 @@ ABM.util = u =
   # Clone a class (a constructor function) including
   # a copied prototype.  This is used when we have multiple
   # models in a page when the prototype has global variables.
-  cloneClass: (oldClass) ->
-    eval(oldClass.toString().replace(/^/, "var ctor = "))
+  cloneClass: (oldClass, newName) ->
+    ctorStr = oldClass.toString().replace(/^/, "var ctor = ")
+    if newName
+      ctorStr = ctorStr.replace(/function.*{/, "function #{newName}() {")
+    # eval(oldClass.toString().replace(/^/, "var ctor = "))
+    eval(ctorStr)
     ctor.prototype = @cloneObject(oldClass.prototype)
     ctor.constructor = oldClass.constructor
     ctor.prototype.constructor = oldClass.prototype.constructor
