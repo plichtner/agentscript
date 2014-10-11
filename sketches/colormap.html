@@ -1,0 +1,108 @@
+<html>
+  <head>
+    <title>ColorMap</title>
+    <script src="../lib/agentscript.js"></script>
+    <script src="../tools/coffee-script.js"></script>
+    <script type="text/coffeescript">
+    # REST interface tests:
+    # pw=16&ph=1&ps=32&map=gradient&args=[16,[[255,255,0],[0,255,255]]]
+    # pw=16&ph=4&ps=32&map=gradient&args=[64,[[255,255,0],[0,255,255]]]
+    # pw=16&ph=16&ps=32&map=gradient&args=[256,jetColors]
+    # pw=64&ph=1&ps=10&map=gradient&args=[64,jetColors]
+    # pw=64&ph=1&ps=10&map=gradient&args=[64,jetColors1,jetLocs1]
+    # pw=64&ph=1&ps=10&map=gradient&args=[64,jetColors]
+    # pw=64&ph=1&ps=10&map=gradient&args=[64,jetColors]&sort
+    # pw=64&ph=1&ps=10&map=gradient&args=[64,rainbowColors]
+    # pw=32&ph=32&ps=16&map=gradient&args=[1024,jetColors]
+    # pw=16&ph=4&ps=32&map=gray&args=64
+    # pw=16&ph=16&ps=32&map=gray&args=256
+    # pw=16&ph=4&ps=32&map=rgb&args=4
+    # pw=16&ph=4&ps=32&map=rgb&args=4&sort
+    # pw=16&ph=4&ps=32&map=rgb&args=4&sort&key=pixel
+    # pw=40&ph=25&ps=10&map=rgb&args=10
+    # pw=40&ph=25&ps=10&map=rgb&args=10&sort
+    # pw=96&ph=32&ps=8&map=rgb&args=10
+    # pw=10&ph=5&ps=32&map=name&args=[simpleNamedColors]
+    # pw=10&ph=5&ps=32&map=name&args=[simpleNamedColors]&sort
+    # pw=10&ph=14&ps=32&map=name&args=[namedColors]
+    # pw=10&ph=14&ps=32&map=name&args=[namedColors]&sort
+    # pw=16&ph=16&ps=32&map=random&args=256
+    # pw=16&ph=16&ps=32&map=random&args=256&sort
+    # pw=32&ph=32&ps=16&map=random&args=1024&sort
+    # pw=64&ph=1&ps=10&map=hsv&args=64
+    # pw=64&ph=1&ps=10&map=hsv&args=[64,128,255]
+    # pw=32&ph=32&ps=16&map=hsv&args=1024
+    # pw=16&ph=16&ps=32&map=hsv&args=256
+
+    u = ABM.util # static variables
+    Color = ABM.Color
+    simpleNamedColors="00FFFFAqua 7FFFD4Aquamarine F0FFFFAzure F5F5DCBeige FFE4C4Bisque 000000Black 0000FFBlue A52A2ABrown 7FFF00Chartreuse D2691EChocolate FF7F50Coral FFF8DCCornsilk DC143CCrimson 00FFFFCyan FF00FFFuchsia DCDCDCGainsboro FFD700Gold 808080Gray 008000Green 4B0082Indigo FFFFF0Ivory F0E68CKhaki E6E6FALavender 00FF00Lime FAF0E6Linen FF00FFMagenta 800000Maroon FFE4B5Moccasin 000080Navy 808000Olive FFA500Orange DA70D6Orchid CD853FPeru FFC0CBPink DDA0DDPlum 800080Purple FF0000Red FA8072Salmon A0522DSienna C0C0C0Silver FFFAFASnow D2B48CTan 008080Teal D8BFD8Thistle FF6347Tomato 40E0D0Turquoise EE82EEViolet F5DEB3Wheat FFFFFFWhite FFFF00Yellow"
+    namedColors="F0F8FFAliceBlue FAEBD7AntiqueWhite 00FFFFAqua 7FFFD4Aquamarine F0FFFFAzure F5F5DCBeige FFE4C4Bisque 000000Black FFEBCDBlanchedAlmond 0000FFBlue 8A2BE2BlueViolet A52A2ABrown DEB887BurlyWood 5F9EA0CadetBlue 7FFF00Chartreuse D2691EChocolate FF7F50Coral 6495EDCornflowerBlue FFF8DCCornsilk DC143CCrimson 00FFFFCyan 00008BDarkBlue 008B8BDarkCyan B8860BDarkGoldenRod A9A9A9DarkGray 006400DarkGreen BDB76BDarkKhaki 8B008BDarkMagenta 556B2FDarkOliveGreen FF8C00DarkOrange 9932CCDarkOrchid 8B0000DarkRed E9967ADarkSalmon 8FBC8FDarkSeaGreen 483D8BDarkSlateBlue 2F4F4FDarkSlateGray 00CED1DarkTurquoise 9400D3DarkViolet FF1493DeepPink 00BFFFDeepSkyBlue 696969DimGray 1E90FFDodgerBlue B22222FireBrick FFFAF0FloralWhite 228B22ForestGreen FF00FFFuchsia DCDCDCGainsboro F8F8FFGhostWhite FFD700Gold DAA520GoldenRod 808080Gray 008000Green ADFF2FGreenYellow F0FFF0HoneyDew FF69B4HotPink CD5C5CIndianRed 4B0082Indigo FFFFF0Ivory F0E68CKhaki E6E6FALavender FFF0F5LavenderBlush 7CFC00LawnGreen FFFACDLemonChiffon ADD8E6LightBlue F08080LightCoral E0FFFFLightCyan FAFAD2LightGoldenRodYellow D3D3D3LightGray 90EE90LightGreen FFB6C1LightPink FFA07ALightSalmon 20B2AALightSeaGreen 87CEFALightSkyBlue 778899LightSlateGray B0C4DELightSteelBlue FFFFE0LightYellow 00FF00Lime 32CD32LimeGreen FAF0E6Linen FF00FFMagenta 800000Maroon 66CDAAMediumAquaMarine 0000CDMediumBlue BA55D3MediumOrchid 9370DBMediumPurple 3CB371MediumSeaGreen 7B68EEMediumSlateBlue 00FA9AMediumSpringGreen 48D1CCMediumTurquoise C71585MediumVioletRed 191970MidnightBlue F5FFFAMintCream FFE4E1MistyRose FFE4B5Moccasin FFDEADNavajoWhite 000080Navy FDF5E6OldLace 808000Olive 6B8E23OliveDrab FFA500Orange FF4500OrangeRed DA70D6Orchid EEE8AAPaleGoldenRod 98FB98PaleGreen AFEEEEPaleTurquoise DB7093PaleVioletRed FFEFD5PapayaWhip FFDAB9PeachPuff CD853FPeru FFC0CBPink DDA0DDPlum B0E0E6PowderBlue 800080Purple FF0000Red BC8F8FRosyBrown 4169E1RoyalBlue 8B4513SaddleBrown FA8072Salmon F4A460SandyBrown 2E8B57SeaGreen FFF5EESeaShell A0522DSienna C0C0C0Silver 87CEEBSkyBlue 6A5ACDSlateBlue 708090SlateGray FFFAFASnow 00FF7FSpringGreen 4682B4SteelBlue D2B48CTan 008080Teal D8BFD8Thistle FF6347Tomato 40E0D0Turquoise EE82EEViolet F5DEB3Wheat FFFFFFWhite F5F5F5WhiteSmoke FFFF00Yellow 9ACD32YellowGreen"
+    jetColors = [ [0,0,127], [0,0,255], [0,127,255], [0,255,255],
+      [127,255,127], [255,255,0], [255,127,0], [255,0,0], [127,0,0] ]
+    jetColors1 = [ [0,0,131], [0,60,170], [5,255,255], [255,255,0],
+      [250,0,0], [128,0,0] ]
+    jetLocs1 = [0, 0.125, 0.373, 0.625, 0.875, 1]
+    rainbowColors = [ [150,0,90], [0,0,200], [0,25,255], [0,152,255],
+      [44,255,150], [151,255,0], [255,234,0], [255,111,0], [255,0,0] ]
+
+
+
+    # Map Types
+    # grayColorMap: (size = 256)
+    # rgbColorMap: (R,G=R,B=R)
+    # gradientColorMap: (nColors, stops, locs)
+    # nameColorMap: (colorsString)
+    # randomColorMap: (nColors)
+    window.flags =
+      pw: 64
+      ph: 1
+      ps: 12
+      map: "gradient"
+      args: [64,[[255,255,0],[0,255,255]]]
+      sort: false
+      decending: false
+      key: "intensity"
+      # w: 16/4, h: 4, s: 50, map: "gradient"
+    # Use query string to update flags.
+    flags[k] = v for k,v of u.parseQueryString()
+    flags.map = flags.map + "ColorMap"
+    flags.pnum = flags.pw * flags.ph
+    flags.args = eval flags.args if typeof flags.args is "string"
+    flags.args = [flags.args] if not Array.isArray(flags.args)
+    console.log k,v for k,v of flags
+
+
+    class ColorTestModel extends ABM.Model
+      startup: ->
+      setup: ->
+        # u.randomSeed() # use for repeatable runs
+        @refreshPatches = false #@refreshLinks = false
+        @patches.setDefault "color", [0,0,0,0]
+
+        window.map = @map = Color[flags.map] flags.args...
+        @map.sortBy flags.key, not flags.decending if flags.sort
+        console.log (c[flags.key] for c in @map) if flags.sort
+        @patches[i].color = c.rgb for c,i in @map
+
+        console.log "patches: #{@patches.length}"
+
+      step: -> @stop() # stop: just one tick
+
+    window.model = new ColorTestModel({
+      div: "layers",
+      size: flags.ps,
+      minX: 1,
+      maxX: flags.pw,
+      minY: 1,
+      maxY: flags.ph
+    })
+    model.debug() # Debug: Put Model vars in global name space
+    model.start() # Run model immediately after startup initialization
+
+    </script>
+  </head>
+  <body>
+    <div id="layers" style="padding:20"></div>
+  </body>
+</html>
