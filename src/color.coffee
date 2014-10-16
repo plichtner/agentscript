@@ -8,22 +8,37 @@ ABM.Color = Color = {
   #   rgb, hsb: array forms of the two colors
   #   intensity: the gray value for the rgb color
   #   rgba, pixel: typed array values.
-  #   rgbString, hexColor: two html/css color formats
-  colorObject: (r, g, b, a=1) ->
+  #   rgbString, hexString: two html/css color formats
+
+  # Experimental:
+  # Control the number of color features in colorObject.
+  # To remove intensity, call options() for a
+  # set of all-true options, and turn off the ones you don't need.
+  options: ->
+    rgb: true
+    hsv: true
+    pixel: true
+    rgbString: true
+    hexString: true
+    intensity: true
+
+  colorObject: (r, g, b, a=1, opt=@options()) ->
     o = {r,g,b,a}
-    o.a255 = Math.round(a*255)
-    o.rgb = [r, g, b]
-    o.hsv = @rgbToHsv r, g, b
-    [o.h, o.s, o.v] = o.hsv
-    # o.rgba = new Uint8ClampedArray([r, g, b, o.a255])
-    # o.pixel = new Uint32Array(o.rgba.buffer)[0]
-    # {o.pixel, o.rgba} = typedArrayColor r, g, b, a255
-    {pixel, rgba} = @typedArrayColor r, g, b, o.a255
-    [o.pixel, o.rgba] = [pixel, rgba]
-    o.rgbString = @rgbString r, g, b, a
-    o.hexColor = @hexColor r, g, b
-    o.intensity = @rgbIntensity r, g, b
-    o.temp = @rgbDistance 0,0,0, r,g,b
+    if opt.rgb
+      o.rgb = [r, g, b]
+    if opt.hsv
+      o.hsv = @rgbToHsv r, g, b
+      [o.h, o.s, o.v] = o.hsv
+    if opt.pixel
+      o.a255 = Math.round(a*255)
+      {pixel, rgba} = @typedArrayColor r, g, b, o.a255
+      [o.pixel, o.rgba] = [pixel, rgba]
+    if opt.rgbString
+      o.rgbString = @rgbString r, g, b, a
+    if opt.hexString
+      o.hexString = @hexString r, g, b
+    if opt.intensity
+      o.intensity = @rgbIntensity r, g, b
     o
 
   # Color utilities.
@@ -37,7 +52,7 @@ ABM.Color = Color = {
   rgbIntensity: (r, g, b) -> 0.2126*r + 0.7152*g + 0.0722*b
 
   # Return a web/html/css hex color string for an r,g,b color
-  hexColor: (r, g, b) ->
+  hexString: (r, g, b) ->
     "#" + (0x1000000 | (b | g << 8 | r << 16)).toString(16).slice(-6)
 
   # Return 2 typed array colors: a single Uint32 pixel, correct endian format,
@@ -75,7 +90,7 @@ ABM.Color = Color = {
   # Return a distance metric between two colors.
   # http://www.compuphase.com/cmetric.htm
   rgbDistance: (r1, g1, b1, r2, g2, b2) ->
-    rMean = Math.round (r1 + r2) / 2
+    rMean = Math.round( (r1 + r2) / 2 )
     [dr, dg, db] = [r1 - r2, g1 - g2, b1 - b2]
     Math.sqrt (((512+rMean)*dr*dr)>>8) + (4*dg*dg) + (((767-rMean)*db*db)>>8)
 
@@ -85,18 +100,35 @@ ABM.Color = Color = {
     # A colormap is an array of Color objects. Each ColorObject has
     # two new properties: ix, the array index, and map, the colormap
     # The ctor takes an array of [r,g,b] arrays. See factories above.
-    constructor: (rgbArray) ->
+    constructor: (rgbArray, @options = Color.options(), @dupsOK = false) ->
+      # Note we keep a copy of the color options
       super(0)
-      for c, i in rgbArray
-        @push Color.colorObject c... # use splats
-        @[i].ix = i
-        @[i].map = @
+      @rgbIndex = {}
+      @nameIndex = {}
+      for rgb, i in rgbArray
+        @addColor rgb...
+
+    # Append a color to the the map if it isn't already
+    # in the map unless dupsOK.  Return the color object
+    addColor: (r, g, b, a=1) ->
+      rgbString = Color.rgbString r, g, b, a
+      if not @dupsOK
+        # rgbString = Color.rgbString r, g, b, a
+        color = @rgbIndex[ rgbString ]
+        console.log color if color
+      if not color
+        color = Color.colorObject r, g, b, a, @options
+        color.ix = @length
+        color.map = @
+        @rgbIndex[rgbString] = color
+        @push color
+      color
 
     # The Array.sort, augmented by updating color.ix to correspond
     # to the new place in the array
     sort: (f) ->
       super f
-      color.ix = i for color, i in @ # c: color, i
+      color.ix = i for color, i in @
       @
 
     # Sugar for sorting by color.key, mainly intensity.
@@ -105,27 +137,25 @@ ABM.Color = Color = {
         if ascenting then a[key]-b[key] else b[key]-a[key]
       @sort compare
 
-    # Find an rgb color in the map, return -1 if not found
-    findRGB: (r, g, b) ->
-      for color, i in @
-        return i if color.r is r and color.g is g and color.b is b
-      -1
+    # Find an rgb color in the map, return undefined if not found
+    findRGB: (r, g, b, a=1) ->
+      @rgbIndex[ Color.rgbString(r, g, b, a) ]
 
-    # Find a color with the given key/value, -1 if not found
-    find: (key, value) ->
+    # Find first color with the given key/value, undefined if not found
+    findKey: (key, value) ->
       for color, i in @
         return color if color[key] is value
-      -1
+      undefined
 
     # Return an random color or index in a map.
-    randomColor: -> @[@randomIndex()]
-    # Standalone: Math.floor(Math.random() * @length)
+    # Standalone:
+    # Math.floor(Math.random() * @length)
     randomIndex: -> u.randomInt @length
+    randomColor: -> @[@randomIndex()]
 
-    # Find the color closest to this rgb color, based on intensity
-    # sum of squares, and closestHSV
-    # http://en.wikipedia.org/wiki/Color_difference
-    closestRGB: (r, g, b) ->
+    # Find the color closest to this color, using Color.rgbDistance.
+    findClosest: (r, g, b) ->
+      return color if ( color = @findRGB(r, g, b) )
       minDist = Infinity
       ixMin = 0
       for color, i in @
@@ -135,7 +165,7 @@ ABM.Color = Color = {
           ixMin = i
       @[ixMin]
 
-  # Utilities for creating color maps
+  # Utilities for creating color maps.
   # https://github.com/bpostlethwaite/colormap
 
   # Create a gray map of gray values (gray: r=g=b)
@@ -143,29 +173,44 @@ ABM.Color = Color = {
   # maps that are not all 256 grays.
   intensityArray: (size = 256) ->
     (Math.round(i*255/(size-1)) for i in [0...size])
-  grayColorMap: (size = 256) ->
-    new ColorMap ([i,i,i] for i in @intensityArray(size))
+  grayColorArray: (size = 256) ->
+    ([i,i,i] for i in @intensityArray(size))
+  grayColorMap: (size = 256, options) ->
+    new ColorMap ([i,i,i] for i in @intensityArray(size)), options
+
+  # Utility to create 3 uniform arrays from 3 number arguments
+  # If any arg is array, no change made.
+  threeArrays: (A1,A2=A1,A3=A1) ->
+    [A1, A2, A3] = ( (if A is 1 then [255] else A) for A in [A1, A2, A3] )
+    A1 = (Math.round(i*255/(A1-1)) for i in [0...A1]) if typeof A1 is "number"
+    A2 = (Math.round(i*255/(A2-1)) for i in [0...A2]) if typeof A2 is "number"
+    A3 = (Math.round(i*255/(A3-1)) for i in [0...A3]) if typeof A3 is "number"
+    [A1, A2, A3]
+
 
   # Create a colormap by rgb values. R, G, B can be either a number,
   # the number of steps beteen 0-255, or an array of values to use
   # for the color.  Ex: R = 3, corresponds to [0, 128, 255]
   # The resulting map permutes the R, G, V values.  Thus if
   # R=G=B=4, the resulting map has 4*4*4=64 colors.
-  rgbColorArray: (R,G=R,B=R) ->
-    R = (Math.round(i*255/(R-1)) for i in [0...R]) if typeof R is "number"
-    G = (Math.round(i*255/(G-1)) for i in [0...G]) if typeof G is "number"
-    B = (Math.round(i*255/(B-1)) for i in [0...B]) if typeof B is "number"
+  rgbColorArray: (R, G=R, B=R) ->
+    [R, G, B] = @threeArrays(R, G, B)
     array=[]; ((array.push [r,g,b] for b in B) for g in G) for r in R
     array
-  rgbColorMap: (R,G=R,B=R) ->
-    new ColorMap @rgbColorArray(R, G, B)
+  rgbColorMap: (R, G=R, B=R, options) ->
+    new ColorMap @rgbColorArray(R, G, B), options
 
   # Create an hsb map with n hues, with constant saturation
   # and brightness.
-  hsvColorArray: (nHues=256, s=255, b=255) ->
-    (Color.hsvToRgb(i*255/(nHues-1), s, b) for i in [0...nHues])
-  hsvColorMap: (nHues=256, s=255, b=255) ->
-    new ColorMap @hsvColorArray(nHues, s, b)
+  # hsvColorArray: (nHues=256, s=255, b=255) ->
+  #   # (Color.hsvToRgb(i*255/(nHues-1), s, b) for i in [0...nHues])
+  #   (@hsvToRgb(i*255/(nHues-1), s, b) for i in [0...nHues])
+  hsvColorArray: (H, S=H, V=H) ->
+    [H, S, V] = @threeArrays(H, S, V)
+    array=[]; ((array.push [h, s, v] for h in H) for s in S) for v in V
+    ( (@hsvToRgb a...) for a in array )
+  hsvColorMap: (H, S=[255], V=H, options) ->
+    new ColorMap @hsvColorArray(H, S, V), options
 
   # Use the canvas gradient feature to create nColors.
   # This is a really sophisticated technique, see:
@@ -174,42 +219,44 @@ ABM.Color = Color = {
   #  https://github.com/bpostlethwaite/colormap
   gradientColorArray: (nColors, stops, locs) ->
     locs = (i/(stops.length-1) for i in [0...stops.length]) if not locs?
-    # util: ctx = u.createCtx nColors, 1
-    can = document.createElement "canvas"
-    can.width = nColors; can.height = 1
-    ctx = can.getContext "2d"
+    ctx = u.createCtx nColors, 1
+    # Standalone:
+    # can = document.createElement "canvas"
+    # can.width = nColors; can.height = 1
+    # ctx = can.getContext "2d"
     grad = ctx.createLinearGradient 0, 0, nColors, 0
     for i in [0...stops.length]
-      grad.addColorStop locs[i], Color.rgbString(stops[i]...)
+      grad.addColorStop locs[i], @rgbString(stops[i]...)
     ctx.fillStyle = grad
     ctx.fillRect 0, 0, nColors, 1
-    # util: id = u.ctxToImageData(ctx).data
-    id = (ctx.getImageData 0, 0, nColors, 1).data
+    # Standalone:
+    # id = (ctx.getImageData 0, 0, nColors, 1).data
+    id = u.ctxToImageData(ctx).data
     ([id[i], id[i+1], id[i+2]] for i in [0...id.length] by 4)
-  gradientColorMap: (nColors, stops, locs) ->
-    new ColorMap @gradientColorArray(nColors, stops, locs)
+  gradientColorMap: (nColors, stops, locs, options) ->
+    new ColorMap @gradientColorArray(nColors, stops, locs), options
 
-  # Create a color map via the 140 html standard colors.  We use a minimal
-  # string format: "XXXXXXColorName", the 6 hex digits followed by the name.
-  # Ex: "000000Black" or "FF0000Red".
-  # The input is a single string of space separated name specs.
-  nameColorMap: (colorsString) ->
-    colorStrings = colorsString.split " "
-    names = (colorString.slice(6) for colorString in colorStrings)
-    hexes = (colorString.slice(0,6) for colorString in colorStrings)
-    toint = (str, start) -> parseInt(str.slice(start,start+2), 16)
-    rgbs = ( [ toint(h,0), toint(h,2), toint(h,4) ] for h in hexes)
-    map = new ColorMap rgbs
-    for c, i in map
-      c.name = names[i]
-      map[c.name] = c
-      map[c.name.toLowerCase()] = c
+  # Create a color map via the 140 html standard colors.
+  # The input is an object of name: [r,g,b] pairs
+  nameColorMap: (colorPairs, options) ->
+    rgbs = ( v for k, v of colorPairs )
+    names = ( k for k, v of colorPairs )
+    map = new ColorMap rgbs, options, true
+    for color, i in map
+      name = names[i]
+      # color.name = name # bad idea, named colors can have duplicates
+      map.nameIndex[name] = color
+      # map.nameIndex[name.toLowerCase()] = color
     map
 
   # Create a map with a random set of colors.
   # Sometimes useful to sort by intensity afterwards.
-  randomColorMap: (nColors) ->
-    rand255 = -> Math.floor(Math.random() * 256) # util.randomInt
-    new ColorMap ([rand255(), rand255(), rand255()] for i in [0...nColors])
+  randomColorArray: (nColors) ->
+    # Standalone:
+    # rand255 = -> Math.floor(Math.random() * 256)
+    rand255 = -> u.randomInt(256)
+    ([rand255(), rand255(), rand255()] for i in [0...nColors])
+  randomColorMap: (nColors, options) ->
+    new ColorMap @randomColorArray(nColors), options
 
 };
