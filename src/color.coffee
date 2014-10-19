@@ -1,46 +1,4 @@
 ABM.Color = Color = {
-  # Create color object from r,g,b,a
-  # Note a between 0-1, not 0-255
-  # The object contains many properties relating to
-  # the r,g,b,a color:
-  #   r, g, b, h, s, v: color integers, 0-255 based
-  #   a, a255: alpha, a float in 0-1, a255 integer in 0-255
-  #   rgb, hsb: array forms of the two colors
-  #   intensity: the gray value for the rgb color
-  #   rgba, pixel: typed array values.
-  #   rgbString, hexString: two html/css color formats
-
-  # Experimental:
-  # Control the number of color features in colorObject.
-  # To remove intensity, call options() for a
-  # set of all-true options, and turn off the ones you don't need.
-  options: ->
-    rgb: true
-    hsv: true
-    pixel: true
-    rgbString: true
-    hexString: true
-    intensity: true
-
-  colorObject: (r, g, b, a=1, opt=@options()) ->
-    o = {r,g,b,a}
-    if opt.rgb
-      o.rgb = [r, g, b]
-    if opt.hsv
-      o.hsv = @rgbToHsv r, g, b
-      [o.h, o.s, o.v] = o.hsv
-    if opt.pixel
-      o.a255 = Math.round(a*255)
-      {pixel, rgba} = @typedArrayColor r, g, b, o.a255
-      [o.pixel, o.rgba] = [pixel, rgba]
-    if opt.rgbString
-      o.rgbString = @rgbString r, g, b, a
-    if opt.hexString
-      o.hexString = @hexString r, g, b
-    if opt.intensity
-      o.intensity = @rgbIntensity r, g, b
-    o
-
   # Color utilities.
 
   # Convert 3 or 4 ints to a html/css color string
@@ -52,7 +10,7 @@ ABM.Color = Color = {
   rgbIntensity: (r, g, b) -> 0.2126*r + 0.7152*g + 0.0722*b
 
   # Return a web/html/css hex color string for an r,g,b color
-  hexString: (r, g, b) ->
+  rgbToHex: (r, g, b) ->
     "#" + (0x1000000 | (b | g << 8 | r << 16)).toString(16).slice(-6)
 
   # Return 2 typed array colors: a single Uint32 pixel, correct endian format,
@@ -61,6 +19,26 @@ ABM.Color = Color = {
     rgba = new Uint8ClampedArray([r, g, b, a])
     pixel = new Uint32Array(rgba.buffer)[0]
     {pixel, rgba}
+
+  # Return an RGB array given any legal CSS color, null otherwise.
+  # http://www.w3schools.com/cssref/css_colors_legal.asp
+  # The string can be CadetBlue, #0f0, rgb(255,0,0), hsl(120,100%,50%)
+  # The rgba/hsla forms ok too, but we don't return the a.
+  # Note: The browser speaks for itself: we simply set a 1x1 canvas fillStyle
+  # to the string and create a pixel, returning the r,g,b values.
+  # Warning: r=g=b=0 can indicate an illegal string.  We test
+  # for a few obvious cases but beware of unexpected [0,0,0] results.
+  ctx1x1: u.createCtx 1, 1 # share across calls. closure wrapper better?
+  stringToRGB: (string) ->
+    @ctx1x1.fillStyle = string
+    @ctx1x1.fillRect 0, 0, 1, 1
+    [r, g, b, a] = @ctx1x1.getImageData(0, 0, 1, 1).data
+    return [r, g, b] if (r+g+b isnt 0) or
+      (string.match(/^black$/i)) or
+      (string in ["#000","#000000"]) or
+      (string.match(/rgba{0,1}\(0,0,0/i)) or
+      (string.match(/hsla{0,1}\(0,0%,0%/i))
+    null
 
   # Convert rgb color to hsb/hsv color array
   rgbToHsv: (r, g, b) ->
@@ -87,12 +65,66 @@ ABM.Color = Color = {
       when 5 then r = v; g = p; b = q
     [Math.round(r*255), Math.round(g*255), Math.round(b*255)] # floor??
 
+  # Return array of 3 random values in 0-255.  OK for both RGB/HSV
+  randomColor: -> (u.randomInt(256) for i in [0..2])
+
   # Return a distance metric between two colors.
+  # Max distance is roughly 765 (3*255), between black & white
   # http://www.compuphase.com/cmetric.htm
   rgbDistance: (r1, g1, b1, r2, g2, b2) ->
     rMean = Math.round( (r1 + r2) / 2 )
     [dr, dg, db] = [r1 - r2, g1 - g2, b1 - b2]
     Math.sqrt (((512+rMean)*dr*dr)>>8) + (4*dg*dg) + (((767-rMean)*db*db)>>8)
+
+  # A very crude way to scale a data value to an rgb color.
+  # value is in [min max], rgb's are two color.
+  # See ColorMap.scaleColor for another method
+  rgbLerp: (value, min, max, rgb1, rgb0 = [0,0,0]) ->
+    scale = u.lerpScale value, min, max #(value - min)/(max - min)
+    (Math.round(u.lerp(rgb0[i], rgb1[i], scale))) for i in [0..2]
+
+  # Create color object from r,g,b,a
+  # Note a between 0-1, not 0-255
+  # The object contains many properties relating to
+  # the r,g,b,a color:
+  #   r, g, b, h, s, v: color integers, 0-255 based
+  #   a, a255: alpha, a float in 0-1, a255 integer in 0-255
+  #   rgb, hsb: array forms of the two colors
+  #   intensity: the gray value for the rgb color
+  #   rgba, pixel: typed array values.
+  #   rgbString, hexString: two html/css color formats
+
+  # Experimental:
+  # Control the number of color features in colorObject.
+  # To remove intensity, call options() for a
+  # set of all-true options, and turn off the ones you don't need.
+  # If all options false, only r,g,b,a remain.
+  options: ->
+    rgb: true
+    hsv: true
+    pixel: true
+    rgbString: true
+    hexString: true
+    intensity: true
+
+  colorObject: (r, g, b, a=1, opt=@options()) ->
+    o = {r,g,b,a}
+    if opt.rgb
+      o.rgb = [r, g, b]
+    if opt.hsv
+      o.hsv = @rgbToHsv r, g, b
+      [o.h, o.s, o.v] = o.hsv
+    if opt.pixel
+      o.a255 = Math.round(a*255)
+      {pixel, rgba} = @typedArrayColor r, g, b, o.a255
+      [o.pixel, o.rgba] = [pixel, rgba]
+    if opt.rgbString
+      o.rgbString = @rgbString r, g, b, a
+    if opt.hexString
+      o.hexString = @rgbToHex r, g, b
+    if opt.intensity
+      o.intensity = @rgbIntensity r, g, b
+    o
 
   # A colormap is an array of ColorObjects which have two additional
   # properties: map: the colormap and ix: the color's index w/in map
@@ -113,9 +145,8 @@ ABM.Color = Color = {
     addColor: (r, g, b, a=1) ->
       rgbString = Color.rgbString r, g, b, a
       if not @dupsOK
-        # rgbString = Color.rgbString r, g, b, a
         color = @rgbIndex[ rgbString ]
-        console.log color if color
+        console.log("dup color", color) if color
       if not color
         color = Color.colorObject r, g, b, a, @options
         color.ix = @length
@@ -148,10 +179,18 @@ ABM.Color = Color = {
       undefined
 
     # Return an random color or index in a map.
-    # Standalone:
-    # Math.floor(Math.random() * @length)
     randomIndex: -> u.randomInt @length
     randomColor: -> @[@randomIndex()]
+
+    # Return the map color proportional to the value between min, max.
+    # This is a linear interpolation based on the map indices.
+    # The optional minColor, maxColor args are for using a subset of the map.
+    scaleColor: (number, min, max, minColor = 0, maxColor = @length-1) ->
+      scale = u.lerpScale number, min, max # (number-min)/(max-min)
+      minColor = minColor.ix if minColor.ix?
+      maxColor = maxColor.ix if maxColor.ix?
+      index = Math.round(u.lerp minColor, maxColor, scale)
+      @[index]
 
     # Find the color closest to this color, using Color.rgbDistance.
     findClosest: (r, g, b) ->
@@ -178,13 +217,14 @@ ABM.Color = Color = {
   grayColorMap: (size = 256, options) ->
     new ColorMap ([i,i,i] for i in @intensityArray(size)), options
 
-  # Utility to create 3 uniform arrays from 3 number arguments
+  # Utility to create 3 uniform array ramps from 3 number arguments
   # If any arg is array, no change made.
+  # If any arg is 1, replace with [255]
   threeArrays: (A1,A2=A1,A3=A1) ->
-    [A1, A2, A3] = ( (if A is 1 then [255] else A) for A in [A1, A2, A3] )
-    A1 = (Math.round(i*255/(A1-1)) for i in [0...A1]) if typeof A1 is "number"
-    A2 = (Math.round(i*255/(A2-1)) for i in [0...A2]) if typeof A2 is "number"
-    A3 = (Math.round(i*255/(A3-1)) for i in [0...A3]) if typeof A3 is "number"
+    # [A1, A2, A3] = ( (if A is 1 then [255] else A) for A in [A1, A2, A3] )
+    [A1, A2, A3] = for A in [A1, A2, A3] # multi-line comprehension
+      if A is 1 then A = [255]
+      if typeof A is "number" then u.aRamp(0, 255, A, true) else A
     [A1, A2, A3]
 
 
@@ -220,17 +260,11 @@ ABM.Color = Color = {
   gradientColorArray: (nColors, stops, locs) ->
     locs = (i/(stops.length-1) for i in [0...stops.length]) if not locs?
     ctx = u.createCtx nColors, 1
-    # Standalone:
-    # can = document.createElement "canvas"
-    # can.width = nColors; can.height = 1
-    # ctx = can.getContext "2d"
     grad = ctx.createLinearGradient 0, 0, nColors, 0
     for i in [0...stops.length]
       grad.addColorStop locs[i], @rgbString(stops[i]...)
     ctx.fillStyle = grad
     ctx.fillRect 0, 0, nColors, 1
-    # Standalone:
-    # id = (ctx.getImageData 0, 0, nColors, 1).data
     id = u.ctxToImageData(ctx).data
     ([id[i], id[i+1], id[i+2]] for i in [0...id.length] by 4)
   gradientColorMap: (nColors, stops, locs, options) ->
@@ -252,8 +286,6 @@ ABM.Color = Color = {
   # Create a map with a random set of colors.
   # Sometimes useful to sort by intensity afterwards.
   randomColorArray: (nColors) ->
-    # Standalone:
-    # rand255 = -> Math.floor(Math.random() * 256)
     rand255 = -> u.randomInt(256)
     ([rand255(), rand255(), rand255()] for i in [0...nColors])
   randomColorMap: (nColors, options) ->
