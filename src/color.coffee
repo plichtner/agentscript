@@ -1,4 +1,4 @@
-ABM.Color = Color = {
+Color = {
   # Color utilities.
 
   # Convert 3 or 4 ints to a html/css color string

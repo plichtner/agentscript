@@ -2,19 +2,14 @@
 # [docco](http://jashkenas.github.com/docco/) which allows
 # [markdown](http://daringfireball.net/projects/markdown/syntax).
 
-# Create the namespace **ABM** for our project.
-# Note here `this` or `@` == window due to coffeescript wrapper call.
-# Thus @ABM is placed in the global scope.
-@ABM={}
-
-# **ABM.util** contains the general utilities for the project. Note that within
-# a **util** function `@` referrs to ABM.util, *not* the global name space.
-# Alias: u is an alias for ABM.util within the agentscript module (not outside)
+# **Util** contains the general utilities for the project. Note that within
+# a **Util** function `@` referrs to Util, *not* the global name space.
+# Alias: u is an alias for ABM.Util within the agentscript module (not outside)
 #
 #      u.clearCtx(ctx) is equivalent to
-#      ABM.util.clearCtx(ctx)
+#      ABM.Util.clearCtx(ctx)
 
-ABM.util = u =
+Util = util = u = # TODO: "util" deprecated in favor of Util
 
   # Shortcut for throwing an error.  Good for debugging:
   #
