@@ -5,7 +5,7 @@
 # The model animator emits `'step'` and `'draw'` events so that an arbitrary
 # function can be triggered every time the model is stepped or drawn (e.g. the patch inspector).
 
-class ABM.Evented
+class Evented
   constructor: () ->
     @events = {}
 

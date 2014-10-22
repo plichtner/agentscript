@@ -28,7 +28,7 @@ class Model
     divOrOpts, size=13, minX=-16, maxX=16, minY=-16, maxY=16,
     isTorus=false, hasNeighbors=true, isHeadless=false
   ) ->
-    u.mixin(@, ABM.Evented)
+    u.mixin(@, Evented)
     if typeof divOrOpts is 'string'
       div = divOrOpts
       @setWorldDeprecated size, minX, maxX, minY, maxY, isTorus, hasNeighbors, isHeadless
