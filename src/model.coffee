@@ -5,7 +5,7 @@
 # ### Class Model
 
 ABM.models = {} # user space, put your models here
-class ABM.Model extends ABM.Evented
+class ABM.Model
   
   # Class variable for layers parameters.
   # Can be added to by programmer to modify/create layers, **before** starting your own model.
@@ -30,7 +30,7 @@ class ABM.Model extends ABM.Evented
     divOrOpts, size=13, minX=-16, maxX=16, minY=-16, maxY=16,
     isTorus=false, hasNeighbors=true, isHeadless=false
   ) ->
-    super()
+    u.mixin(@, ABM.Evented)
     if typeof divOrOpts is 'string'
       div = divOrOpts
       @setWorldDeprecated size, minX, maxX, minY, maxY, isTorus, hasNeighbors, isHeadless

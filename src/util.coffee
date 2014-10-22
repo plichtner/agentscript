@@ -227,6 +227,12 @@ ABM.util = u =
     ctor.constructor = oldClass.constructor
     ctor.prototype.constructor = oldClass.prototype.constructor
     ctor
+  # Mix the attributes from one class into another;
+  # an alternative to prototypal inheritance
+  # Similar to extend, but mixin() knows to instantiate the srcClass
+  mixin: (destObj, srcClass) ->
+    newInstance = new srcClass()
+    destObj[key] = newInstance[key] for key of newInstance
 
   # Parse a string to its JS value.
   # If s isn't a JS expression, return decoded string
