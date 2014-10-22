@@ -14,8 +14,8 @@
 #
 # below, which passes all its arguments to `Model`
 
-u = ABM.util # ABM.util alias, u.s is also ABM.shapes accessor.
-Shapes = ABM.Shapes # ABM.util alias, u.s is also ABM.shapes accessor.
+u = ABM.Util # ABM.Util alias
+Shapes = ABM.Shapes # ABM.Util alias, u.s is also ABM.shapes accessor.
 log = (arg) -> console.log arg
 class MyModel extends ABM.Model
   # `startup` initializes resources used by `setup` and `step`.
