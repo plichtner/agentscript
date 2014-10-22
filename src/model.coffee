@@ -201,6 +201,12 @@ class ABM.Model extends ABM.Evented
     @drawSpotlight @spotlightAgent, @contexts.spotlight  if @spotlightAgent?
     @emit('draw')
 
+# Wrapper around user-defined step() function calls
+# 'step' event at each model step.
+  _step: ->
+    @step()
+    @emit('step')
+
 # Creates a spotlight effect on an agent, so we can follow it throughout the model.
 # Use:
 #
