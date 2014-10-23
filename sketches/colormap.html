@@ -50,8 +50,8 @@ pw=64&ph=1&ps=10&map=hsv&args=[[43],[255],64]
 pw=32&ph=32&ps=16&map=hsv&args=1024
 pw=16&ph=16&ps=32&map=hsv&args=256
 ###
-u = ABM.util # static variables
-Color = ABM.Color
+u = ABM.Util # static variables
+window.Color = ABM.Color
 
 # ARGGG: Aqua == Cyan and Fuchsia == Magenta
 # The 140 standard html colors are the X11 set
@@ -423,6 +423,7 @@ flags.args = eval flags.args if typeof flags.args is "string"
 flags.args = [flags.args] if not Array.isArray(flags.args)
 console.log k,v for k,v of flags
 
+Color.basicColorMap = (array) -> new Color.ColorMap array
 
 class ColorTestModel extends ABM.Model
   startup: ->
@@ -431,7 +432,13 @@ class ColorTestModel extends ABM.Model
     @refreshPatches = false # just paint once
     @patches.setDefault "color", [0,0,0,0] # default: transparent
 
-    window.map = @map = Color[flags.map] flags.args...
+    window.map = @map =
+      if flags.map is "basicColorMap"
+        new Color.ColorMap flags.args
+      else
+        Color[flags.map] flags.args...
+
+    # window.map = @map = Color[flags.map] flags.args...
     @map.sortBy(flags.key, not flags.decending) if flags.sort
     console.log (c[flags.key] for c in @map) if flags.sort
     @patches[i].color = colorObj.rgb for colorObj,i in @map

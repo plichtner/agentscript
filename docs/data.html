@@ -51,7 +51,7 @@ and an image-as-data class.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>
-u = ABM.util
+u = ABM.Util
 ABM.DataSet = <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DataSet</span></span></pre></div></div>
             
         </li>
@@ -140,7 +140,7 @@ The parse method converts a string into a dataset. Async</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">constructor</span>: <span class="hljs-function"><span class="hljs-params">(width=<span class="hljs-number">0</span>, height=<span class="hljs-number">0</span>, data=[], <span class="hljs-property">@model</span>)</span> -&gt;</span> 
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">constructor</span>: <span class="hljs-function"><span class="hljs-params">(width=<span class="hljs-number">0</span>, height=<span class="hljs-number">0</span>, data=[], <span class="hljs-property">@model</span>)</span> -&gt;</span>
     <span class="hljs-property">@setDefaults</span>()
     <span class="hljs-property">@reset</span> width, height, data</pre></div></div>
             
@@ -409,7 +409,8 @@ If p &lt; 0, print data, otherwise use toFixed to truncate to p precision</p>
         ta[j] = ta[j+<span class="hljs-number">1</span>] = ta[j+<span class="hljs-number">2</span>] = Math.floor num
         ta[j+<span class="hljs-number">3</span>] = <span class="hljs-property">@alpha</span>
       <span class="hljs-keyword">else</span>
-        ta[j]=(num&gt;&gt;<span class="hljs-number">16</span>)&amp;<span class="hljs-number">0xff</span>; ta[j+<span class="hljs-number">1</span>]=(num&gt;&gt;<span class="hljs-number">8</span>)&amp;<span class="hljs-number">0xff</span>; ta[j+<span class="hljs-number">2</span>]=num&amp;<span class="hljs-number">0xff</span>; ta[j+<span class="hljs-number">3</span>]=(num&gt;&gt;<span class="hljs-number">24</span>)&amp;<span class="hljs-number">0xff</span>
+        ta[j]=(num&gt;&gt;<span class="hljs-number">16</span>)&amp;<span class="hljs-number">0xff</span>; ta[j+<span class="hljs-number">1</span>]=(num&gt;&gt;<span class="hljs-number">8</span>)&amp;<span class="hljs-number">0xff</span>; ta[j+<span class="hljs-number">2</span>]=num&amp;<span class="hljs-number">0xff</span>
+        ta[j+<span class="hljs-number">3</span>] = <span class="hljs-keyword">if</span> <span class="hljs-property">@normalizeImage</span> <span class="hljs-keyword">then</span> <span class="hljs-property">@alpha</span> <span class="hljs-keyword">else</span> ta[j+<span class="hljs-number">3</span>]=(num&gt;&gt;<span class="hljs-number">24</span>)&amp;<span class="hljs-number">0xff</span>
     ctx.putImageData idata, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>
     ctx</pre></div></div>
             
@@ -616,14 +617,14 @@ See <a href="http://goo.gl/ubFiji">Convolution article</a></p>
                 <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
               <p>Create two new convolved datasets, slope and aspect, common in
-the use of an elevation data set. See Esri tutorials for 
+the use of an elevation data set. See Esri tutorials for
 <a href="http://goo.gl/ZcOl08">slope</a> and <a href="http://goo.gl/KoI4y5">aspect</a>
 It also returns the two derivitive DataSets, dzdx, dzdy for
 those wanting to use the results of the two convolutions.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">slopeAndAspect</span>: <span class="hljs-function"><span class="hljs-params">(noNaNs=<span class="hljs-literal">true</span>, posAngle=<span class="hljs-literal">true</span>)</span> -&gt;</span> 
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">slopeAndAspect</span>: <span class="hljs-function"><span class="hljs-params">(noNaNs=<span class="hljs-literal">true</span>, posAngle=<span class="hljs-literal">true</span>)</span> -&gt;</span>
     dzdx = <span class="hljs-property">@dzdx</span>() <span class="hljs-comment"># sub left z from right</span>
     dzdy = <span class="hljs-property">@dzdy</span>() <span class="hljs-comment"># sub bottom z from top</span>
     aspect = []; slope = []; h = dzdx.height; w = dzdx.width
@@ -785,7 +786,7 @@ img may be a canvas</p>
     <span class="hljs-property">@rowsPerSlice</span> <span class="hljs-keyword">or</span>= img.height
     data = u.imageRowsToData img, <span class="hljs-property">@rowsPerSlice</span>, <span class="hljs-property">@f</span>, <span class="hljs-property">@arrayType</span>
     <span class="hljs-property">@reset</span> img.width, img.height, data
-    
+
 ABM.PatchDataSet = <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">PatchDataSet</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">DataSet</span></span>
   <span class="hljs-attribute">constructor</span>: <span class="hljs-function"><span class="hljs-params">(f, arrayType=Array, <span class="hljs-property">@model</span>)</span> -&gt;</span>
     data = <span class="hljs-keyword">new</span> arrayType (ps=<span class="hljs-property">@model</span>.patches).length
