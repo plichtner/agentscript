@@ -312,5 +312,6 @@ class Model
   Link
   Links
   Animator
+  Evented
   Model
 }
