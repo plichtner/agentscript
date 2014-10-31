@@ -1,5 +1,3 @@
-# ### Agent
-
 # Class Agent instances represent the dynamic, behavioral element of modeling.
 # Each agent knows the patch it is on, and interacts with that and other
 # patches, as well as other agents.

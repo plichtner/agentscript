@@ -1,10 +1,13 @@
-  # Color utilities.  This module contains three color features:
+  # The Color for AgentScript.
+  #
+  # This module contains three color features:
   #
   # * Core color functions
   # * A color object
   # * A color map class and several colormap "factories"
 
 Color = {
+  # ### Core Color Functions
 
   # Convert 3 or 4 ints to a html/css color string
   rgbString: (r, g, b, a=1) ->
@@ -19,18 +22,24 @@ Color = {
     "#" + (0x1000000 | (b | g << 8 | r << 16)).toString(16).slice(-6)
 
   # Return 2 typed array colors: a single Uint32 pixel, correct endian format,
-  # and a 4 Uint8Array, r,g,b,a255 (i.e. a int in 0-255)
+  # and a 4 Uint8Array, r,g,b,a255, each an Uint8 in 0-255)
   typedArrayColor: (r, g, b, a=255) ->
     rgba = new Uint8ClampedArray([r, g, b, a])
     pixel = new Uint32Array(rgba.buffer)[0]
     {pixel, rgba}
 
-  # Return an RGB array given any legal CSS color, null otherwise.
-  # http://www.w3schools.com/cssref/css_colors_legal.asp
-  # The string can be CadetBlue, #0f0, rgb(255,0,0), hsl(120,100%,50%)
-  # The rgba/hsla forms ok too, but we don't return the a.
+  # Return an RGB array given any
+  # [legal CSS string color](
+  # http://www.w3schools.com/cssref/css_colors_legal.asp)
+  # , null otherwise.
+  #
+  # Legal strings vary widely: CadetBlue, #0f0, rgb(255,0,0), hsl(120,100%,50%)
+  #
+  # (The rgba/hsla forms ok too, but we don't return the a)
+  #
   # Note: The browser speaks for itself: we simply set a 1x1 canvas fillStyle
   # to the string and create a pixel, returning the r,g,b values.
+  #
   # Warning: r=g=b=0 can indicate an illegal string.  We test
   # for a few obvious cases but beware of unexpected [0,0,0] results.
   ctx1x1: u.createCtx 1, 1 # share across calls. closure wrapper better?

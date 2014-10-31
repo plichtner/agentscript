@@ -114,6 +114,9 @@ class AgentSet extends Array
     breeds = breeds.split(" ")
     @asSet (o for o in @ when o.breed.name not in breeds)
 
+  # A generalized, but complex, flood fill, designed to work on any
+  # agentset type. To see a simpler version, look at the gridpath model.
+  #
   # Floodfill arguments:
   #
   # * aset: initial array of agents, often a single agent: [a]
