@@ -1,5 +1,10 @@
+  # Color utilities.  This module contains three color features:
+  #
+  # * Core color functions
+  # * A color object
+  # * A color map class and several colormap "factories"
+
 Color = {
-  # Color utilities.
 
   # Convert 3 or 4 ints to a html/css color string
   rgbString: (r, g, b, a=1) ->

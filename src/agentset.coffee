@@ -93,8 +93,6 @@ class AgentSet extends Array
   # Vars = a string of space separated names or an array of name strings
   # Return agentset.
   own: (vars) -> # maybe not set default if val is null?
-    # vars = vars.split(" ") if not u.isArray vars
-    # for name in vars#.split(" ") # if not u.isArray vars
     for name in vars.split(" ")
       @setDefault name, null
       @ownVariables.push name
