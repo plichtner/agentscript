@@ -301,6 +301,15 @@ class AgentSet extends Array
       @asSet (a for a in rSet when \
         (a is o and meToo) or u.inCone(heading,cone,radius,x,y,a.x,a.y))
 
+# ### Event delegation
+  on: (name, cb) ->
+    for agent in this
+      agent.on(name, cb)
+
+  off: (name, cb) ->
+    for agent in this
+      agent.off(name, cb)
+
 # ### Debugging
 
   # Useful in console.
