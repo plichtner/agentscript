@@ -33,6 +33,7 @@ class Patch
 
   # New Patch: Just set x,y. Neighbors set by Patches constructor if needed.
   constructor: (@x, @y) ->
+    u.mixin(@, new Evented())
 
   # Return a string representation of the patch.
   toString: -> "{id:#{@id} xy:#{[@x,@y]} c:#{@color}}"
