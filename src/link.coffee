@@ -24,6 +24,7 @@ class Link
   labelColor: [0,0,0] # its color
   labelOffset: [0,0]  # its offset from my midpoint
   constructor: (@end1, @end2) ->
+    u.mixin(@, new Evented())
     if @end1.links?
       @end1.links.push @
       @end2.links.push @

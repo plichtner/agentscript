@@ -43,12 +43,15 @@ class Agent
   cacheLinks: false   # should I keep links to/from me in links array?.
   links: null         # array of links to/from me as an endpoint; init by ctor
   constructor: -> # called by agentSets create factory, not user
+    u.mixin(@, new Evented())
     @x = @y = 0
     @p = @model.patches.patch @x, @y
     @color = u.randomColor() unless @color? # promote color if default not set
     @heading = u.randomFloat(Math.PI*2) unless @heading?
     @p.agents.push @ if @p.agents? # @model.patches.cacheAgentsHere
     @links = [] if @cacheLinks
+
+
 
   # Set agent color to `c` scaled by `s`. Usage: see patch.scaleColor
   scaleColor: (c, s) ->
