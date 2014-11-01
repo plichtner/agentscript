@@ -62,6 +62,10 @@ class Link
     u.removeItem @end2.links, @ if @end2.links?
     null
 
+  hitTest: (x, y) ->
+    distance = u.aSum (a.distanceXY x, y for a in @bothEnds())
+    distance - @length() < 1 / @model.patches.size
+
   # Return the two endpoints of this link
   bothEnds: -> [@end1, @end2]
 
