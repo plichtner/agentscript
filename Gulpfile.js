@@ -22,7 +22,7 @@ var coffeeTasks = lazypipe()
   .pipe(coffee)
   .pipe(jsTasks);
 
-gulp.task('all', ['build', 'docs']);
+gulp.task('all', ['build', 'docs', 'models']);
 
 // Build tasks:
 gulp.task('build-agentscript', function () {
@@ -55,6 +55,14 @@ gulp.task('watch', function() {
     .pipe(coffeeTasks());
   });
 });
+
+// Build any models not embedded in html file:
+gulp.task('models', function() {
+  return gulp.src('./models/*.coffee')
+  .pipe(coffee())
+  .pipe(gulp.dest('./models/'));
+});
+
 
 // Documentation tasks
 gulp.task('docs', function() {
