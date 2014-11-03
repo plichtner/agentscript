@@ -64,11 +64,6 @@ class Model
       # Setup spotlight layer, also not an agentset:
       @contexts.spotlight.globalCompositeOperation = "xor"
 
-    # if isHeadless
-    # # Initialize animator to headless default: 30fps, async
-    # then @anim = new Animator @, null, true
-    # # Initialize animator to default: 30fps, not async
-    # else
     @anim = new Animator @
     # Set drawing controls.  Default to drawing each agentset.
     # Optimization: If any of these is set to false, the associated
