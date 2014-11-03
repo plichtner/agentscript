@@ -5,19 +5,6 @@
 # ### Class Model
 
 class Model
-
-  # Class variable for layers parameters.
-  # Can be added to by programmer to modify/create layers, **before** starting your own model.
-  # Example:
-  #
-  #     v.z++ for k,v of Model::contextsInit # increase each z value by one
-  contextsInit: { # Experimental: image:   {z:15,  ctx:"img"}
-    patches:   {z:10, ctx:"2d"}
-    drawing:   {z:20, ctx:"2d"}
-    links:     {z:30, ctx:"2d"}
-    agents:    {z:40, ctx:"2d"}
-    spotlight: {z:50, ctx:"2d"}
-  }
   # Constructor:
   #
   # * create agentsets, install them and ourselves in ABM global namespace
@@ -40,35 +27,12 @@ class Model
 
     @contexts = {}
     unless isHeadless
-      (@div=document.getElementById(div)).setAttribute 'style',
-        "position:relative; width:#{@world.pxWidth}px; height:#{@world.pxHeight}px"
-
-      # * Create 2D canvas contexts layered on top of each other.
-      # * Initialize a patch coord transform for each layer.
-      #
-      # Note: this transform is permanent .. there isn't the usual ctx.restore().
-      # To use the original canvas 2D transform temporarily:
-      #
-      #     u.setIdentity ctx
-      #       <draw in native coord system>
-      #     ctx.restore() # restore patch coord system
-      for own k,v of @contextsInit
-        @contexts[k] = ctx = u.createLayer @div, @world.pxWidth, @world.pxHeight, v.z, v.ctx
-        @setCtxTransform ctx if ctx.canvas?
-        if ctx.canvas? then ctx.canvas.style.pointerEvents = 'none'
-        u.elementTextParams ctx, "10px sans-serif", "center", "middle"
-
-      # One of the layers is used for drawing only, not an agentset:
+      @view = new CanvasView(@, opts)
+      @contexts = @view.contexts # copy contexts over from view
       @drawing = @contexts.drawing
-      @drawing.clear = => u.clearCtx @drawing
-      # Setup spotlight layer, also not an agentset:
-      @contexts.spotlight.globalCompositeOperation = "xor"
+      @div = @view.div
 
     @anim = new Animator @
-    # Set drawing controls.  Default to drawing each agentset.
-    # Optimization: If any of these is set to false, the associated
-    # agentset is drawn only once, remaining static after that.
-    @refreshLinks = @refreshAgents = @refreshPatches = true
 
     # Create model-local versions of AgentSets and their
     # agent class.  Clone the agent classes so that they
@@ -101,11 +65,6 @@ class Model
     minXcor=minX-.5; maxXcor=maxX+.5; minYcor=minY-.5; maxYcor=maxY+.5
     @world = {size,minX,maxX,minY,maxY,minXcor,maxXcor,minYcor,maxYcor,
       numX,numY,pxWidth,pxHeight,isTorus,hasNeighbors,isHeadless}
-  setCtxTransform: (ctx) ->
-    ctx.canvas.width = @world.pxWidth; ctx.canvas.height = @world.pxHeight
-    ctx.save()
-    ctx.scale @world.size, -@world.size
-    ctx.translate -(@world.minXcor), -(@world.maxYcor)
   globals: (globalNames) ->
     if globalNames?
     then @globalNames = globalNames; @globalNames.set = true
@@ -165,8 +124,8 @@ class Model
   reset: (restart = false) ->
     console.log "reset: anim"
     @anim.reset() # stop & reset ticks/steps counters
-    console.log "reset: contexts" # clear/resize canvas xfms b4 agentsets
-    (v.restore(); @setCtxTransform v) for k,v of @contexts when v.canvas?
+    console.log "reset: view"
+    @view.reset() # clear/resize canvas transforms before agentsets
     console.log "reset: patches"
     @patches = new @Patches @, @Patch, "patches"
     console.log "reset: agents"
@@ -181,14 +140,9 @@ class Model
 
 #### Animation.
 
-# Call the agentset draw methods if either the first draw call or
-# their "refresh" flags are set.  The latter are simple optimizations
-# to avoid redrawing the same static scene. Called by animator.
+# Called by animator.
   draw: (force=@anim.stopped) ->
-    @patches.draw @contexts.patches  if force or @refreshPatches or @anim.draws is 1
-    @links.draw   @contexts.links    if force or @refreshLinks   or @anim.draws is 1
-    @agents.draw  @contexts.agents   if force or @refreshAgents  or @anim.draws is 1
-    @drawSpotlight @spotlightAgent, @contexts.spotlight  if @spotlightAgent?
+    @view.draw(force)
 
 # Creates a spotlight effect on an agent, so we can follow it throughout the model.
 # Use:
