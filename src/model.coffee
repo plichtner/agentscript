@@ -5,7 +5,6 @@
 # ### Class Model
 
 class Model
-
   # Class variable for layers parameters.
   # Can be added to by programmer to modify/create layers, **before** starting your own model.
   # Example:
@@ -29,6 +28,7 @@ class Model
     divOrOpts, size=13, minX=-16, maxX=16, minY=-16, maxY=16,
     isTorus=false, hasNeighbors=true, isHeadless=false
   ) ->
+    u.mixin(@, new Evented())
     if typeof divOrOpts is 'string'
       div = divOrOpts
       @setWorldDeprecated size, minX, maxX, minY, maxY, isTorus, hasNeighbors, isHeadless
@@ -92,7 +92,7 @@ class Model
     @globalNames = null; @globalNames = u.ownKeys @
     @globalNames.set = false
     @startup()
-    u.waitOnFiles => @modelReady=true; @setup(); @globals() unless @globalNames.set
+    u.waitOnFiles => @modelReady=true; @setupAndEmit(); @globals() unless @globalNames.set
 
   # Initialize/reset world parameters.
   setWorld: (opts) ->
@@ -183,7 +183,7 @@ class Model
     @links = new @Links @, @Link, "links"
     Shapes.spriteSheets.length = 0 # possibly null out entries?
     console.log "reset: setup"
-    @setup()
+    @setupAndEmit()
     @setRootVars() if @debugging
     @start() if restart
 
@@ -197,6 +197,16 @@ class Model
     @links.draw   @contexts.links    if force or @refreshLinks   or @anim.draws is 1
     @agents.draw  @contexts.agents   if force or @refreshAgents  or @anim.draws is 1
     @drawSpotlight @spotlightAgent, @contexts.spotlight  if @spotlightAgent?
+    @emit('draw')
+
+#### Wrappers around user-implemented methods
+
+  setupAndEmit: ->
+    @setup()
+    @emit('setup')
+  stepAndEmit: ->
+    @step()
+    @emit('step')
 
 # Creates a spotlight effect on an agent, so we can follow it throughout the model.
 # Use:
@@ -305,5 +315,6 @@ class Model
   Link
   Links
   Animator
+  Evented
   Model
 }

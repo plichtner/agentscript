@@ -230,6 +230,12 @@ Util = util = u = # TODO: "util" deprecated in favor of Util
     ctor.constructor = oldClass.constructor
     ctor.prototype.constructor = oldClass.prototype.constructor
     ctor
+  # Mix the attributes from one class into another;
+  # an alternative to prototypal inheritance. Similar to extend, but
+  # mixin() knows to copy prototype functions into the prototype
+  mixin: (destObj, srcObject) ->
+    destObj[key] = srcObject[key] for own key of srcObject
+    destObj.__proto__[key] = srcObject.__proto__[key] for own key of srcObject.__proto__
 
   # Parse a string to its JS value.
   # If s isn't a JS expression, return decoded string
