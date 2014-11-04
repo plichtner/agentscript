@@ -1,5 +1,3 @@
-# ### Agent
-
 # Class Agent instances represent the dynamic, behavioral element of modeling.
 # Each agent knows the patch it is on, and interacts with that and other
 # patches, as well as other agents.
@@ -56,6 +54,10 @@ class Agent
   scaleColor: (c, s) ->
     @color = u.clone @color unless @hasOwnProperty "color" # promote color to inst var
     u.scaleColor c, s, @color
+
+  scaleOpacity: (c, s) ->
+    @color = u.clone @color unless @hasOwnProperty "color"
+    u.scaleOpacity c, s, @color
 
   # Return a string representation of the agent.
   toString: -> "{id:#{@id} xy:#{u.aToFixed [@x,@y]} c:#{@color} h: #{h=@heading.toFixed 2}/#{Math.round(u.radToDeg(h))}}"

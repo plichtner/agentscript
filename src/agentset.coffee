@@ -93,8 +93,6 @@ class AgentSet extends Array
   # Vars = a string of space separated names or an array of name strings
   # Return agentset.
   own: (vars) -> # maybe not set default if val is null?
-    # vars = vars.split(" ") if not u.isArray vars
-    # for name in vars#.split(" ") # if not u.isArray vars
     for name in vars.split(" ")
       @setDefault name, null
       @ownVariables.push name
@@ -116,6 +114,9 @@ class AgentSet extends Array
     breeds = breeds.split(" ")
     @asSet (o for o in @ when o.breed.name not in breeds)
 
+  # A generalized, but complex, flood fill, designed to work on any
+  # agentset type. To see a simpler version, look at the gridpath model.
+  #
   # Floodfill arguments:
   #
   # * aset: initial array of agents, often a single agent: [a]
