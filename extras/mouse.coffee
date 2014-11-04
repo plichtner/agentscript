@@ -6,6 +6,7 @@ class ABM.Mouse
     @lastX = Infinity; @lastY = Infinity
     @div = @model.div
     @lastAgents = []
+    @draggingAgents = []
     @start()
   # Start/stop the mouseListeners.  Note that NetLogo's model is to have
   # mouse move events always on, rather than starting/stopping them
@@ -38,7 +39,7 @@ class ABM.Mouse
     @handleMouseEvent(e)
   handleStep: () =>
     @delegateMouseOverAndOutEvents(@x, @y) if not isNaN(@x)
-
+    @deligateAgentDragEvents(@x, @y) if not isNaN(@x)
   handleMouseEvent: (e) =>
     eventTypes = @computeEventTypes()
     @delegateEventsToAllAgents(eventTypes, e)
@@ -64,8 +65,6 @@ class ABM.Mouse
       if not @dragging
         eventTypes.push 'dragstart'
       @dragging = true
-      console.log('drag')
-      eventTypes.push 'drag'
 
     if not @down and @dragging
       @dragging = false
@@ -112,10 +111,15 @@ class ABM.Mouse
 
     @lastAgents = agentsHere
 
+  deligateAgentDragEvents: (x, y) ->
+    for agent in @draggingAgents
+      mouseEvent = {target: agent, patchX: x, patchY: y}
+      agent.emit('drag', mouseEvent)
+
   delegateEventsToPatchAtPoint: (eventTypes, x, y, e) ->
     curPatch = @model.patches.patch(x, y)
     mouseEvent = {target: curPatch, patchX:  x, patchY: y, originalEvent: e}
-    curPatch.emit(type, mouseEvent) for type in eventTypes
+    @emitAgentEvent(type, curPatch, mouseEvent) for type in eventTypes
 
   delegateEventsToAgentsAtPoint: (eventTypes, x, y, e) ->
     curPatch = @model.patches.patch(x, y)
@@ -125,10 +129,17 @@ class ABM.Mouse
       for agent in patch.agentsHere()
         if agent.hitTest(x, y)
           mouseEvent = {target: agent, patchX:  x, patchY: y, originalEvent: e}
-          agent.emit(type, mouseEvent) for type in eventTypes
+          @emitAgentEvent(type, agent, mouseEvent) for type in eventTypes
 
   delegateEventsToLinksAtPoint: (eventTypes, x, y, e) ->
     for link in @model.links
       if link.hitTest(x, y)
         mouseEvent = {target: link, patchX:  x, patchY: y, originalEvent: e}
-        link.emit(type, mouseEvent) for type in eventTypes
+        @emitAgentEvent(type, link, mouseEvent) for type in eventTypes
+
+  emitAgentEvent: (eventType, agent, mouseEvent) ->
+    if eventType == 'dragstart'
+      @draggingAgents.push(agent)
+    if eventType == 'dragend'
+      @draggingAgents = []
+    agent.emit(eventType, mouseEvent) 
