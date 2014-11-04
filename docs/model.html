@@ -97,6 +97,7 @@ Example:</p>
     divOrOpts, size=<span class="hljs-number">13</span>, minX=-<span class="hljs-number">16</span>, maxX=<span class="hljs-number">16</span>, minY=-<span class="hljs-number">16</span>, maxY=<span class="hljs-number">16</span>,
     isTorus=<span class="hljs-literal">false</span>, hasNeighbors=<span class="hljs-literal">true</span>, isHeadless=<span class="hljs-literal">false</span>
   )<span class="hljs-function"> -&gt;</span>
+    u.mixin(@, <span class="hljs-keyword">new</span> Evented())
     <span class="hljs-keyword">if</span> <span class="hljs-keyword">typeof</span> divOrOpts <span class="hljs-keyword">is</span> <span class="hljs-string">'string'</span>
       div = divOrOpts
       <span class="hljs-property">@setWorldDeprecated</span> size, minX, maxX, minY, maxY, isTorus, hasNeighbors, isHeadless
@@ -258,7 +259,7 @@ models run on a page.</p>
     <span class="hljs-property">@globalNames</span> = <span class="hljs-literal">null</span>; <span class="hljs-property">@globalNames</span> = u.ownKeys @
     <span class="hljs-property">@globalNames</span>.set = <span class="hljs-literal">false</span>
     <span class="hljs-property">@startup</span>()
-    u.waitOnFiles<span class="hljs-function"> =&gt;</span> <span class="hljs-property">@modelReady</span>=<span class="hljs-literal">true</span>; <span class="hljs-property">@setup</span>(); <span class="hljs-property">@globals</span>() <span class="hljs-keyword">unless</span> <span class="hljs-property">@globalNames</span>.set</pre></div></div>
+    u.waitOnFiles<span class="hljs-function"> =&gt;</span> <span class="hljs-property">@modelReady</span>=<span class="hljs-literal">true</span>; <span class="hljs-property">@setupAndEmit</span>(); <span class="hljs-property">@globals</span>() <span class="hljs-keyword">unless</span> <span class="hljs-property">@globalNames</span>.set</pre></div></div>
             
         </li>
         
@@ -551,7 +552,7 @@ Will advance the ticks/draws counters.</p>
     <span class="hljs-property">@links</span> = <span class="hljs-keyword">new</span> <span class="hljs-property">@Links</span> @, <span class="hljs-property">@Link</span>, <span class="hljs-string">"links"</span>
     Shapes.spriteSheets.length = <span class="hljs-number">0</span> <span class="hljs-comment"># possibly null out entries?</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"reset: setup"</span>
-    <span class="hljs-property">@setup</span>()
+    <span class="hljs-property">@setupAndEmit</span>()
     <span class="hljs-property">@setRootVars</span>() <span class="hljs-keyword">if</span> <span class="hljs-property">@debugging</span>
     <span class="hljs-property">@start</span>() <span class="hljs-keyword">if</span> restart</pre></div></div>
             
@@ -587,7 +588,8 @@ to avoid redrawing the same static scene. Called by animator.</p>
     <span class="hljs-property">@patches</span>.draw <span class="hljs-property">@contexts</span>.patches  <span class="hljs-keyword">if</span> force <span class="hljs-keyword">or</span> <span class="hljs-property">@refreshPatches</span> <span class="hljs-keyword">or</span> <span class="hljs-property">@anim</span>.draws <span class="hljs-keyword">is</span> <span class="hljs-number">1</span>
     <span class="hljs-property">@links</span>.draw   <span class="hljs-property">@contexts</span>.links    <span class="hljs-keyword">if</span> force <span class="hljs-keyword">or</span> <span class="hljs-property">@refreshLinks</span>   <span class="hljs-keyword">or</span> <span class="hljs-property">@anim</span>.draws <span class="hljs-keyword">is</span> <span class="hljs-number">1</span>
     <span class="hljs-property">@agents</span>.draw  <span class="hljs-property">@contexts</span>.agents   <span class="hljs-keyword">if</span> force <span class="hljs-keyword">or</span> <span class="hljs-property">@refreshAgents</span>  <span class="hljs-keyword">or</span> <span class="hljs-property">@anim</span>.draws <span class="hljs-keyword">is</span> <span class="hljs-number">1</span>
-    <span class="hljs-property">@drawSpotlight</span> <span class="hljs-property">@spotlightAgent</span>, <span class="hljs-property">@contexts</span>.spotlight  <span class="hljs-keyword">if</span> <span class="hljs-property">@spotlightAgent</span>?</pre></div></div>
+    <span class="hljs-property">@drawSpotlight</span> <span class="hljs-property">@spotlightAgent</span>, <span class="hljs-property">@contexts</span>.spotlight  <span class="hljs-keyword">if</span> <span class="hljs-property">@spotlightAgent</span>?
+    <span class="hljs-property">@emit</span>(<span class="hljs-string">'draw'</span>)</pre></div></div>
             
         </li>
         
@@ -597,6 +599,27 @@ to avoid redrawing the same static scene. Called by animator.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-32">&#182;</a>
+              </div>
+              <h3 id="wrappers-around-user-implemented-methods">Wrappers around user-implemented methods</h3>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+  <span class="hljs-attribute">setupAndEmit</span>:<span class="hljs-function"> -&gt;</span>
+    <span class="hljs-property">@setup</span>()
+    <span class="hljs-property">@emit</span>(<span class="hljs-string">'setup'</span>)
+  <span class="hljs-attribute">stepAndEmit</span>:<span class="hljs-function"> -&gt;</span>
+    <span class="hljs-property">@step</span>()
+    <span class="hljs-property">@emit</span>(<span class="hljs-string">'step'</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-33">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
               <p>Creates a spotlight effect on an agent, so we can follow it throughout the model.
 Use:</p>
@@ -618,11 +641,11 @@ Use:</p>
         </li>
         
         
-        <li id="section-33">
+        <li id="section-34">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
+                <a class="pilcrow" href="#section-34">&#182;</a>
               </div>
               <h3 id="breeds">Breeds</h3>
 
@@ -631,11 +654,11 @@ Use:</p>
         </li>
         
         
-        <li id="section-34">
+        <li id="section-35">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
               <p>Three versions of NL’s <code>breed</code> commands.</p>
 <pre><code><span class="hljs-property">@patchBreeds</span> <span class="hljs-string">"streets buildings"</span>
@@ -673,11 +696,11 @@ not usable due to the patches being prebuilt.  Stay tuned.</p>
         </li>
         
         
-        <li id="section-35">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
               <p>Utility for models to create agentsets from arrays.  Ex:</p>
 <pre><code>even = <span class="hljs-property">@asSet</span> (a <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> <span class="hljs-property">@agents</span> <span class="hljs-keyword">when</span> a.id % <span class="hljs-number">2</span> <span class="hljs-keyword">is</span> <span class="hljs-number">0</span>)
@@ -690,11 +713,11 @@ even.shuffle().getProp(<span class="hljs-string">"id"</span>) <span class="hljs-
         </li>
         
         
-        <li id="section-36">
+        <li id="section-37">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
               <p>A simple debug aid which places short names in the global name space.
 Note we avoid using the actual name, such as “patches” because this
@@ -728,11 +751,11 @@ See <a href="http://goo.gl/1i7bd">CoffeeConsole</a> Chrome extension too.</p>
         </li>
         
         
-        <li id="section-37">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
               <p>Create the namespace <strong>ABM</strong> for our project.
 Note here <code>this</code> or <code>@</code> == window due to coffeescript wrapper call.
@@ -757,6 +780,7 @@ Thus @ABM is placed in the global scope.
   Link
   Links
   Animator
+  Evented
   Model
 }</pre></div></div>
             
