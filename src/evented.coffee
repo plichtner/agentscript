@@ -2,7 +2,7 @@
 
 # Modified from https://gist.github.com/contra/2759355.
 
-# The model animator emits `'step'` and `'draw'` events so that an arbitrary
+# Instances of Model emit `'step'` and `'draw'` events so that an arbitrary
 # function can be triggered every time the model is stepped or drawn (e.g. the patch inspector).
 
 class Evented
