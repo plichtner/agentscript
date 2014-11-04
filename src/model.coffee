@@ -92,7 +92,7 @@ class Model
     @globalNames = null; @globalNames = u.ownKeys @
     @globalNames.set = false
     @startup()
-    u.waitOnFiles => @modelReady=true; @setup(); @globals() unless @globalNames.set
+    u.waitOnFiles => @modelReady=true; @setupAndEmit(); @globals() unless @globalNames.set
 
   # Initialize/reset world parameters.
   setWorld: (opts) ->
@@ -183,7 +183,7 @@ class Model
     @links = new @Links @, @Link, "links"
     u.s.spriteSheets.length = 0 # possibly null out entries?
     console.log "reset: setup"
-    @setup()
+    @setupAndEmit()
     @setRootVars() if @debugging
     @start() if restart
 
@@ -199,9 +199,12 @@ class Model
     @drawSpotlight @spotlightAgent, @contexts.spotlight  if @spotlightAgent?
     @emit('draw')
 
-# Wrapper around user-defined step() function calls
-# 'step' event at each model step.
-  _step: ->
+#### Wrappers around user-implemented methods
+
+  setupAndEmit: ->
+    @setup()
+    @emit('setup')
+  stepAndEmit: ->
     @step()
     @emit('step')
 
