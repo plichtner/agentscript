@@ -440,6 +440,8 @@ class ColorTestModel extends ABM.Model
     # window.map = @map = Color[flags.map] flags.args...
     @map.sortBy(flags.key, not flags.decending) if flags.sort
     console.log (c[flags.key] for c in @map) if flags.sort
+
+    # debugger;
     @patches[i].color = colorObj.rgb for colorObj,i in @map
 
     console.log "patches: #{@patches.length}"

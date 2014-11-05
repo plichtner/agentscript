@@ -1,24 +1,46 @@
-  # The Color for AgentScript.
-  #
-  # This module contains three color features:
+  # This module contains three color sections:
   #
   # * Core color primitive functions
   # * A color object
   # * A color map class and several colormap "factories"
   #
-  # We use r,g,b & h,s,v values normalized to be in 0-255,
-  # with a (alpha) in 0-1.
+  # Colors in HTML/CSS are strings, see [legal CSS string colors](
+  # http://www.w3schools.com/cssref/css_colors_legal.asp)
+  # and [Mozilla's Color Reference](
+  # https://developer.mozilla.org/en-US/docs/Web/CSS/color_value)
+  # as wall as the [future CSS4](http://dev.w3.org/csswg/css-color/) spec.
+  #
+  # The strings can be may forms:
+  #
+  # * Names: [140 color case-insensitive names](
+  #   http://en.wikipedia.org/wiki/Web_colors#HTML_color_names) like CadetBlue
+  # * Hex, short and long form: #0f0, #ff10a0
+  # * RGB: rgb(255, 0, 0), rgba(255, 0, 0, 0.5)
+  # * HSL: hsl(120, 100%, 50%), hsla(120, 100%, 50%, 0.8)
+  #
+  # In addition, numeric Typed Arrays are used in canvas's [ImageData pixels](
+  # https://developer.mozilla.org/en-US/docs/Web/API/ImageData)
+  # and WebGL colors (4 rgba floats in 0-1)
   #
   # There are many other representations, such as floats in 0-1
   # and odd mixtures of values, some in degrees, some in percentages.
 
-Color = {
+window.c = Color = {
   # ### Core Color Functions
 
-  # Convert 3 or 4 ints to a html/css color string
+  # Convert 3 r,g,b ints in [0-255] to a css color string.
+  # Alpha "a" is opacity, float in [0-1]
   rgbString: (r, g, b, a=1) ->
     throw new Error "alpha > 1" if a > 1 # a: 0-1 not 0-255
     if a is 1 then "rgb(#{r},#{g},#{b})" else "rgba(#{r},#{g},#{b},#{a})"
+
+  # Convert 3 ints, h in [0-360], s,l in [0-100] to a css color string.
+  # Alpha "a" is opacity, float in [0-1].
+  # Note h=0 and h=360 are the same, you might limit yourself to h in 0-359.
+  # The browser clamps the h,s,l values to legal values.
+  hslString: (h, s, l, a=1) ->
+    throw new Error "alpha > 1" if a > 1 # a: 0-1 not 0-255
+    if a is 1 then "hsl(#{h},#{s},#{l})" else "hsla(#{h},#{s},#{l},#{a})"
 
   # Return the gray/intensity value for a given r,g,b color
   # Round for 0-255 int for gray color value.
@@ -36,14 +58,14 @@ Color = {
     pixel = new Uint32Array(rgba.buffer)[0]
     {pixel, rgba}
 
-  # Return an RGB array given any
+  # Return an RGB array given any legal CSS string color
   # [legal CSS string color](
   # http://www.w3schools.com/cssref/css_colors_legal.asp)
   # , null otherwise.
   #
   # Legal strings vary widely: CadetBlue, #0f0, rgb(255,0,0), hsl(120,100%,50%)
   #
-  # (The rgba/hsla forms ok too, but we don't return the a (0-255 int) value)
+  # (The rgba/hsla forms ok too, but we don't return the a in 0-255 int value)
   #
   # Note: The browser speaks for itself: we simply set a 1x1 canvas fillStyle
   # to the string and create a pixel, returning the r,g,b values.
@@ -57,52 +79,58 @@ Color = {
     @ctx1x1.fillStyle = string
     @ctx1x1.fillRect 0, 0, 1, 1
     string = string.replace(/\ */g, '') # "\ " a coffee disambiguation problem
-    console.log string
     [r, g, b, a] = @ctx1x1.getImageData(0, 0, 1, 1).data
+    console.log string, [r, g, b, a]
     return [r, g, b] if (r+g+b isnt 0) or
       (string in ["#000","#000000","transparent","black"]) or
       (string.match(/rgba{0,1}\(0,0,0/i)) or
       (string.match(/hsla{0,1}\(0,0%,0%/i))
     null
 
-  # RGB <> HSB (HSV) conversions.
+  # RGB <> HSL (Hue, Saturation, Lightness) conversions.
   #
-  # r,g,b and h,s,v values are in in [0-255].
+  # r,g,b are ints in [0-255], i.e. 3 unsigned bytes of a pixel.
+  # h int in [0-360] degrees; s,v ints [0-100] percents; (h=0 same as h=360)
   # See [Wikipedia](http://en.wikipedia.org/wiki/HSV_color_space)
-  # and [Blog Post](http://goo.gl/7yP4cO)
+  # and [Blog Post](
+  # http://axonflux.com/handy-rgb-to-hsl-and-rgb-to-hsv-color-model-c)
   #
-  # Note that HSB/HSV is [not the same as HSL](
+  # This is a [good table of hues](
+  # http://dev.w3.org/csswg/css-color/#named-hue-examples)
+  # and this is the [W3C HSL standard](
+  # http://www.w3.org/TR/css3-color/#hsl-color)
+  #
+  # Note that HSL is [not the same as HSB/HSV](
   # http://en.wikipedia.org/wiki/HSL_and_HSV)
 
   # Convert float in 0-1 to int in 0-255
-  round255: (float) ->
-    u.error "round255: float out of range" unless 0 <= float <= 1
-    u.clamp Math.round(255*float), 0, 255
-  rgbToHsv: (r, g, b) ->
-    r=r/255; g=g/255; b=b/255
-    max = Math.max(r,g,b); min = Math.min(r,g,b); v = max
-    h = 0; d = max-min; s = if max is 0 then 0 else d/max
-    if max isnt min then switch max
-      when r then h = (g - b) / d + (if g < b then 6 else 0)
-      when g then h = (b - r) / d + 2
-      when b then h = (r - g) / d + 4
-    [@round255(h/6), @round255(s), @round255(v)]
+  roundToInt: (float, max=255) ->
+    console.log "roundToInt: float #{float}, max #{max}" unless 0 <= float <= 1
+    int = Math.round(max*float)
+    console.log "roundToInt: int #{int}, max #{max}" unless 0 <= int <= max
+    u.clamp int, 0, max
 
-  hsvToRgb: (h, s, v) ->
-    h=h/255; s=s/255; v=v/255; i = Math.floor(h*6)
-    f = h * 6 - i;        p = v * (1 - s)
-    q = v * (1 - f * s);  t = v * (1 - (1 - f) * s)
-    switch(i % 6)
-      when 0 then r = v; g = t; b = p
-      when 1 then r = q; g = v; b = p
-      when 2 then r = p; g = v; b = t
-      when 3 then r = p; g = q; b = v
-      when 4 then r = t; g = p; b = v
-      when 5 then r = v; g = p; b = q
-    [@round255(r), @round255(g), @round255(b)]
+  rgbToHsl: (r, g, b) ->
+    r = r/255; g = g/255; b = b/255
+    max = Math.max(r,g,b); min = Math.min(r,g,b)
+    sum = max + min; diff = max - min
+    l = sum/2 # lightness is the average of the largest and smallest rgb's
+    if max is min
+      h = s = 0 # achromatic, a shade of gray
+    else
+      s = if l > 0.5 then diff/(2-sum) else diff/sum
+      switch max
+        when r then h = ((g - b) / diff) + (if g < b then 6 else 0)
+        when g then h = ((b - r) / diff) + 2
+        when b then h = ((r - g) / diff) + 4
+    [@roundToInt(h/6, 360), @roundToInt(s, 100), @roundToInt(l, 100)]
+  hslToRgb: (h, s, l) ->
+    str = @hslString(h, s, l)
+    @stringToRGB str
 
-  # Return array of 3 random values in 0-255.  OK for both RGB/HSV
-  randomColor: -> (u.randomInt(256) for i in [0..2])
+
+  # # Return array of 3 random values in 0-255.
+  # randomColor: -> (u.randomInt(256) for i in [0..2])
 
   # Return a [distance metric](
   # http://www.compuphase.com/cmetric.htm) between two colors.
@@ -114,7 +142,7 @@ Color = {
 
   # A very crude way to scale a data value to an rgb color.
   # value is in [min max], rgb's are two color.
-  # See ColorMap.scaleColor for another method
+  # See ColorMap.scaleColor for preferred method
   rgbLerp: (value, min, max, rgb1, rgb0 = [0,0,0]) ->
     scale = u.lerpScale value, min, max #(value - min)/(max - min)
     (Math.round(u.lerp(rgb0[i], rgb1[i], scale))) for i in [0..2]
@@ -142,8 +170,8 @@ Color = {
   #
   # If all options false, only r,g,b,a remain.
   options: ->
-    rgb: true
-    hsv: true
+    rgbArray: true
+    hsl: true
     pixel: true
     rgbString: true
     hexString: true
@@ -153,11 +181,11 @@ Color = {
   # Use the options object if you want to eliminate any of the color features.
   colorObject: (r, g, b, a=1, opt=@options()) ->
     o = {r,g,b,a}
-    if opt.rgb
+    if opt.rgbArray
       o.rgb = [r, g, b]
-    if opt.hsv
-      o.hsv = @rgbToHsv r, g, b
-      [o.h, o.s, o.v] = o.hsv
+    if opt.hsl
+      o.hsl = @rgbToHsl r, g, b
+      [o.h, o.s, o.l] = o.hsl
     if opt.pixel
       o.a255 = Math.round(a*255)
       {pixel, rgba} = @typedArrayColor r, g, b, o.a255
@@ -197,7 +225,7 @@ Color = {
       super(0)
       # We also keep an index for rapid lookup of a color within the map.
       # It will always have the rgb string for the color.  It can also have
-      # other values such as the color name (green) or hsv string value.
+      # values such as the color name (green) or other string values.
       @index = {}
       @addColor rgb... for rgb, i in rgbArray
 
@@ -281,24 +309,28 @@ Color = {
   grayColorMap: (size = 256, options, dupsOK) ->
     new ColorMap ([i,i,i] for i in @intensityArray(size)), options, dupsOK
 
-  # Utility to create 3 uniform array ramps from 3 number arguments
-  # If any arg is array, no change made.
-  # If any arg is 1, replace with [255].
+  # Utility to permute 3 arrays.
   #
-  # Used by rgbColorArray and hsvColorArray.
-
-  threeArrays: (A1,A2=A1,A3=A1) ->
-    [A1, A2, A3] = for A in [A1, A2, A3] # multi-line comprehension
-      if A is 1 then A = [255]
-      if typeof A is "number" then u.aRamp(0, 255, A, true) else A
+  # * If any arg is array, no change made.
+  # * If any arg is 1, replace with [max].
+  # * If any arg is n>1, replace with u.aIntRamp(0,max,n).
+  #
+  # Resulting array is an array of arrays of len 3 permuting A1, A2, A3
+  # Used by rgbColorArray and hslColorArray.
+  permuteColors: (isRGB, A1, A2=A1, A3=A2) ->
+    max = if isRGB then [255,255,255] else [360,100,100]
+    [A1, A2, A3] = for A, i in [A1, A2, A3] # multi-line comprehension
+      if typeof A is "number"
+        if A is 1
+          [max[i]]
+        else
+          u.aIntRamp(0, [max[i]], A)
+      else
+        A
     array= []
     ((array.push [a1,a2,a3] for a1 in A1) for a2 in A2) for a3 in A3
+    console.log [A1,A2,A3], array
     array
-  # threeArrays: (A1,A2=A1,A3=A1) ->
-  #   [A1, A2, A3] = for A in [A1, A2, A3] # multi-line comprehension
-  #     if A is 1 then A = [255]
-  #     if typeof A is "number" then u.aRamp(0, 255, A, true) else A
-  #   [A1, A2, A3]
 
   # Create a colormap by rgb values. R, G, B can be either a number,
   # the number of steps beteen 0-255, or an array of values to use
@@ -306,27 +338,17 @@ Color = {
   # The resulting map permutes the R, G, V values.  Thus if
   # R=G=B=4, the resulting map has 4*4*4=64 colors.
 
-  # rgbColorArray: (R, G=R, B=R) ->
-  #   [R, G, B] = @threeArrays(R, G, B)
-  #   array=[]; ((array.push [r,g,b] for b in B) for g in G) for r in R
-  #   array
-  rgbColorArray: (R, G=R, B=R) ->
-    @threeArrays(R, G, B)
+  rgbColorArray: (R, G=R, B=R) -> @permuteColors(R, G, B)
 
   rgbColorMap: (R, G=R, B=R, options, dupsOK) ->
     new ColorMap @rgbColorArray(R, G, B), options, dupsOK
 
   # Create an hsb map, inputs similar to above.  Convert the
-  # HSV values to RGB.
-  hsvColorArray: (H, S=H, V=H) ->
-    ( (@hsvToRgb a...) for a in @threeArrays(H, S, V) )
-  # hsvColorArray: (H, S=H, V=H) ->
-  #   [H, S, V] = @threeArrays(H, S, V)
-  #   array=[]; ((array.push [h, s, v] for h in H) for s in S) for v in V
-  #   ( (@hsvToRgb a...) for a in array )
+  # HSL values to RGB.
+  hslColorArray: (H, S=H, V=S) -> @permuteColors(R, G, B)
 
-  hsvColorMap: (H, S=[255], V=H, options, dupsOK) ->
-    new ColorMap @hsvColorArray(H, S, V), options, dupsOK
+  hslColorMap: (H, S=[255], L=S, options, dupsOK) ->
+    new ColorMap @hslColorArray(H, S, L), options, dupsOK
 
   # Use the canvas gradient feature to create nColors.
   # This is a really powerful technique, see:
