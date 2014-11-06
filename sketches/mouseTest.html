@@ -63,37 +63,37 @@
           unless agent.origColor?
            agent.origColor = agent.color
           agent.color = [0,0,255]
-          @draw()
 
         @agents.on 'mouseout', (mouseEvent) =>
           agent = mouseEvent.target
           if agent.origColor
             agent.color = agent.origColor
-          @draw()
+
+        @agents.on 'dragstart', (mouseEvent) =>
+          mouseEvent.target.dragging = true
+
+        @agents.on 'dragend', (mouseEvent) =>
+          mouseEvent.target.dragging = false
 
         @agents.on 'drag', (mouseEvent) =>
           agent = mouseEvent.target
-          agent.x = mouseEvent.patchX
-          agent.y = mouseEvent.patchY
-          @draw()
+          agent.setXY(mouseEvent.patchX, mouseEvent.patchY)
 
         @links.on 'mouseover', (mouseEvent) =>
           agent = mouseEvent.target.end1
           unless agent.origColor?
            agent.origColor = agent.color
           agent.color = [0,0,255]
-          @draw()
 
         @links.on 'mouseout', (mouseEvent) =>
           agent = mouseEvent.target.end1
           if agent.origColor
             agent.color = agent.origColor
-          @draw()
 
 
       step: ->
         console.log @anim.toString() if @anim.ticks % 100 is 0
-        for d in @drivers #for d in @drivers()
+        for d in @drivers when not d.dragging
           d.face d.toNode
           d.forward Math.min d.v, d.distance d.toNode
           if .01 > d.distance d.toNode # or (d.distance d.toNode) < .01
