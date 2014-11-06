@@ -31,7 +31,7 @@ class ABM.Mouse
     @handleMouseEvent(e)
   handleMouseUp: (e) =>
     @down = false
-    @moved = false
+    @moved = false    
     @handleMouseEvent(e)
   handleMouseMove: (e) =>
     @setXY(e)
@@ -39,7 +39,6 @@ class ABM.Mouse
     @handleMouseEvent(e)
   handleStep: () =>
     @delegateMouseOverAndOutEvents(@x, @y) if not isNaN(@x)
-    @deligateAgentDragEvents(@x, @y) if not isNaN(@x)
   handleMouseEvent: (e) =>
     eventTypes = @computeEventTypes()
     @delegateEventsToAllAgents(eventTypes, e)
@@ -54,11 +53,9 @@ class ABM.Mouse
     eventTypes = []
 
     if @down and not @moved
-      console.log('mousedown')
       eventTypes.push 'mousedown'
 
     if not @down and not @moved
-      console.log('mouseup')
       eventTypes.push 'mouseup'
 
     if @down and @moved
@@ -68,12 +65,10 @@ class ABM.Mouse
 
     if not @down and @dragging
       @dragging = false
-      console.log('dragend')
-      eventTypes.push 'dragend'
+      @dragEnd = true
 
     if @moved
       eventTypes.push 'mousemove'
-      console.log('mousemove')
 
     return eventTypes
 
@@ -81,7 +76,46 @@ class ABM.Mouse
     @delegateEventsToAgentsAtPoint(types, @x, @y, e)
     @delegateEventsToLinksAtPoint(types, @x, @y, e)
     @delegateEventsToPatchAtPoint(types, @x, @y, e)
+    @delegateDragEvents(@x, @y, e)
     @delegateMouseOverAndOutEvents(@x, @y, e)
+
+  delegateEventsToPatchAtPoint: (eventTypes, x, y, e) ->
+    curPatch = @model.patches.patch(x, y)
+    mouseEvent = {target: curPatch, patchX:  x, patchY: y, originalEvent: e}
+    @emitAgentEvent(type, curPatch, mouseEvent) for type in eventTypes
+
+  delegateEventsToAgentsAtPoint: (eventTypes, x, y, e) ->
+    curPatch = @model.patches.patch(x, y)
+
+    # iterate through all agents in this patch and its neighbors
+    for patch in curPatch.n.concat(curPatch)
+      for agent in patch.agentsHere()
+        if agent.hitTest(x, y)
+          mouseEvent = {target: agent, patchX:  x, patchY: y, originalEvent: e}
+          @emitAgentEvent(type, agent, mouseEvent) for type in eventTypes
+
+  delegateEventsToLinksAtPoint: (eventTypes, x, y, e) ->
+    for link in @model.links
+      if link.hitTest(x, y)
+        mouseEvent = {target: link, patchX:  x, patchY: y, originalEvent: e}
+        @emitAgentEvent(type, link, mouseEvent) for type in eventTypes
+
+  emitAgentEvent: (eventType, agent, mouseEvent) ->
+    @updateDraggingAgents(eventType, agent)
+    agent.emit(eventType, mouseEvent)
+
+  updateDraggingAgents: (eventType, agent) ->
+    if eventType == 'dragstart'
+      @draggingAgents.push(agent)
+
+  delegateDragEvents: (x, y, e) =>
+    for agent in @draggingAgents
+      mouseEvent = {target: agent, patchX: x, patchY: y, originalEvent: e}
+      if @moved then agent.emit('drag', mouseEvent)
+      if @dragEnd then agent.emit('dragend', mouseEvent)
+    if @dragEnd
+      @draggingAgents = []
+      @dragEnd = false
 
   delegateMouseOverAndOutEvents: (x, y, e) =>
     agentsHere = {}
@@ -110,36 +144,3 @@ class ABM.Mouse
           agent.emit('mouseout', mouseEvent)
 
     @lastAgents = agentsHere
-
-  deligateAgentDragEvents: (x, y) ->
-    for agent in @draggingAgents
-      mouseEvent = {target: agent, patchX: x, patchY: y}
-      agent.emit('drag', mouseEvent)
-
-  delegateEventsToPatchAtPoint: (eventTypes, x, y, e) ->
-    curPatch = @model.patches.patch(x, y)
-    mouseEvent = {target: curPatch, patchX:  x, patchY: y, originalEvent: e}
-    @emitAgentEvent(type, curPatch, mouseEvent) for type in eventTypes
-
-  delegateEventsToAgentsAtPoint: (eventTypes, x, y, e) ->
-    curPatch = @model.patches.patch(x, y)
-
-    # iterate through all agents in this patch and its neighbors
-    for patch in curPatch.n.concat(curPatch)
-      for agent in patch.agentsHere()
-        if agent.hitTest(x, y)
-          mouseEvent = {target: agent, patchX:  x, patchY: y, originalEvent: e}
-          @emitAgentEvent(type, agent, mouseEvent) for type in eventTypes
-
-  delegateEventsToLinksAtPoint: (eventTypes, x, y, e) ->
-    for link in @model.links
-      if link.hitTest(x, y)
-        mouseEvent = {target: link, patchX:  x, patchY: y, originalEvent: e}
-        @emitAgentEvent(type, link, mouseEvent) for type in eventTypes
-
-  emitAgentEvent: (eventType, agent, mouseEvent) ->
-    if eventType == 'dragstart'
-      @draggingAgents.push(agent)
-    if eventType == 'dragend'
-      @draggingAgents = []
-    agent.emit(eventType, mouseEvent) 
