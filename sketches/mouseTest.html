@@ -16,7 +16,7 @@
         
         # 40-44fps->58+fps
         @refreshPatches = false # 56fps
-        @refreshLinks = false # 40-49fps
+        @refreshLinks = true # 40-49fps
         # @patches.usePixels() # 58+fps same as refresh off
         # @patches.cacheAgentsHere() # 40fps; not needed, slight overhead
         @agents.setUseSprites() # 24 -> 36
@@ -69,16 +69,6 @@
           if agent.origColor
             agent.color = agent.origColor
 
-        @agents.on 'dragstart', (mouseEvent) =>
-          mouseEvent.target.dragging = true
-
-        @agents.on 'dragend', (mouseEvent) =>
-          mouseEvent.target.dragging = false
-
-        @agents.on 'drag', (mouseEvent) =>
-          agent = mouseEvent.target
-          agent.setXY(mouseEvent.patchX, mouseEvent.patchY)
-
         @links.on 'mouseover', (mouseEvent) =>
           agent = mouseEvent.target.end1
           unless agent.origColor?
@@ -90,6 +80,8 @@
           if agent.origColor
             agent.color = agent.origColor
 
+        @links.setDraggable()
+        @nodes.setDraggable()
 
       step: ->
         console.log @anim.toString() if @anim.ticks % 100 is 0
