@@ -48,6 +48,7 @@ class ABM.Mouse
     @lastX = @x; @lastY = @y
     @pixX = e.offsetX; @pixY = e.offsetY
     [@x, @y] = @model.patches.pixelXYtoPatchXY(@pixX,@pixY)
+    @dx = @lastX - @x; @dy = @lastY - @y
 
   computeEventTypes: () =>
     eventTypes = []

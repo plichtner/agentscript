@@ -44,3 +44,6 @@ class Links extends AgentSet
       a.heading = startAngle + direction*dTheta*i
       a.forward radius
     null
+
+  setDraggable: () ->
+    link.setDraggable() for link in @

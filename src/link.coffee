@@ -23,6 +23,7 @@ class Link
   label: null         # my text
   labelColor: [0,0,0] # its color
   labelOffset: [0,0]  # its offset from my midpoint
+  isDragging: false   
   constructor: (@end1, @end2) ->
     u.mixin(@, new Evented())
     if @end1.links?
@@ -76,3 +77,14 @@ class Link
   # Return the other end of the link, given an endpoint agent.
   # Assumes the given input *is* one of the link endpoint pairs!
   otherEnd: (a) -> if @end1 is a then @end2 else @end1
+
+  setDraggable: () ->
+    @on 'dragstart', (mouseEvent) =>
+      @dragging = true
+
+    @on 'dragend', (mouseEvent) =>
+      @dragging = false
+
+    @on 'drag', (mouseEvent) =>
+      @end1.setXY(@end1.p.x - mouseEvent.dx, @end1.p.y - mouseEvent.dy)
+      @end2.setXY(@end2.p.x - mouseEvent.dx, @end2.p.y - mouseEvent.dy)
