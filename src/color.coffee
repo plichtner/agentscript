@@ -34,17 +34,20 @@ window.c = Color = {
     throw new Error "alpha > 1" if a > 1 # a: 0-1 not 0-255
     if a is 1 then "rgb(#{r},#{g},#{b})" else "rgba(#{r},#{g},#{b},#{a})"
 
-  # Convert 3 ints, h in [0-360], s,l in [0-100] to a css color string.
-  # Alpha "a" is opacity, float in [0-1].
+  # Convert 3 ints, h in [0-360], s,l in [0-100]% to a css color string.
+  # Alpha "a" is opacity, float in [0-1]. Some browsers will allow floats
+  # in 0-1 for s,l rather than int % values in 0-100.
+  #
   # Note h=0 and h=360 are the same, you might limit yourself to h in 0-359.
   # The browser clamps the h,s,l values to legal values.
   hslString: (h, s, l, a=1) ->
     throw new Error "alpha > 1" if a > 1 # a: 0-1 not 0-255
-    if a is 1 then "hsl(#{h},#{s},#{l})" else "hsla(#{h},#{s},#{l},#{a})"
+    if a is 1 then "hsl(#{h},#{s}%,#{l}%)" else "hsla(#{h},#{s}%,#{l}%,#{a})"
 
-  # Return the gray/intensity value for a given r,g,b color
+  # Return the gray/intensity float value for a given r,g,b color
   # Round for 0-255 int for gray color value.
-  # [Good post on image filters](http://goo.gl/pE9cV8)
+  # [Good post on image filters](
+  # http://www.html5rocks.com/en/tutorials/canvas/imagefilters/)
   rgbIntensity: (r, g, b) -> 0.2126*r + 0.7152*g + 0.0722*b
 
   # Return a web/html/css hex color string for an r,g,b color
@@ -53,7 +56,7 @@ window.c = Color = {
 
   # Return 2 typed array colors: a single Uint32 pixel, correct endian format,
   # and a 4 Uint8Array, r,g,b,a255, each an Uint8 in 0-255)
-  typedArrayColor: (r, g, b, a=255) ->
+  rgbToPixel: (r, g, b, a=255) ->
     rgba = new Uint8ClampedArray([r, g, b, a])
     pixel = new Uint32Array(rgba.buffer)[0]
     {pixel, rgba}
@@ -73,7 +76,7 @@ window.c = Color = {
   # Warning: r=g=b=0 can indicate an illegal string.  We test
   # for a few obvious cases but beware of unexpected [0,0,0] results.
   ctx1x1: u.createCtx 1, 1 # share across calls. closure wrapper better?
-  stringToRGB: (string) ->
+  stringToRgb: (string) ->
     string = string.toLowerCase()
     @ctx1x1.clearRect 0, 0, 1, 1
     @ctx1x1.fillStyle = string
@@ -83,8 +86,8 @@ window.c = Color = {
     console.log string, [r, g, b, a]
     return [r, g, b] if (r+g+b isnt 0) or
       (string in ["#000","#000000","transparent","black"]) or
-      (string.match(/rgba{0,1}\(0,0,0/i)) or
-      (string.match(/hsla{0,1}\(0,0%,0%/i))
+      (string.match(/rgba{0,1}\(0,0,0/)) or
+      (string.match(/hsla{0,1}\([^,]*,[^,]*,0%/))
     null
 
   # RGB <> HSL (Hue, Saturation, Lightness) conversions.
@@ -103,13 +106,14 @@ window.c = Color = {
   # Note that HSL is [not the same as HSB/HSV](
   # http://en.wikipedia.org/wiki/HSL_and_HSV)
 
-  # Convert float in 0-1 to int in 0-255
+  # Convert float in 0-1 to int in 0-max
   roundToInt: (float, max=255) ->
     console.log "roundToInt: float #{float}, max #{max}" unless 0 <= float <= 1
     int = Math.round(max*float)
     console.log "roundToInt: int #{int}, max #{max}" unless 0 <= int <= max
     u.clamp int, 0, max
 
+  # Convert r, g, b to [h, s, l] array.
   rgbToHsl: (r, g, b) ->
     r = r/255; g = g/255; b = b/255
     max = Math.max(r,g,b); min = Math.min(r,g,b)
@@ -124,9 +128,11 @@ window.c = Color = {
         when g then h = ((b - r) / diff) + 2
         when b then h = ((r - g) / diff) + 4
     [@roundToInt(h/6, 360), @roundToInt(s, 100), @roundToInt(l, 100)]
+
+  # Convert h, s, l to r, g, b by use of stringToRgb.
   hslToRgb: (h, s, l) ->
     str = @hslString(h, s, l)
-    @stringToRGB str
+    @stringToRgb str
 
 
   # # Return array of 3 random values in 0-255.
@@ -155,10 +161,10 @@ window.c = Color = {
   # The object contains many properties relating to
   # the r,g,b,a color:
   #
-  # * r, g, b, h, s, v: color integers, 0-255 based
+  # * r, g, b, h, s, l: color integers, see above
   # * a, a255: alpha, a float in 0-1, a255 integer in 0-255
-  # * rgb, hsb: array forms of the two colors
-  # * intensity: the gray value for the rgb color
+  # * rgb, hsl: array forms of the two colors
+  # * intensity: the float computed gray value for the rgb color
   # * rgba, pixel: typed array values.
   # * rgbString, hexString: two html/css color formats
 
@@ -188,7 +194,7 @@ window.c = Color = {
       [o.h, o.s, o.l] = o.hsl
     if opt.pixel
       o.a255 = Math.round(a*255)
-      {pixel, rgba} = @typedArrayColor r, g, b, o.a255
+      {pixel, rgba} = @rgbToPixel r, g, b, o.a255
       [o.pixel, o.rgba] = [pixel, rgba]
     if opt.rgbString
       o.rgbString = @rgbString r, g, b, a
@@ -318,13 +324,13 @@ window.c = Color = {
   # Resulting array is an array of arrays of len 3 permuting A1, A2, A3
   # Used by rgbColorArray and hslColorArray.
   permuteColors: (isRGB, A1, A2=A1, A3=A2) ->
-    max = if isRGB then [255,255,255] else [360,100,100]
+    max = if isRGB then [255,255,255] else [359,100,100]
     [A1, A2, A3] = for A, i in [A1, A2, A3] # multi-line comprehension
       if typeof A is "number"
         if A is 1
           [max[i]]
         else
-          u.aIntRamp(0, [max[i]], A)
+          u.aIntRamp(0, max[i], A) # u.aIntRamp(0, [max[i]], A)
       else
         A
     array= []
@@ -338,17 +344,19 @@ window.c = Color = {
   # The resulting map permutes the R, G, V values.  Thus if
   # R=G=B=4, the resulting map has 4*4*4=64 colors.
 
-  rgbColorArray: (R, G=R, B=R) -> @permuteColors(R, G, B)
-
+  rgbColorArray: (R, G=R, B=R) -> @permuteColors(true, R, G, B)
   rgbColorMap: (R, G=R, B=R, options, dupsOK) ->
     new ColorMap @rgbColorArray(R, G, B), options, dupsOK
 
-  # Create an hsb map, inputs similar to above.  Convert the
-  # HSL values to RGB.
-  hslColorArray: (H, S=H, V=S) -> @permuteColors(R, G, B)
-
-  hslColorMap: (H, S=[255], L=S, options, dupsOK) ->
-    new ColorMap @hslColorArray(H, S, L), options, dupsOK
+  # Create an hsl map, inputs similar to above.  Convert the
+  # HSL values to RGB, default to hue ramp.
+  hslColorArray: (H, S=1, L=1) -> @permuteColors(false, H, S, L)
+  hslColorMap: (H, S=1, L=1, options, dupsOK) ->
+    hslArray = @hslColorArray(H, S, L)
+    console.log "hslArray: ", hslArray
+    rgbArray = (@hslToRgb a... for a in hslArray) # @hslColorArray(H, S, L))
+    console.log "rgbArray: ", rgbArray
+    new ColorMap rgbArray, options, dupsOK
 
   # Use the canvas gradient feature to create nColors.
   # This is a really powerful technique, see:
