@@ -81,8 +81,7 @@ class ABM.Mouse
 
   delegateEventsToPatchAtPoint: (eventTypes, x, y, e) ->
     curPatch = @model.patches.patch(x, y)
-    mouseEvent = {target: curPatch, patchX:  x, patchY: y, originalEvent: e}
-    @emitAgentEvent(type, curPatch, mouseEvent) for type in eventTypes
+    @emitAgentEvent(type, curPatch, @mouseEvent(curPatch, e)) for type in eventTypes
 
   delegateEventsToAgentsAtPoint: (eventTypes, x, y, e) ->
     curPatch = @model.patches.patch(x, y)
@@ -91,13 +90,12 @@ class ABM.Mouse
     for patch in curPatch.n.concat(curPatch)
       for agent in patch.agentsHere()
         if agent.hitTest(x, y)
-          mouseEvent = {target: agent, patchX:  x, patchY: y, originalEvent: e}
-          @emitAgentEvent(type, agent, mouseEvent) for type in eventTypes
+          @emitAgentEvent(type, agent, @mouseEvent(agent, e)) for type in eventTypes
 
   delegateEventsToLinksAtPoint: (eventTypes, x, y, e) ->
     for link in @model.links
       if link.hitTest(x, y)
-        mouseEvent = {target: link, patchX:  x, patchY: y, originalEvent: e}
+        mouseEvent = @mouseEvent(link, e)
         @emitAgentEvent(type, link, mouseEvent) for type in eventTypes
 
   emitAgentEvent: (eventType, agent, mouseEvent) ->
@@ -110,7 +108,7 @@ class ABM.Mouse
 
   delegateDragEvents: (x, y, e) =>
     for agent in @draggingAgents
-      mouseEvent = {target: agent, patchX: x, patchY: y, originalEvent: e}
+      mouseEvent = @mouseEvent(agent, e)
       if @moved then agent.emit('drag', mouseEvent)
       if @dragEnd then agent.emit('dragend', mouseEvent)
     if @dragEnd
@@ -132,15 +130,16 @@ class ABM.Mouse
         agentsHere[agent.breed.name] ?= {}
         agentsHere[agent.breed.name][agent.id] = agent
         if (not @lastAgents[agent.breed.name] or agent.id not of @lastAgents[agent.breed.name])
-          mouseEvent = {target: agent, patchX: x, patchY: y, originalEvent: e}
-          agent.emit('mouseover', mouseEvent)
+          agent.emit('mouseover', @mouseEvent(agent, e))
 
     # mouseout
     for breedname of @lastAgents
       for agentId of @lastAgents[breedname]
         if (not agentsHere[breedname] or agentId not of agentsHere[breedname])
           agent = @lastAgents[breedname][agentId]
-          mouseEvent = {target: agent, patchX: x, patchY: y, originalEvent: e}
-          agent.emit('mouseout', mouseEvent)
+          agent.emit('mouseout', @mouseEvent(agent, e))
 
     @lastAgents = agentsHere
+
+  mouseEvent: (agent, e) -> 
+    return {target: agent, patchX: @x, patchY: @y, dx: @dx, dy: @dy, originalEvent: e}
