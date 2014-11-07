@@ -10,16 +10,32 @@
 pw=15&ph=1&ps=20&map=gradient&args=[15,[[0,0,0],[0,255,255],[255,255,255]]]
 pw=16&ph=1&ps=32&map=gradient&args=[16,[[255,255,0],[0,255,255]]]
 pw=16&ph=4&ps=32&map=gradient&args=[64,[[255,255,0],[0,255,255]]]
-pw=16&ph=16&ps=32&map=gradient&args=[256,jetColors]
+
+pw=16&ph=16&ps=20&map=gradient&args=[256,jetColors]
 pw=64&ph=1&ps=10&map=gradient&args=[64,jetColors]
 pw=64&ph=1&ps=10&map=gradient&args=[64,jetColors1,jetLocs1]
 pw=64&ph=1&ps=10&map=gradient&args=[64,jetColors]
 pw=64&ph=1&ps=10&map=gradient&args=[64,jetColors]&sort
-pw=64&ph=1&ps=10&map=gradient&args=[64,rainbowColors]
-pw=32&ph=32&ps=16&map=gradient&args=[1024,jetColors]
-pw=32&ph=32&ps=16&map=gradient&args=[1024,rainbowColors]
+
+pw=64&ph=1&ps=10&map=gradient&args=[64,rgbRainbowColors]
+pw=32&ph=4&ps=10&map=gradient&args=[128,rgbRainbowColors]
+pw=16&ph=16&ps=20&map=gradient&args=[256,rgbRainbowColors]
+pw=32&ph=16&ps=10&map=gradient&args=[512,rgbRainbowColors] # many dups
+
+pw=64&ph=1&ps=10&map=gradient&args=[64,namedRainbowArray]
+pw=32&ph=4&ps=10&map=gradient&args=[128,namedRainbowArray]
+pw=16&ph=16&ps=20&map=gradient&args=[256,namedRainbowArray]
+pw=32&ph=16&ps=10&map=gradient&args=[512,namedRainbowArray] # many dups
+
+pw=32&ph=8&ps=10&map=gradient&args=[256,namedRainbowArray]
+pw=32&ph=16&ps=10&map=gradient&args=[512,namedRainbowArray]
+
+pw=32&ph=32&ps=16&map=gradient&args=[1024,jetColors] # many dups
+pw=32&ph=32&ps=16&map=gradient&args=[1024,rgbRainbowColors] # many dups
+
 pw=16&ph=4&ps=32&map=gray&args=64
 pw=16&ph=16&ps=32&map=gray&args=256
+
 pw=6&ph=36&ps=32&map=rgb&args=6
 pw=16&ph=4&ps=32&map=rgb&args=4
 pw=16&ph=4&ps=32&map=rgb&args=4&sort
@@ -30,27 +46,36 @@ pw=40&ph=25&ps=16&map=rgb&args=10&sort&key=h
 pw=64&ph=64&ps=10&map=rgb&args=16
 pw=64&ph=64&ps=10&map=rgb&args=16&sort&key=h
 pw=96&ph=32&ps=8&map=rgb&args=10
+
 pw=10&ph=5&ps=32&map=name&args=[simpleNamedColors]
 pw=10&ph=5&ps=32&map=name&args=[simpleNamedColors]&sort
 pw=10&ph=14&ps=32&map=name&args=[namedColors,null,true]
 pw=10&ph=14&ps=32&map=name&args=[namedColors]&sort
+pw=6&ph=1&ps=128&map=name&args=[namedRainbowObj]
 pw=5&ph=6&ps=32&map=name&args=[triColors]&sort
 pw=8&ph=8&ps=32&map=name&args=[quadColors]&sort
+pw=8&ph=8&ps=32&map=name&args=[quadColors]&sort
+
 pw=16&ph=16&ps=32&map=random&args=256
 pw=16&ph=16&ps=32&map=random&args=256&sort
 pw=32&ph=32&ps=16&map=random&args=1024&sort
-pw=64&ph=1&ps=10&map=hsv&args=4
-pw=64&ph=1&ps=10&map=hsv&args=4&sort
-pw=64&ph=1&ps=10&map=hsv&args=[1,8,8]
-pw=64&ph=1&ps=10&map=hsv&args=[1,8,8]&sort
-pw=64&ph=1&ps=10&map=hsv&args=[64,1,1]&sort
-pw=64&ph=1&ps=10&map=hsv&args=[[43],64,[255]]
-pw=64&ph=1&ps=10&map=hsv&args=[[43],[255],64]
-pw=32&ph=32&ps=16&map=hsv&args=[256,1,3]
-pw=16&ph=16&ps=32&map=hsv&args=256
+
+pw=36&ph=10&ps=20&map=hsl&args=[360,1,[50]]
+pw=5&ph=9&ps=30&map=hsl&args=[[0],[100,75,50,25,0],[100,88,75,63,50,38,25,13,0],,true]
+pw=5&ph=9&ps=30&map=hsl&args=[[30],[100,75,50,25,0],[100,88,75,63,50,38,25,13,0],,true]
+
+
+pw=64&ph=1&ps=10&map=hsl&args=4&sort
+pw=64&ph=1&ps=10&map=hsl&args=[1,8,8]
+pw=64&ph=1&ps=10&map=hsl&args=[1,8,8]&sort
+pw=64&ph=1&ps=10&map=hsl&args=[64,1,1]&sort
+pw=64&ph=1&ps=10&map=hsl&args=[[43],64,[255]]
+pw=64&ph=1&ps=10&map=hsl&args=[[43],[255],64]
+pw=32&ph=32&ps=16&map=hsl&args=[256,1,3]
+pw=16&ph=16&ps=32&map=hsl&args=256
 ###
 u = ABM.Util # static variables
-window.Color = ABM.Color
+window.c = window.Color = ABM.Color
 
 # ARGGG: Aqua == Cyan and Fuchsia == Magenta
 # The 140 standard html colors are the X11 set
@@ -393,10 +418,13 @@ jetColors = [ [0,0,127], [0,0,255], [0,127,255], [0,255,255],
 jetColors1 = [ [0,0,131], [0,60,170], [5,255,255], [255,255,0],
   [250,0,0], [128,0,0] ]
 jetLocs1 = [0, 0.125, 0.373, 0.625, 0.875, 1]
-rainbowColors = [ [150,0,90], [0,0,200], [0,25,255], [0,152,255],
+rgbRainbowColors = [ [150,0,90], [0,0,200], [0,25,255], [0,152,255],
   [44,255,150], [151,255,0], [255,234,0], [255,111,0], [255,0,0] ]
-
-
+namedRainbowObj = {}
+for n in ["red", "orange", "yellow", "green", "blue", "indigo"]
+  console.log "rainbow", n, c.stringToRgb(n)
+  namedRainbowObj[n] = c.stringToRgb n
+namedRainbowArray = (v for k,v of namedRainbowObj)
 
 # Map Types
 # grayColorMap: (size = 256)
@@ -447,6 +475,12 @@ class ColorTestModel extends ABM.Model
     console.log "patches: #{@patches.length}"
 
   step: -> @stop() # stop: just one tick
+  testNamedColors: -> # Works! Yay!
+    for k,v in namedColors
+      s1=v.toString()
+      s2=c.stringToRGB(v...).toString()
+      console.log "nameTest: #{k} #{s1} #{s2}" if s1 isnt s2
+    null
 
 window.model = new ColorTestModel({
   div: "layers",
