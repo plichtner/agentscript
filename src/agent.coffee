@@ -42,6 +42,7 @@ class Agent
   sprite: null        # an image of me for optimized drawing
   cacheLinks: false   # should I keep links to/from me in links array?.
   links: null         # array of links to/from me as an endpoint; init by ctor
+  isDragging: false
   constructor: -> # called by agentSets create factory, not user
     u.mixin(@, new Evented())
     @x = @y = 0
@@ -222,3 +223,13 @@ class Agent
   # Return other end of myOutinks
   outLinkNeighbors: ->
     l.end2 for l in @myLinks() when l.end1 is @
+
+  setDraggable: -> 
+    @on 'dragstart', (mouseEvent) =>
+      @dragging = true
+
+    @on 'dragend', (mouseEvent) =>
+      @dragging = false
+
+    @on 'drag', (mouseEvent) =>
+      @setXY(mouseEvent.patchX, mouseEvent.patchY)

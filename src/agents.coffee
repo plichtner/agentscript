@@ -53,3 +53,6 @@ class Agents extends AgentSet
   inRadius: (a, radius, meToo=false)->
     as = @inRect a, radius, radius, true
     super a, radius, meToo # as.inRadius a, radius, meToo
+
+  setDraggable: () ->
+    agent.setDraggable() for agent in @
