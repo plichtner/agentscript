@@ -42,7 +42,6 @@ class Agent
   sprite: null        # an image of me for optimized drawing
   cacheLinks: false   # should I keep links to/from me in links array?.
   links: null         # array of links to/from me as an endpoint; init by ctor
-  isDragging: false
   constructor: -> # called by agentSets create factory, not user
     u.mixin(@, new Evented())
     @x = @y = 0

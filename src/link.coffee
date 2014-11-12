@@ -23,7 +23,6 @@ class Link
   label: null         # my text
   labelColor: [0,0,0] # its color
   labelOffset: [0,0]  # its offset from my midpoint
-  isDragging: false   
   constructor: (@end1, @end2) ->
     u.mixin(@, new Evented())
     if @end1.links?
