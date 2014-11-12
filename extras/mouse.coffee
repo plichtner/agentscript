@@ -5,7 +5,7 @@ class ABM.Mouse
   constructor: (@model, @callback) ->
     @lastX = Infinity; @lastY = Infinity
     @div = @model.div
-    @lastAgents = []
+    @lastAgentsHovered = []
     @draggingAgents = []
     @start()
   # Start/stop the mouseListeners.  Note that NetLogo's model is to have
@@ -130,17 +130,17 @@ class ABM.Mouse
       if agent.hitTest(x, y)
         agentsHere[agent.breed.name] ?= {}
         agentsHere[agent.breed.name][agent.id] = agent
-        if (not @lastAgents[agent.breed.name] or agent.id not of @lastAgents[agent.breed.name])
+        if (not @lastAgentsHovered[agent.breed.name] or agent.id not of @lastAgentsHovered[agent.breed.name])
           agent.emit('mouseover', @mouseEvent(agent, e))
 
     # mouseout
-    for breedname of @lastAgents
-      for agentId of @lastAgents[breedname]
+    for breedname of @lastAgentsHovered
+      for agentId of @lastAgentsHovered[breedname]
         if (not agentsHere[breedname] or agentId not of agentsHere[breedname])
-          agent = @lastAgents[breedname][agentId]
+          agent = @lastAgentsHovered[breedname][agentId]
           agent.emit('mouseout', @mouseEvent(agent, e))
 
-    @lastAgents = agentsHere
+    @lastAgentsHovered = agentsHere
 
   mouseEvent: (agent, e) -> 
     return {target: agent, patchX: @x, patchY: @y, dx: @dx, dy: @dy, originalEvent: e}
