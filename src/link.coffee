@@ -85,5 +85,5 @@ class Link
       @dragging = false
 
     @on 'drag', (mouseEvent) =>
-      @end1.setXY(@end1.p.x - mouseEvent.dx, @end1.p.y - mouseEvent.dy)
-      @end2.setXY(@end2.p.x - mouseEvent.dx, @end2.p.y - mouseEvent.dy)
+      @end1.setXY(@end1.x - mouseEvent.dx, @end1.y - mouseEvent.dy)
+      @end2.setXY(@end2.x - mouseEvent.dx, @end2.y - mouseEvent.dy)
