@@ -3,6 +3,7 @@
     <title>ColorMap</title>
     <script src="../lib/agentscript.js"></script>
     <script src="../tools/coffee-script.js"></script>
+    <script src="colorobject.coffee" type="text/coffeescript"></script>
     <script type="text/coffeescript">
 
 # REST interface tests:
@@ -36,7 +37,16 @@ pw=32&ph=32&ps=16&map=gradient&args=[1024,rgbRainbowColors] # many dups
 pw=16&ph=4&ps=32&map=gray&args=64
 pw=16&ph=16&ps=32&map=gray&args=256
 
-pw=6&ph=36&ps=32&map=rgb&args=6
+pw=9&ph=3&ps=30&map=rgb&args=3
+pw=24&ph=9&ps=30&map=rgb&args=6
+pw=32&ph=16&ps=30&map=rgb&args=8
+pw=36&ph=21&ps=28&map=rgb&args=9
+pw=40&ph=25&ps=25&map=rgb&args=10
+pw=48&ph=36&ps=25&map=rgb&args=12
+pw=64&ph=64&ps=12&map=rgb&args=16
+
+pw=32&ph=16&ps=30&map=rgb&args=8
+
 pw=16&ph=4&ps=32&map=rgb&args=4
 pw=16&ph=4&ps=32&map=rgb&args=4&sort
 pw=16&ph=4&ps=32&map=rgb&args=4&sort&key=pixel
@@ -47,7 +57,7 @@ pw=64&ph=64&ps=10&map=rgb&args=16
 pw=64&ph=64&ps=10&map=rgb&args=16&sort&key=h
 pw=96&ph=32&ps=8&map=rgb&args=10
 
-pw=10&ph=5&ps=32&map=name&args=[simpleNamedColors]
+pw=11&ph=5&ps=32&map=name&args=[simpleNamedColors]
 pw=10&ph=5&ps=32&map=name&args=[simpleNamedColors]&sort
 pw=10&ph=14&ps=32&map=name&args=[namedColors,null,true]
 pw=10&ph=14&ps=32&map=name&args=[namedColors]&sort
@@ -60,13 +70,18 @@ pw=16&ph=16&ps=32&map=random&args=256
 pw=16&ph=16&ps=32&map=random&args=256&sort
 pw=32&ph=32&ps=16&map=random&args=1024&sort
 
-pw=36&ph=10&ps=20&map=hsl&args=[360,1,[50]]
+pw=36&ph=10&ps=20&map=hsl&args=[360,[100],[50]]
+pw=25&ph=1&ps=15&map=hsl&args=[1,5,5,,true]
+pw=10&ph=10&ps=30&map=hsl&args=[1,10,10,,true]
+These test well against the w3c standard:
+    http://dev.w3.org/csswg/css-color/#hsl-examples
 pw=5&ph=9&ps=30&map=hsl&args=[[0],[100,75,50,25,0],[100,88,75,63,50,38,25,13,0],,true]
 pw=5&ph=9&ps=30&map=hsl&args=[[30],[100,75,50,25,0],[100,88,75,63,50,38,25,13,0],,true]
+pw=5&ph=9&ps=30&map=hsl&args=[[60],[100,75,50,25,0],[100,88,75,63,50,38,25,13,0],,true]
 
 
 pw=64&ph=1&ps=10&map=hsl&args=4&sort
-pw=64&ph=1&ps=10&map=hsl&args=[1,8,8]
+pw=64&ph=1&ps=10&map=hsl&args=[1,8,8,true]
 pw=64&ph=1&ps=10&map=hsl&args=[1,8,8]&sort
 pw=64&ph=1&ps=10&map=hsl&args=[64,1,1]&sort
 pw=64&ph=1&ps=10&map=hsl&args=[[43],64,[255]]
@@ -422,7 +437,7 @@ rgbRainbowColors = [ [150,0,90], [0,0,200], [0,25,255], [0,152,255],
   [44,255,150], [151,255,0], [255,234,0], [255,111,0], [255,0,0] ]
 namedRainbowObj = {}
 for n in ["red", "orange", "yellow", "green", "blue", "indigo"]
-  console.log "rainbow", n, c.stringToRgb(n)
+  # console.log "rainbow", n, c.stringToRgb(n)
   namedRainbowObj[n] = c.stringToRgb n
 namedRainbowArray = (v for k,v of namedRainbowObj)
 
@@ -467,21 +482,79 @@ class ColorTestModel extends ABM.Model
 
     # window.map = @map = Color[flags.map] flags.args...
     @map.sortBy(flags.key, not flags.decending) if flags.sort
-    console.log (c[flags.key] for c in @map) if flags.sort
+    # console.log (c[flags.key] for c in @map) if flags.sort
 
     # debugger;
-    @patches[i].color = colorObj.rgb for colorObj,i in @map
+    @patches[i].color = c.colorObjToRgb(colorObj) for colorObj,i in @map
 
-    console.log "patches: #{@patches.length}"
+    console.log "patches: #{@patches.length}; map: #{map.length}"
+    console.log "testNamedColors: start"
+    @testNamedColors()
+    console.log "testNamedColors: done"
 
   step: -> @stop() # stop: just one tick
-  testNamedColors: -> # Works! Yay!
+
+  testNamedColors: -> # Works! Yay! Don't need arrays, just names
     for k,v in namedColors
       s1=v.toString()
       s2=c.stringToRGB(v...).toString()
       console.log "nameTest: #{k} #{s1} #{s2}" if s1 isnt s2
     null
-
+  testGrays: (n) -> # see how many grays are in map
+    grays = c.grayValueArray(n)
+    for g in grays
+      color = map.findClosest g,g,g
+      diff = Math.round(c.rgbDistance(color.rgb...,g,g,g))
+      console.log "gray: #{g}, closest: #{color.rgb}, diff: #{diff}"
+    null
+  testRandomColors: (n) ->
+    randomRgbs = c.randomColorArray(n)
+    for randomRgb in randomRgbs
+      color = map.findClosest randomRgb...
+      diff = Math.round(c.rgbDistance(color.r, color.g, color.b, randomRgb...))
+      # console.log randomRgbs, randomRgb, color, diff
+      console.log "random: #{randomRgb}, closest: #{color.rgb}, diff: #{diff}"
+    null
+  compareRandomColors: ->
+    n = Math.floor(@patches.length/2)
+    for i in [0...n]
+      randomRgb = c.randomRgbColor()
+      color = map.findClosest randomRgb...
+      ps[i*2].color = color.rgb
+      ps[i*2+1].color = randomRgb
+      app.draw()
+    null
+  getClosestRgb: (r, g, b, itemsPerChannel) ->
+    step = 255/(itemsPerChannel-1)
+    # [r, g, b] = (Math.round(channel/step)*step for channel in [r, g, b])
+    [rLoc, gLoc, bLoc] = (Math.round(color/step) for color in [r, g, b])
+    # [r, g, b] = (Math.round(loc*step) for loc in [rLoc, gLoc, bLoc])
+    i = rLoc + gLoc*itemsPerChannel + bLoc*itemsPerChannel*itemsPerChannel
+    # console.log r,g,b,rLoc,gLoc,bLoc,i,map[i].ix,map[i].rgb
+    i
+  compareRandomColors: ->
+    n = Math.floor(@patches.length/2)
+    console.log "comparing #{n} random colors"
+    for i in [0...n]
+      randomRgb = c.randomRgbColor()
+      closestRgb = c.colorObjToRgb(map.findClosest randomRgb...)
+      ps[i*2].color = closestRgb
+      ps[i*2+1].color = randomRgb
+    console.log "drawing"
+    app.draw()
+    null
+  compareRandomColors1: ->
+    n = Math.floor(@patches.length/2)
+    step = Math.round(Math.pow(map.length,1/3))
+    console.log "comparing #{n} random colors"
+    for i in [0...n]
+      randomRgb = c.randomRgbColor()
+      closestRgb = c.colorObjToRgb(map[@getClosestRgb(randomRgb...,step)])
+      ps[i*2].color = closestRgb
+      ps[i*2+1].color = randomRgb
+    console.log "drawing"
+    app.draw()
+    null
 window.model = new ColorTestModel({
   div: "layers",
   size: flags.ps,

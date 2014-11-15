@@ -1284,14 +1284,16 @@ Iterate rather than reduce: work with typed arrays</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-69">&#182;</a>
               </div>
-              <p>Return a range, an array [start..stop] by step.
-If start&gt;stop, use step negative. All three args can be floats
+              <p>Return a range, an array [start..stop] by optional step.
+If start&gt;stop, you should use step negative, generally =1.
+All three args can be floats
 with the usual caveat that floats can be surprising!
 Warning: if step isn’t exact, stop may not be in array.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">aRange</span>: <span class="hljs-function"><span class="hljs-params">(start, stop, step=<span class="hljs-number">1</span>)</span> -&gt;</span> (x <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> [start..stop] <span class="hljs-keyword">by</span> step)</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">aRange</span>: <span class="hljs-function"><span class="hljs-params">(start, stop, step = <span class="hljs-number">1</span>)</span> -&gt;</span>
+    (x <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> [start..stop] <span class="hljs-keyword">by</span> step)</pre></div></div>
             
         </li>
         
@@ -1303,14 +1305,15 @@ Warning: if step isn’t exact, stop may not be in array.</p>
                 <a class="pilcrow" href="#section-70">&#182;</a>
               </div>
               <p>Return a “ramp” (array of sorted floats)
-in [start,stop] with numItems, equally spaced.
-Unlike aRange, this will always include start/stop w/in float accuracy.</p>
+in [start,stop] with numItems, numItems positive integer.
+OK for start&gt;stop. Unlike aRange, this will always
+include start/stop w/in float accuracy.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">aRamp</span>: <span class="hljs-function"><span class="hljs-params">(start, stop, numItems)</span> -&gt;</span>
     step = (stop-start)/(numItems-<span class="hljs-number">1</span>)
-    <span class="hljs-property">@aRange</span> start, stop, step</pre></div></div>
+    (start + step*i <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>..numItems]) <span class="hljs-comment"># set last to stop?</span></pre></div></div>
             
         </li>
         

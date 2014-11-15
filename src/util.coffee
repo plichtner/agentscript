@@ -421,17 +421,20 @@ Util = util = u = # TODO: "util" deprecated in favor of Util
   # Return array indices for which array value is NaN
   aNaNs: (array) -> (i for v,i in array when isNaN v)
 
-  # Return a range, an array [start..stop] by step.
-  # If start>stop, use step negative. All three args can be floats
+  # Return a range, an array [start..stop] by optional step.
+  # If start>stop, you should use step negative, generally =1.
+  # All three args can be floats
   # with the usual caveat that floats can be surprising!
   # Warning: if step isn't exact, stop may not be in array.
-  aRange: (start, stop, step=1) -> (x for x in [start..stop] by step)
+  aRange: (start, stop, step = 1) ->
+    (x for x in [start..stop] by step)
   # Return a "ramp" (array of sorted floats)
-  # in [start,stop] with numItems, equally spaced.
-  # Unlike aRange, this will always include start/stop w/in float accuracy.
+  # in [start,stop] with numItems, numItems positive integer.
+  # OK for start>stop. Unlike aRange, this will always
+  # include start/stop w/in float accuracy.
   aRamp: (start, stop, numItems) ->
     step = (stop-start)/(numItems-1)
-    @aRange start, stop, step
+    (start + step*i for i in [0...numItems]) # set last to stop?
   # Integer version of aRamp, rounding each element
   aIntRamp: (start, stop, numItems) ->
     (Math.round(num) for num in @aRamp start, stop, numItems)

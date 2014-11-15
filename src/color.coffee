@@ -38,7 +38,7 @@ window.c = Color = {
   # Alpha "a" is opacity, float in [0-1]. Some browsers will allow floats
   # in 0-1 for s,l rather than int % values in 0-100.
   #
-  # Note h=0 and h=360 are the same, you might limit yourself to h in 0-359.
+  # Note h=0 and h=360 are the same, you typically limit yourself to h in 0-359.
   # The browser clamps the h,s,l values to legal values.
   hslString: (h, s, l, a=1) ->
     throw new Error "alpha > 1" if a > 1 # a: 0-1 not 0-255
@@ -50,16 +50,22 @@ window.c = Color = {
   # http://www.html5rocks.com/en/tutorials/canvas/imagefilters/)
   rgbIntensity: (r, g, b) -> 0.2126*r + 0.7152*g + 0.0722*b
 
-  # Return a web/html/css hex color string for an r,g,b color
+  # Return a web/html/css hex color string for an r,g,b color.
+  # Identical color will be drawn as if using rgbString above
+  # but without an alpha capability.
   rgbToHex: (r, g, b) ->
     "#" + (0x1000000 | (b | g << 8 | r << 16)).toString(16).slice(-6)
 
-  # Return 2 typed array colors: a single Uint32 pixel, correct endian format,
-  # and a 4 Uint8Array, r,g,b,a255, each an Uint8 in 0-255)
-  rgbToPixel: (r, g, b, a=255) ->
-    rgba = new Uint8ClampedArray([r, g, b, a])
-    pixel = new Uint32Array(rgba.buffer)[0]
-    {pixel, rgba}
+  # Return a single Uint32 pixel, correct endian format. If arrayToo
+  # also return a 4 Uint8Array, r,g,b,a255, each a Uint8 in 0-255
+  rgbToPixel: (r, g, b, a255=255, arrayToo = false) ->
+    rgba255 = new Uint8ClampedArray([r, g, b, a255])
+    pixel = new Uint32Array(rgba255.buffer)[0]
+    if arrayToo then [pixel, rgba255] else pixel
+  # Convert a pixel to a typed Uint8 r,g,b,a255 array
+  pixelToRgb: (pixel) ->
+    pixelArray = new Uint32Array([pixel])
+    new Uint8ClampedArray(pixelArray.buffer)
 
   # Return an RGB array given any legal CSS string color
   # [legal CSS string color](
@@ -75,15 +81,15 @@ window.c = Color = {
   #
   # Warning: r=g=b=0 can indicate an illegal string.  We test
   # for a few obvious cases but beware of unexpected [0,0,0] results.
-  ctx1x1: u.createCtx 1, 1 # share across calls. closure wrapper better?
+  sharedCtx1x1: u.createCtx 1, 1 # share across calls.
   stringToRgb: (string) ->
     string = string.toLowerCase()
-    @ctx1x1.clearRect 0, 0, 1, 1
-    @ctx1x1.fillStyle = string
-    @ctx1x1.fillRect 0, 0, 1, 1
+    @sharedCtx1x1.clearRect 0, 0, 1, 1
+    @sharedCtx1x1.fillStyle = string
+    @sharedCtx1x1.fillRect 0, 0, 1, 1
     string = string.replace(/\ */g, '') # "\ " a coffee disambiguation problem
-    [r, g, b, a] = @ctx1x1.getImageData(0, 0, 1, 1).data
-    console.log string, [r, g, b, a]
+    [r, g, b, a] = @sharedCtx1x1.getImageData(0, 0, 1, 1).data
+    # console.log string, [r, g, b, a]
     return [r, g, b] if (r+g+b isnt 0) or
       (string in ["#000","#000000","transparent","black"]) or
       (string.match(/rgba{0,1}\(0,0,0/)) or
@@ -135,8 +141,8 @@ window.c = Color = {
     @stringToRgb str
 
 
-  # # Return array of 3 random values in 0-255.
-  # randomColor: -> (u.randomInt(256) for i in [0..2])
+  # Return array of 3 random values in 0-255.
+  randomRgbColor: -> (u.randomInt(256) for i in [0..2])
 
   # Return a [distance metric](
   # http://www.compuphase.com/cmetric.htm) between two colors.
@@ -163,9 +169,8 @@ window.c = Color = {
   #
   # * r, g, b, h, s, l: color integers, see above
   # * a, a255: alpha, a float in 0-1, a255 integer in 0-255
-  # * rgb, hsl: array forms of the two colors
   # * intensity: the float computed gray value for the rgb color
-  # * rgba, pixel: typed array values.
+  # * rgba255, pixel: typed array values.
   # * rgbString, hexString: two html/css color formats
 
 
@@ -176,33 +181,32 @@ window.c = Color = {
   #
   # If all options false, only r,g,b,a remain.
   options: ->
-    rgbArray: true
-    hsl: true
-    pixel: true
-    rgbString: true
-    hexString: true
-    intensity: true
+    hsl: true         # store individual calculated h,s,l values
+    pixel: true       # store Uint32 pixel
+    intensity: true   # store float intensity calculated from r,g,b
+    rgbString: true   # store css rgb/rgba string
+    hexString: true   # store css hex (r,g,b) string
 
   # Create a colorObject with all the color types supplied by the primitives.
   # Use the options object if you want to eliminate any of the color features.
+  # Call colorObject with hslToRgb(h,s,l)... if you are working in hue space.
   colorObject: (r, g, b, a=1, opt=@options()) ->
     o = {r,g,b,a}
-    if opt.rgbArray
-      o.rgb = [r, g, b]
-    if opt.hsl
-      o.hsl = @rgbToHsl r, g, b
-      [o.h, o.s, o.l] = o.hsl
+    [o.h, o.s, o.l] = @rgbToHsl r, g, b if o.hsl
     if opt.pixel
       o.a255 = Math.round(a*255)
-      {pixel, rgba} = @rgbToPixel r, g, b, o.a255
-      [o.pixel, o.rgba] = [pixel, rgba]
-    if opt.rgbString
-      o.rgbString = @rgbString r, g, b, a
-    if opt.hexString
-      o.hexString = @rgbToHex r, g, b
-    if opt.intensity
-      o.intensity = @rgbIntensity r, g, b
+      o.pixel = @rgbToPixel r, g, b, o.a255
+    o.intensity = @rgbIntensity r, g, b if opt.intensity
+    o.rgbString = @rgbString r, g, b, a if opt.rgbString
+    o.hexString = @rgbToHex r, g, b if opt.hexString
     o
+  # Mainly legacy: return an rgb/rgba array.  Beware GC overhead!
+  colorObjToRgb: (o) ->
+    if o.a is 1 then [o.r, o.g, o.b] else  [o.r, o.g, o.b, o.a]
+
+  randomColorObject: (a=1, opt=@options()) ->
+    # randomColor = @randomColor()
+    @colorObject @randomRgbColor()..., a, opt
 
   # ### Color Maps
 
@@ -213,6 +217,46 @@ window.c = Color = {
   # * Space Effeciency: They *vastly* reduce the number of color objects used.
   # * Data: They provide a MatLab/NumPy "color as data" feature.
   #   Ex: "Heat" may be mapped to a gradient from green to red.
+
+  # A data colormap is designed for the model/view interface.
+  # A model is a time varying set of data values.
+  # A view presents these values to the user visually.
+  #
+  # The data colormap lets the model compute an index into an array
+  # of colors for the view to use.
+  DataColorMap: class DataColorMap extends Array
+    # A data colormap is an array of any of the forms of color
+    # discussed above: css string, pixel, rgba255 typed array.
+    #
+    # The ctor takes an array sorted so that model data values scale
+    # into the array's indices: [0, length-1], along with a function
+    # to convert the array items into a valid color.
+    #
+    # Example: the array can be the ints from 0-255 and the function
+    # converts them into gray colors such as css strings or pixels.
+    # The default function is the identity, and the input array
+    # valid colors.
+    constructor: (array, aToColor=(a)->a) ->
+      super(0)
+      @push aToColor(a) for a in array
+
+    # Return an random color or index in a map.
+    randomIndex: -> u.randomInt @length
+    randomColor: -> @[@randomIndex()]
+
+    # Return the map index proportional to the value between min, max.
+    # This is a linear interpolation based on the map indices.
+    # The optional minColor, maxColor args are for using a subset of the map.
+    scaleIndex: (number, min, max, minColor = 0, maxColor = @length-1) ->
+      scale = u.lerpScale number, min, max # (number-min)/(max-min)
+      Math.round(u.lerp minColor, maxColor, scale)
+    # Same but return color at the computed index
+    scaleColor: (number, min, max, minColor = 0, maxColor = @length-1) ->
+      @[@scaleIndex(number, min, max, minColor, maxColor)]
+
+
+  # The more general colormap, mainly for designing and minipulating
+  # colors.
   ColorMap: class ColorMap extends Array
     # A colormap is an array of Color objects. Each ColorObject has
     # two additional properties: ix, the array index, and map, the colormap.
@@ -266,7 +310,7 @@ window.c = Color = {
       @sort compare
 
     # Find an rgb color in the map, return undefined if not found
-    findRGB: (r, g, b, a=1) ->
+    findRgb: (r, g, b, a=1) ->
       @index[ Color.rgbString(r, g, b, a) ]
 
     # Find first color with the given key/value, undefined if not found
@@ -284,18 +328,18 @@ window.c = Color = {
     # The optional minColor, maxColor args are for using a subset of the map.
     scaleColor: (number, min, max, minColor = 0, maxColor = @length-1) ->
       scale = u.lerpScale number, min, max # (number-min)/(max-min)
-      minColor = minColor.ix if minColor.ix?
-      maxColor = maxColor.ix if maxColor.ix?
+      # minColor = minColor.ix if minColor.ix?
+      # maxColor = maxColor.ix if maxColor.ix?
       index = Math.round(u.lerp minColor, maxColor, scale)
       @[index]
 
     # Find the color closest to this color, using Color.rgbDistance.
     findClosest: (r, g, b) ->
-      return color if ( color = @findRGB(r, g, b) )
+      return color if ( color = @findRgb(r, g, b) )
       minDist = Infinity
       ixMin = 0
       for color, i in @
-        d = Color.rgbDistance color.rgb..., r, g, b
+        d = Color.rgbDistance color.r, color.g, color.b, r, g, b
         if d < minDist
           minDist = d
           ixMin = i
@@ -308,12 +352,13 @@ window.c = Color = {
   # Create a gray map of gray values (gray: r=g=b)
   # The optional size argument is the size of the map for
   # maps that are not all 256 grays.
-  intensityArray: (size = 256) ->
-    (Math.round(i*255/(size-1)) for i in [0...size])
+  grayValueArray: (size = 256) ->
+    u.error "Color: gray value > 256" if size > 256
+    u.aIntRamp 0, 255, size
   grayColorArray: (size = 256) ->
-    ([i,i,i] for i in @intensityArray(size))
-  grayColorMap: (size = 256, options, dupsOK) ->
-    new ColorMap ([i,i,i] for i in @intensityArray(size)), options, dupsOK
+    ([i,i,i] for i in @grayValueArray(size))
+  grayColorMap: (size = 256, options) ->
+    new ColorMap @grayColorArray(size), options, false
 
   # Utility to permute 3 arrays.
   #
@@ -330,12 +375,12 @@ window.c = Color = {
         if A is 1
           [max[i]]
         else
-          u.aIntRamp(0, max[i], A) # u.aIntRamp(0, [max[i]], A)
+          u.aIntRamp(0, max[i], A)
       else
         A
     array= []
     ((array.push [a1,a2,a3] for a1 in A1) for a2 in A2) for a3 in A3
-    console.log [A1,A2,A3], array
+    # console.log [A1,A2,A3], array
     array
 
   # Create a colormap by rgb values. R, G, B can be either a number,
@@ -346,16 +391,16 @@ window.c = Color = {
 
   rgbColorArray: (R, G=R, B=R) -> @permuteColors(true, R, G, B)
   rgbColorMap: (R, G=R, B=R, options, dupsOK) ->
-    new ColorMap @rgbColorArray(R, G, B), options, dupsOK
+    map = new ColorMap @rgbColorArray(R, G, B), options, dupsOK
 
   # Create an hsl map, inputs similar to above.  Convert the
   # HSL values to RGB, default to hue ramp.
   hslColorArray: (H, S=1, L=1) -> @permuteColors(false, H, S, L)
   hslColorMap: (H, S=1, L=1, options, dupsOK) ->
     hslArray = @hslColorArray(H, S, L)
-    console.log "hslArray: ", hslArray
+    # console.log "hslArray: ", hslArray
     rgbArray = (@hslToRgb a... for a in hslArray) # @hslColorArray(H, S, L))
-    console.log "rgbArray: ", rgbArray
+    # console.log "rgbArray: ", rgbArray
     new ColorMap rgbArray, options, dupsOK
 
   # Use the canvas gradient feature to create nColors.
@@ -396,8 +441,7 @@ window.c = Color = {
   # Create a map with a random set of colors.
   # Sometimes useful to sort by intensity afterwards.
   randomColorArray: (nColors) ->
-    rand255 = -> u.randomInt(256)
-    ([rand255(), rand255(), rand255()] for i in [0...nColors])
+    (@randomRgbColor() for i in [0...nColors])
   randomColorMap: (nColors, options, dupsOK) ->
     new ColorMap @randomColorArray(nColors), options, dupsOK
 
