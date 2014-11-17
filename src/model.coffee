@@ -27,7 +27,7 @@ class Model
 
     @contexts = {}
     unless isHeadless
-      @view = new CanvasView(@, opts)
+      @view = new CanvasTileView(@, opts)
       @contexts = @view.contexts # copy contexts over from view
       @drawing = @contexts.drawing
       @div = @view.div
