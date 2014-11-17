@@ -182,9 +182,11 @@
       //       "Goat size": 500
       //     })
       for (var name in uiObject) {
-        if (this.datGuiControllers[name]) {
-          this.datGuiControllers[name].setValue(uiObject[name]);
-          this.datGuiControllers[name].onChange();
+        var curCtrl = this.datGuiControllers[name];
+        if (curCtrl) {
+          curCtrl.setValue(uiObject[name]);
+          var changeFun = curCtrl.__onChange || curCtrl.__onFinishChange;
+          changeFun(this.datGuiModel[name]);
         }
       }
     }
