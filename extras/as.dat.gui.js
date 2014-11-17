@@ -66,35 +66,39 @@
           var uiEl = ui[name];
           
           if (isFolder(uiEl)) {
-            // You can make dat.gui folders by nesting objects. E.g.:
-            // {
-            //   "Moose stuff": {
-            //     "Create a moose": {
-            //       type: "button"
-            //     },
-            //     "Moose color": {
-            //       type: "choice",
-            //       vals: ["brown", "dark brown"]
+            // You can group ui elements into folders by nesting objects. E.g.:
+
+            //     {
+            //       "Moose stuff": {
+            //         "Create a moose": {
+            //           type: "button"
+            //         },
+            //         "Moose color": {
+            //           type: "choice",
+            //           vals: ["brown", "dark brown"]
+            //         }
+            //       },
+            //       "Goat stuff": {
+            //         "Look for a goat": {
+            //           type: "button"
+            //         },
+            //         "Goat size": {
+            //           type: "slider",
+            //           min: 1,
+            //           max: 9000
+            //         }
+            //       }
             //     }
-            //   },
-            //   "Goat stuff": {
-            //     "Look for a goat": {
-            //       type: "button"
-            //     },
-            //     "Goat size": {
-            //       type: "slider",
-            //       min: 1,
-            //       max: 9000
-            //     }
-            //   }
-            // }
+
+            // Element names should still be unique across folders.
+
             var subFolder = folder.addFolder(name);
             this.initUIElements(uiEl, subFolder);
             continue;
           }
           
           if (uiEl.type != 'button') {
-            // store the state of all non-button elements in this.datGuiModel
+            // The state of all non-button elements is stored in `this.datGuiModel`.
             this.datGuiModel[name] = uiEl.val;
 
             if (typeof fbui != 'undefined') {
@@ -106,7 +110,7 @@
           }
 
           var ctrl = null;
-          // a uiEl can be of type "button", "choice", "switch", or "slider"
+          // A uiEl can be of type `"button"`, `"choice"`, `"switch"`, or `"slider"`.
           switch(uiEl.type) {
             case 'button':
               this.datGuiModel[name] = self.fbui ?
@@ -141,13 +145,13 @@
                 self.setModelValue(this.name, value, this.setter);
               }.bind({ name: name, setter: ui[name].setter });
             }
-            // a slider can be 'smooth', in which case
-            // the setter is called during a drag
+            // A slider can be `"smooth"`, in which case
+            // the setter is called during a drag.
             if (uiEl.smooth) {
               ctrl.onChange(callback);
             }
-            // otherwise the setter is called at the end
-            // of the drag
+            // Otherwise, the setter is called at the end
+            // of the drag.
             else {
               ctrl.onFinishChange(callback);
             }
@@ -158,14 +162,11 @@
     }
 
     DatGUI.prototype.setModelValue = function(name, value, setter) {
-      // var setter = this.ui[name] && this.ui[name].setter;
-      // if you specify a setter, DatGUI will look for
-      // it in the model and call it with the new value
       if (setter) {
         this.model[setter](value);
       }
-      // otherwise we assume the ui element name is
-      // the name of a model variable
+      // If you don't specify a setter, we assume the ui element name is
+      // the name of a model variable.
       else {
         this.model[name] = value;
       }
@@ -174,7 +175,12 @@
       this.emit('change', { name: name, value: value });
     }
 
+    // Use `update` to set the current state of the UI. E.g.:
     DatGUI.prototype.update = function(uiObject) {
+      //     myUI.update({
+      //       "Moose color": "brown",
+      //       "Goat size": 500
+      //     })
       for (var name in uiObject) {
         if (this.datGuiControllers[name]) {
           this.datGuiControllers[name].setValue(uiObject[name]);
