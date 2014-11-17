@@ -46,6 +46,7 @@
       var self = this;
       this.gui = new dat.GUI();
       this.datGuiModel = {};
+      this.datGuiControllers = {};
 
       var model, ui, fbui;
       if (arguments.length == 2) {
@@ -114,6 +115,7 @@
             else {
               ctrl.onFinishChange(callback);
             }
+            this.datGuiControllers[name] = ctrl;
           }
         }
       }
@@ -136,6 +138,14 @@
       this.emit('change', { name: name, value: value });
     }
 
+    DatGUI.prototype.update = function(uiObject) {
+      for (var name in uiObject) {
+        if (this.datGuiControllers[name]) {
+          this.datGuiControllers[name].setValue(uiObject[name]);
+          this.datGuiControllers[name].onChange();
+        }
+      }
+    }
     DatGUI.prototype.updateGui = function() {
       for (var i in this.gui.__controllers) {
         this.gui.__controllers[i].updateDisplay();
