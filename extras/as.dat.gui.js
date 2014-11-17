@@ -41,6 +41,7 @@
     // TODO: Allow a subset of ui elements to remain in sync.
 
     function DatGUI(fbuiOrModel, uiObject) {
+      ABM.Util.mixin(this, new ABM.Evented())
 
       var self = this;
       this.gui = new dat.GUI();
@@ -130,6 +131,9 @@
       else {
         this.model[name] = value;
       }
+      // ABM.DatGUI will emit a `'change'` event
+      // whenever part of its model changes.
+      this.emit('change', { name: name, value: value });
     }
 
     DatGUI.prototype.updateGui = function() {
