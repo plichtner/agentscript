@@ -42,8 +42,6 @@
 
     function DatGUI(fbuiOrModel, uiObject) {
       ABM.Util.mixin(this, new ABM.Evented())
-
-      var self = this;
       this.gui = new dat.GUI();
       this.datGuiModel = {};
       this.datGuiControllers = {};
@@ -58,16 +56,53 @@
         ui = this.ui = fbui.ui;
       }
 
+      this.initUIElements(ui, this.gui);
+    }
+
+    DatGUI.prototype.initUIElements = function(ui, folder) {
+      var self = this;
       for (var name in ui) {
         if (ui.hasOwnProperty(name)) {
           var uiEl = ui[name];
+          
+          if (isFolder(uiEl)) {
+            // You can make dat.gui folders by nesting objects. E.g.:
+            // {
+            //   "Moose stuff": {
+            //     "Create a moose": {
+            //       type: "button"
+            //     },
+            //     "Moose color": {
+            //       type: "choice",
+            //       vals: ["brown", "dark brown"]
+            //     }
+            //   },
+            //   "Goat stuff": {
+            //     "Look for a goat": {
+            //       type: "button"
+            //     },
+            //     "Goat size": {
+            //       type: "slider",
+            //       min: 1,
+            //       max: 9000
+            //     }
+            //   }
+            // }
+            var subFolder = folder.addFolder(name);
+            this.initUIElements(uiEl, subFolder);
+            continue;
+          }
+          
           if (uiEl.type != 'button') {
+            // store the state of all non-button elements in this.datGuiModel
             this.datGuiModel[name] = uiEl.val;
 
-            fbui && fbui.refs[name].child('val').on('value', function(valSnap) {
-              self.datGuiModel[this.name] = valSnap.val();
-              self.updateGui();
-            }.bind({ name: name }));
+            if (typeof fbui != 'undefined') {
+              fbui.refs[name].child('val').on('value', function(valSnap) {
+                self.datGuiModel[this.name] = valSnap.val();
+                self.updateGui();
+              }.bind({ name: name }));
+            }
           }
 
           var ctrl = null;
@@ -79,20 +114,21 @@
                   self.fbui.setUIValue(this.name, true); 
                 }.bind({ name: name }) :
                 function() {
-                  self.setModelValue(this.name);
-                }.bind({ name: name });
-              this.gui.add(this.datGuiModel, name);
+                  self.setModelValue(this.name, null, this.setter);
+                }.bind({ name: name, setter: ui[name].setter });
+              folder.add(this.datGuiModel, name);
             break;
             case 'choice':
-              ctrl = this.gui.add(this.datGuiModel, name, uiEl.vals);
+              ctrl = folder.add(this.datGuiModel, name, uiEl.vals);
             break;
             case 'switch':
-              ctrl = this.gui.add(this.datGuiModel, name);
+              ctrl = folder.add(this.datGuiModel, name);
             break;
             case 'slider':
-              ctrl = this.gui.add(this.datGuiModel, name, uiEl.min, uiEl.max).step(uiEl.step);
+              ctrl = folder.add(this.datGuiModel, name, uiEl.min, uiEl.max).step(uiEl.step);
             break;
           }
+
           if (ctrl) {
             var callback;
             if (self.fbui) {
@@ -102,8 +138,8 @@
             }
             else {
               callback = function(value) {
-                self.setModelValue(this.name, value);
-              }.bind({ name: name }); 
+                self.setModelValue(this.name, value, this.setter);
+              }.bind({ name: name, setter: ui[name].setter });
             }
             // a slider can be 'smooth', in which case
             // the setter is called during a drag
@@ -121,8 +157,8 @@
       }
     }
 
-    DatGUI.prototype.setModelValue = function(name, value) {
-      var setter = this.ui[name].setter;
+    DatGUI.prototype.setModelValue = function(name, value, setter) {
+      // var setter = this.ui[name] && this.ui[name].setter;
       // if you specify a setter, DatGUI will look for
       // it in the model and call it with the new value
       if (setter) {
@@ -146,10 +182,15 @@
         }
       }
     }
+
     DatGUI.prototype.updateGui = function() {
       for (var i in this.gui.__controllers) {
         this.gui.__controllers[i].updateDisplay();
       }
+    }
+
+    function isFolder(obj) {
+      return typeof obj.type == 'undefined';
     }
         
     return DatGUI;
