@@ -194,7 +194,7 @@ class Agent
 
   # Return true if world coordinate falls on agent sprite
   hitTest: (x, y) ->
-    @distanceXY(x, y) < @size * @model.patches.size
+    @distanceXY(x, y) < @size
 
   # Return other end of link from me
   otherEnd: (l) -> if l.end1 is @ then l.end2 else l.end1
