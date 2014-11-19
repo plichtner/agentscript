@@ -74,9 +74,11 @@ class ABM.Mouse
     return eventTypes
 
   delegateEventsToAllAgents: (types, e) ->
-    @delegateEventsToAgentsAtPoint(types, @x, @y, e)
-    @delegateEventsToLinksAtPoint(types, @x, @y, e)
-    @delegateEventsToPatchAtPoint(types, @x, @y, e)
+    delegatedAgent = @delegateEventsToAgentsAtPoint(types, @x, @y, e)
+    if not delegatedAgent
+      delegatedAgent = @delegateEventsToLinksAtPoint(types, @x, @y, e)
+    if not delegatedAgent
+      @delegateEventsToPatchAtPoint(types, @x, @y, e)
     @delegateDragEvents(@x, @y, e)
     @delegateMouseOverAndOutEvents(@x, @y, e)
 
@@ -92,12 +94,14 @@ class ABM.Mouse
       for agent in patch.agentsHere()
         if agent.hitTest(x, y)
           @emitAgentEvent(type, agent, @mouseEvent(agent, e)) for type in eventTypes
+          return agent
 
   delegateEventsToLinksAtPoint: (eventTypes, x, y, e) ->
     for link in @model.links
       if link.hitTest(x, y)
         mouseEvent = @mouseEvent(link, e)
         @emitAgentEvent(type, link, mouseEvent) for type in eventTypes
+        return link
 
   emitAgentEvent: (eventType, agent, mouseEvent) ->
     @updateDraggingAgents(eventType, agent)
