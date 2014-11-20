@@ -116,14 +116,7 @@ class CanvasTileView
           if @debugging then @renderPatchBorder(ctx, curPatch, tileTopLeft)
 
           for agent in curPatch.agentsHere()
-            shape = ABM.shapes[agent.shape]
-            drawPos = @patchCoordToPixelCoord(agent.x, agent.y, zoom)
-            scaledSize = agent.size * zoomScale
-            # For some reason rotation is reversed compared to the normal canvas view,
-            # so we use -heading instead of heading. Maybe because we don't set the
-            # transform to flip the y coordinate?
-            ABM.shapes.draw(ctx, shape, drawPos[0] - tileTopLeft.x, drawPos[1] - tileTopLeft.y, scaledSize, -agent.heading, agent.color)
-            # @renderAgent(ctx, agent, tileTopLeft)
+            @renderAgent(ctx, agent, tileTopLeft)
             
   renderAgent: (ctx, agent, tileTopLeft) ->
     shape = ABM.shapes[agent.shape]
@@ -132,7 +125,7 @@ class CanvasTileView
     # For some reason rotation is reversed compared to the normal canvas view,
     # so we use -heading instead of heading. Maybe because we don't set the
     # transform to flip the y coordinate?
-    ABM.shapes.draw(ctx, shape, drawPos[0] - tileTopLeft.x, drawPos[1] - tileTopLeft.y, scaledSize, -agent.heading, agent.color)
+    ABM.shapes.draw(ctx, shape, drawPos[0] - tileTopLeft[0], drawPos[1] - tileTopLeft[1], scaledSize, -agent.heading, agent.color)
 
   renderPatch: (ctx, patch, tileTopLeft) ->
     patchSize = @world.size # without zoom, how many pixels in a patch
