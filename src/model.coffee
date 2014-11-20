@@ -16,8 +16,9 @@ class Model
     divOrOpts, size=13, minX=-16, maxX=16, minY=-16, maxY=16,
     isTorus=false, hasNeighbors=true, isHeadless=false
   ) ->
+    u.mixin(@, new Evented())
     if typeof divOrOpts is 'string' # using deprecated constructor
-      opts = { div, size, minX, maxX, minY, maxY, isTorus, hasNeighbors, isHeadless }
+      opts = { divOrOpts, size, minX, maxX, minY, maxY, isTorus, hasNeighbors, isHeadless }
     else
       opts = divOrOpts
 
@@ -53,7 +54,7 @@ class Model
     @globalNames = null; @globalNames = u.ownKeys @
     @globalNames.set = false
     @startup()
-    u.waitOnFiles => @modelReady=true; @setup(); @globals() unless @globalNames.set
+    u.waitOnFiles => @modelReady=true; @setupAndEmit(); @globals() unless @globalNames.set
 
   # Initialize/reset world parameters.
   setWorld: (opts) ->
@@ -134,7 +135,7 @@ class Model
     @links = new @Links @, @Link, "links"
     Shapes.spriteSheets.length = 0 # possibly null out entries?
     console.log "reset: setup"
-    @setup()
+    @setupAndEmit()
     @setRootVars() if @debugging
     @start() if restart
 
@@ -143,6 +144,16 @@ class Model
 # Called by animator.
   draw: (force=@anim.stopped) ->
     @view.draw(force)
+    @emit('draw')
+
+#### Wrappers around user-implemented methods
+
+  setupAndEmit: ->
+    @setup()
+    @emit('setup')
+  stepAndEmit: ->
+    @step()
+    @emit('step')
 
 # Creates a spotlight effect on an agent, so we can follow it throughout the model.
 # Use:
@@ -251,5 +262,6 @@ class Model
   Link
   Links
   Animator
+  Evented
   Model
 }
