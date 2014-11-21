@@ -223,7 +223,7 @@ Util = util = u = # TODO: "util" deprecated in favor of Util
   cloneClass: (oldClass, newName) ->
     ctorStr = oldClass.toString().replace(/^/, "var ctor = ")
     if newName
-      ctorStr = ctorStr.replace(/function.*{/, "function #{newName}() {")
+      ctorStr = ctorStr.replace(/function.*(?=\()/, "function #{newName}")
     # eval(oldClass.toString().replace(/^/, "var ctor = "))
     eval(ctorStr)
     ctor.prototype = @cloneObject(oldClass.prototype)
