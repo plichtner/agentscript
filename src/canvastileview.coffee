@@ -28,14 +28,18 @@ class CanvasTileView
     # Style the parent div and create rendering contexts 
     (@div=document.getElementById(opts.div)).setAttribute 'style',
         "position:relative; width:#{@world.pxWidth}px; height:#{@world.pxHeight}px"
-    
+
+    # Initialize the Leaflet map
     @map = L.map(opts.div, {
       center: [90, -180],
-      zoom: 5,
+      zoom: 0,
       crs: L.extend({}, L.CRS.EPSG3857, {
         wrapLat: null, wrapLng: null, infinite: true
       })
-    });
+    })
+
+    # Center the world
+    @map.panTo(@map.unproject([@world.pxWidth / 2, @world.pxHeight / 2]))
     
     @createCtxs()
     u.waitOn((=> @model.modelReady), (=> @createAgentTileLayer()))
