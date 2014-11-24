@@ -70,30 +70,34 @@ class CanvasTileView
       continuousWorld: true
     })
 
-    tileLayer.drawTile = (canvas, tilePoint, zoom) =>
-      renderTile = @getDrawTileClosure(canvas, tilePoint, zoom)
-      
-      @model.on('draw', renderTile)
-      
-      @map.on('zoomstart', () =>
-        @model.off('draw')
-      )
-
-      @map.on('layerremove', (e) =>
-        if (e.layer is @tileLayer)
-          @model.off('draw')
-      )
+    tileLayer.drawTile = @initTileRendering
 
     tileLayer.addTo(@map)
+
     return tileLayer
 
-  getDrawTileClosure: (canvas, tilePoint, zoom) ->
+  initTileRendering: (canvas, tilePoint, zoom) =>
+    renderTile = @getDrawTileClosure(canvas, tilePoint, zoom)
 
+    if not renderTile?
+      return
+
+    @model.on('draw', renderTile)
+    
+    @map.on('zoomstart', () =>
+      @model.off('draw', renderTile)
+    )
+
+    @map.on('layerremove', (e) =>
+      if (e.layer is @tileLayer)
+        @model.off('draw', renderTile)
+    )
+
+  getDrawTileClosure: (canvas, tilePoint, zoom) ->
     @zoom = zoom
     @zoomScale = zoomScale = Math.pow(2, zoom)
     
     ctx = canvas.getContext('2d')
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     # world coordinates of tile corners
     tileTopLeft = [canvas.width * tilePoint.x, canvas.height * tilePoint.y]
@@ -109,29 +113,71 @@ class CanvasTileView
     bottomPatchY = Math.floor(tileBottomRightPatchCoord[1])
     topPatchY = Math.ceil(tileTopLeftPatchCoord[1])
 
-    if @debugging then @drawCanvasTile(canvas, tilePoint)
+    # don't draw tiles that have no patches on them
+    if leftPatchX > @world.maxX or topPatchY < @world.minY or rightPatchX < @world.minX or bottomPatchY > @world.maxY
+      return
 
     return () =>
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      ctx.save()
+      ctx.translate(-tileTopLeft[0], -tileTopLeft[1])
+
+      agentsToRender = []
+
       for x in [leftPatchX..rightPatchX]
         for y in [bottomPatchY..topPatchY]
+
           curPatch = @model.patches.patch(x, y)
-          # @renderPatch(ctx, curPatch, tileTopLeft)
+          @renderPatch(ctx, curPatch)
 
-          if @debugging then @renderPatchBorder(ctx, curPatch, tileTopLeft)
+          if @debugging then @renderPatchBorder(ctx, curPatch)
 
-          for agent in curPatch.agentsHere()
-            @renderAgent(ctx, agent, tileTopLeft)
-            
-  renderAgent: (ctx, agent, tileTopLeft) ->
+          agentsToRender = agentsToRender.concat(curPatch.agentsHere())
+
+      for agent in agentsToRender
+        @renderAgent(ctx, agent)
+
+      ctx.restore()
+
+      if @debugging then @drawCanvasTile(canvas, tilePoint)
+          
+  renderLink: (ctx, link) ->
+    end1Pos = @patchCoordToPixelCoord(link.end1.x, link.end1.y, @zoom)
+    end2Pos = @patchCoordToPixelCoord(link.end2.x, link.end2.y, @zoom)
+
+    ctx.save()
+    ctx.strokeStyle = u.colorStr link.color
+    ctx.lineWidth = @model.patches.fromBits @thickness
+    ctx.beginPath()
+    if !@model.patches.isTorus
+      ctx.moveTo end1Pos[0], end1Pos[1]
+      ctx.lineTo end2Pos[0], end2Pos[1]
+    else
+      pt = @end1.torusPt @end2
+      ptPos = @patchCoordToPixelCoord(pt[0], pt[1], @zoom)
+      ctx.moveTo end1Pos[0], end1Pos[1]
+      ctx.lineTo ptPos...
+      if pt[0] isnt end2Pos[0] or pt[1] isnt end2Pos[1]
+        pt = @end2.torusPt @end1
+        ptPos = @patchCoordToPixelCoord(pt[0], pt[1], @zoom)
+        ctx.moveTo end2Pos[0], end2Pos[1]
+        ctx.lineTo ptPos...
+    ctx.closePath()
+    ctx.stroke()
+    ctx.restore()
+
+  renderAgent: (ctx, agent) ->
     shape = ABM.shapes[agent.shape]
     drawPos = @patchCoordToPixelCoord(agent.x, agent.y, @zoom)
-    scaledSize = agent.size * @zoomScale
-    # For some reason rotation is reversed compared to the normal canvas view,
-    # so we use -heading instead of heading. Maybe because we don't set the
-    # transform to flip the y coordinate?
-    ABM.shapes.draw(ctx, shape, drawPos[0] - tileTopLeft[0], drawPos[1] - tileTopLeft[1], scaledSize, -agent.heading, agent.color)
+    # Couple of weirdnesses here. In the default view, the canvas
+    # is scaled by @world.size and the y-axis is inverted. Our canvas tiles
+    # have not had these transformations applied, so we have to multiply by @world.size
+    # manually, and we draw with -agent.heading instead of agent.heading
+    scaledSize = agent.size * @world.size * @zoomScale
+    ABM.shapes.draw(ctx, shape, drawPos[0], drawPos[1], scaledSize, -agent.heading, agent.color)
 
-  renderPatch: (ctx, patch, tileTopLeft) ->
+  renderPatch: (ctx, patch) ->
     patchSize = @world.size # without zoom, how many pixels in a patch
     zoomedPatchSize = @zoomScale * patchSize # at this zoom, how many pixels in a patch
 
@@ -139,8 +185,8 @@ class CanvasTileView
     patchTop = patchCenter[1] + zoomedPatchSize/2
     patchLeft = patchCenter[0] - zoomedPatchSize/2
     
-    startX = patchLeft - tileTopLeft.x
-    startY = patchTop - tileTopLeft.y
+    startX = patchLeft
+    startY = patchTop
 
     ctx.beginPath()
     ctx.moveTo(startX, startY)
@@ -200,7 +246,7 @@ class CanvasTileView
     ctx.textAlign = 'center'
     ctx.fillText("tile (#{tilePoint.x}, #{tilePoint.y})", canvas.width/2, canvas.height/2)
 
-  renderPatchBorder: (ctx, patch, tileTopLeft) ->
+  renderPatchBorder: (ctx, patch) ->
     patchSize = @world.size # without zoom, how many pixels in a patch
     zoomedPatchSize = @zoomScale * patchSize # at this zoom, how many pixels in a patch
 
@@ -208,8 +254,10 @@ class CanvasTileView
     patchTop = patchCenter[1] + zoomedPatchSize/2
     patchLeft = patchCenter[0] - zoomedPatchSize/2
     
-    startX = patchLeft - tileTopLeft.x
-    startY = patchTop - tileTopLeft.y
+    startX = patchLeft
+    startY = patchTop
+    # startX = patchLeft - tileTopLeft[0]
+    # startY = patchTop - tileTopLeft[1]
 
     ctx.beginPath()
     ctx.moveTo(startX, startY)
