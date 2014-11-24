@@ -42,7 +42,7 @@ class CanvasTileView
     @map.panTo(@map.unproject([@world.pxWidth / 2, @world.pxHeight / 2]))
     
     @createCtxs()
-    u.waitOn((=> @model.modelReady), (=> @createAgentTileLayer()))
+    u.waitOn((=> @model.modelReady), (=> @createTileLayer()))
 
   createCtxs: () ->
     # * Create 2D canvas contexts layered on top of each other.
@@ -65,7 +65,7 @@ class CanvasTileView
     # @contexts.spotlight.globalCompositeOperation = "xor"
     return @contexts
 
-  createAgentTileLayer: () ->
+  createTileLayer: () ->
     tileLayer = @tileLayer = new L.TileLayer.Canvas({
       continuousWorld: true
     })
