@@ -70,13 +70,13 @@
             agent.color = agent.origColor
 
         @links.on 'mouseover', (mouseEvent) =>
-          agent = mouseEvent.target.end1
+          agent = mouseEvent.target
           unless agent.origColor?
            agent.origColor = agent.color
           agent.color = [0,0,255]
 
         @links.on 'mouseout', (mouseEvent) =>
-          agent = mouseEvent.target.end1
+          agent = mouseEvent.target
           if agent.origColor
             agent.color = agent.origColor
 
