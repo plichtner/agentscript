@@ -183,9 +183,13 @@ window.flags =
   pw: 64
   ph: 1
   ps: 12
+  pnum: null
   map: "gradient"
+  type: "typed" # "css" "pixel" "typed"
   args: [64,[[255,255,0],[0,255,255]]]
   sort: false
+  proto: false
+  index: false
   key: "intensity"
   sortFcns:
     intensity: (a,b) ->
@@ -199,13 +203,17 @@ window.flags =
 # w: 16/4, h: 4, s: 50, map: "gradient"
 # Use query string to update flags.
 flags[k] = v for k,v of u.parseQueryString()
-flags.map = flags.map + "ColorMap"
 flags.pnum = flags.pw * flags.ph
 flags.args = eval flags.args if typeof flags.args is "string"
 flags.args = [flags.args] if not Array.isArray(flags.args)
+flags.args.push null if (flags.map is "gradient") and (flags.args.length is 2)
+if flags.args.length is 1 and flags.map is "rgb"
+  cube = flags.args[0]
+  flags.args = [cube, cube, cube]
+flags.map = flags.map + if flags.proto then "ProtoMap" else "ColorMap"
 console.log k,v for k,v of flags
 
-Color.basicColorMap = (array) -> new Color.ColorMap array
+# Color.basicColorMap = (array) -> new Color.ColorMap array
 
 class ColorTestModel extends ABM.Model
   startup: ->
@@ -216,22 +224,28 @@ class ColorTestModel extends ABM.Model
 
     window.map = @map =
       if flags.map is "basicColorMap"
-        new Color.ColorMap flags.args
+        new Color.ColorMap flags.args, flags.type, flags.index
+      else if flags.map is "basicProtoMap"
+        Color.protoMap flags.args, flags.type, flags.index
       else
-        Color[flags.map] flags.args...
-
+        Color[flags.map] flags.args..., flags.type, flags.index
     # window.map = @map = Color[flags.map] flags.args...
     @map.sort(flags.sortFcns[flags.key]) if flags.sort
     # console.log (c[flags.key] for c in @map) if flags.sort
 
     # debugger;
     # @patches[i].color = color.toArray(true) for color,i in @map
-    for color,i in @map
-      color = c.convertColor color, "typed"
-      @patches[i].color = color.toArray(true)
+    # for color,i in @map
+      # color = c.convertColor color, "typed"
+      # @patches[i].color = color.toArray(true)
+    @patches[i].color = Color.legacyColor(color) for color,i in @map
 
 
     console.log "patches: #{@patches.length}; map: #{map.length}"
+    if @map.index
+      window.keys = Object.keys(@map.index)
+      dups = @map.length - keys.length
+      console.log "    map index: size=#{keys.length}, dups=#{dups}"
     console.log "testNamedColors: start"
     @testNamedColors()
     console.log "testNamedColors: done"
@@ -259,55 +273,31 @@ class ColorTestModel extends ABM.Model
       # console.log randomRgbs, randomRgb, color, diff
       console.log "random: #{randomRgb}, closest: #{color.rgb}, diff: #{diff}"
     null
-  compareRandomColors: ->
-    n = Math.floor(@patches.length/2)
-    for i in [0...n]
-      randomRgb = c.randomRgbColor()
-      color = map.findClosest randomRgb...
-      ps[i*2].color = color.rgb
-      ps[i*2+1].color = randomRgb
-      app.draw()
-    null
-  getClosestRgb: (r, g, b, itemsPerChannel) ->
-    step = 255/(itemsPerChannel-1)
-    # [r, g, b] = (Math.round(channel/step)*step for channel in [r, g, b])
-    [rLoc, gLoc, bLoc] = (Math.round(color/step) for color in [r, g, b])
-    # [r, g, b] = (Math.round(loc*step) for loc in [rLoc, gLoc, bLoc])
-    i = rLoc + gLoc*itemsPerChannel + bLoc*itemsPerChannel*itemsPerChannel
-    # console.log r,g,b,rLoc,gLoc,bLoc,i,map[i].ix,map[i].rgb
-    i
+
   compareRandomColors: ->
     n = Math.floor(@patches.length/2)
     console.log "comparing #{n} random colors"
     for i in [0...n]
-      randomRgb = c.randomRgbColor()
-      closestRgb = c.colorObjToRgb(map.findClosest randomRgb...)
-      ps[i*2].color = closestRgb
+      randomRgb = c.randomRgb()
+      closestRgb = c.colorToArray (map.findClosestColor randomRgb...)
+      ps[i*2].color = c.legacyColor closestRgb
       ps[i*2+1].color = randomRgb
     console.log "drawing"
     app.draw()
     null
-  compareRandomColors1: ->
-    n = Math.floor(@patches.length/2)
-    step = Math.round(Math.pow(map.length,1/3))
-    console.log "comparing #{n} random colors"
-    for i in [0...n]
-      randomRgb = c.randomRgbColor()
-      closestRgb = c.colorObjToRgb(map[@getClosestRgb(randomRgb...,step)])
-      ps[i*2].color = closestRgb
-      ps[i*2+1].color = randomRgb
-    console.log "drawing"
-    app.draw()
-    null
-  memoryTest: ->
-    window.fatMap = c.rgbColorMap(64)
-    window.fatterMap = new c.ObjColorMap(64)
-    # for color in fatMap
-    #   cobj = {}
-    #   cobj.rgba = new Uint8ClampedArray color
-    #   cobj.pixel = new Uint32Array(cobj.rgba.buffer)
-    #   cobj.str = color.str+"x"
-    #   fatterMap.push cobj
+
+  memoryTest: -> # two cubes of 64 steps per axis, 262,144 colors
+    console.log "building maps of each type w/ 262,144 colors"
+    console.log "fatPixelMap start (pixels, no index)"
+    window.fatPixelMap = new c.ColorMap 64, "pixel", false
+    console.log "fatPixelMap done: size = #{u.tls fatPixelMap.length}"
+    console.log "fatCsslMap start (css strings, no index)"
+    window.fatCsslMap = new c.ColorMap 64, "css", false
+    console.log "fatCsslMap done: size = #{u.tls fatCsslMap.length}"
+    console.log "fatTypedMap start (typed colors, w/ css and index)"
+    window.fatTypedMap = new c.ColorMap 64, "typed", true
+    tc.css for tc in fatTypedMap # promote css strings
+    console.log "fatTypedMap done: size = #{u.tls fatTypedMap.length}"
     null
 window.model = new ColorTestModel({
   div: "layers",
