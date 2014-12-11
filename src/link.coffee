@@ -64,7 +64,7 @@ class Link
 
   hitTest: (x, y) ->
     distance = u.aSum (a.distanceXY x, y for a in @bothEnds())
-    distance - @length() < 0.25 / @model.patches.size
+    distance - @length() < 0.05 / @model.patches.size
 
   # Return the two endpoints of this link
   bothEnds: -> [@end1, @end2]
