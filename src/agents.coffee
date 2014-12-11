@@ -54,5 +54,12 @@ class Agents extends AgentSet
     as = @inRect a, radius, radius, true
     super a, radius, meToo # as.inRadius a, radius, meToo
 
-  setDraggable: () ->
-    agent.setDraggable() for agent in @
+  setDraggable: -> 
+    @on 'dragstart', (mouseEvent) =>
+      mouseEvent.target.dragging = true
+
+    @on 'dragend', (mouseEvent) =>
+      mouseEvent.target.dragging = false
+
+    @on 'drag', (mouseEvent) =>
+      mouseEvent.target.setXY(mouseEvent.patchX, mouseEvent.patchY)

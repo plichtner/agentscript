@@ -56,6 +56,7 @@ class AgentSet extends Array
   # This sub-array feature is how breeds are managed, see class `Model`
   constructor: (@model, @agentClass, @name, @mainSet) ->
     super(0) # doesn't yield empty array if already instances in the mainSet
+    u.mixin(@, new Evented())
     @breeds = [] unless @mainSet?
     @agentClass::breed = @ # let the breed know I'm it's agentSet
     @agentClass::model = @model # let the breed know its model
@@ -300,15 +301,6 @@ class AgentSet extends Array
     else
       @asSet (a for a in rSet when \
         (a is o and meToo) or u.inCone(heading,cone,radius,x,y,a.x,a.y))
-
-# ### Event delegation
-  on: (name, cb) ->
-    for agent in this
-      agent.on(name, cb)
-
-  off: (name, cb) ->
-    for agent in this
-      agent.off(name, cb)
 
 # ### Debugging
 

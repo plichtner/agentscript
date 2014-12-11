@@ -43,7 +43,6 @@ class Agent
   cacheLinks: false   # should I keep links to/from me in links array?.
   links: null         # array of links to/from me as an endpoint; init by ctor
   constructor: -> # called by agentSets create factory, not user
-    u.mixin(@, new Evented())
     @x = @y = 0
     @p = @model.patches.patch @x, @y
     @color = u.randomColor() unless @color? # promote color if default not set
@@ -223,12 +222,4 @@ class Agent
   outLinkNeighbors: ->
     l.end2 for l in @myLinks() when l.end1 is @
 
-  setDraggable: -> 
-    @on 'dragstart', (mouseEvent) =>
-      @dragging = true
 
-    @on 'dragend', (mouseEvent) =>
-      @dragging = false
-
-    @on 'drag', (mouseEvent) =>
-      @setXY(mouseEvent.patchX, mouseEvent.patchY)

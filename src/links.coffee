@@ -46,4 +46,14 @@ class Links extends AgentSet
     null
 
   setDraggable: () ->
-    link.setDraggable() for link in @
+    @on 'dragstart', (mouseEvent) =>
+      mouseEvent.target.dragging = true
+
+    @on 'dragend', (mouseEvent) =>
+      mouseEvent.target.dragging = false
+
+    @on 'drag', (mouseEvent) =>
+      end1 = mouseEvent.target.end1
+      end2 = mouseEvent.target.end2
+      end1.setXY(end1.x - mouseEvent.dx, end1.y - mouseEvent.dy)
+      end2.setXY(end2.x - mouseEvent.dx, end2.y - mouseEvent.dy)
