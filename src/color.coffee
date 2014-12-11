@@ -58,7 +58,7 @@ Color = {
       when "pixel" then return @rgbaToPixel array...
       when "typed" then return @typedColor array...
     u.error "arrayToColor problem"
-  # Return array representing the color.
+  # Return array (either typed or Array) representing the color.
   # With this and the above, all color permutations are possible,
   # i.e. a css string can be converted to a typed color:
   #
@@ -76,7 +76,14 @@ Color = {
     @arrayToColor(@colorToArray(color), type)
 
   # Return a random color of the given type
-  randomColor: (type) -> @arrayToColor(@randomRgba()..., type)
+  randomColor: (type="typed") -> @arrayToColor(@randomRgba(), type)
+  # Hopefully temporary .. convert to 3 or 4 element array with alpha in 0-1
+  legacyColor: (color) ->
+    array = Array(@colorToArray(color)...)
+    if array[3] is 255 then array.pop() else array[3] /= 255
+    array
+
+
 
 
 # ### CSS Color Strings.
@@ -294,9 +301,13 @@ Color = {
     scale = u.lerpScale value, min, max #(value - min)/(max - min)
     (Math.round(u.lerp(rgb0[i], rgb1[i], scale))) for i in [0..2]
 
-  # Return rgba array with random rgb values, a constant, defaulting to opaque.
+  # Return rgb array with 3 random ints in 0-255.
+  randomRgb: -> (u.randomInt(256) for i in [0..2])
+  # Return rgba array with random rgb values, with "a" a constant opacity
   randomRgba: (a=255)->
-    (if i is 3 then 255 else u.randomInt(a) for i in [0..3])
+    color = @randomRgb()
+    color.push a
+    color
 
 # ### Typed Color
 
@@ -326,45 +337,45 @@ Color = {
      # including Object.defineProperties without enlarging them.
     # typedColor = (r, g, b, a=255, stringToo=true) ->
     typedColor = (r, g, b, a=255) ->
-      # # check for missing "a" but existing stringToo
-      # # i.e. typedColor [r,g,b]...,false
-      # (stringToo = a; a = 255) if typeof a is "boolean"
       Color.checkAlpha "typedColor", a
       ua = new Uint8ClampedArray([r,g,b,a])
       ua.pixelArray = new Uint32Array(ua.buffer)
-      # Legacy name "str" from earlier Array color string property
-      # ua.str = Color.triString(r, g, b, a) if stringToo
+      # lazy evaluation will set the css string for this typed array:
+      #
+      #     ua.string = Color.triString(r, g, b, a)
+      #
+      # do not set the ua.string directly, will get typed values out of sync.
+
       # Make me an instance of TypedColorProto
       ua.__proto__ = TypedColorProto
       ua
     TypedColorProto = {
-      # Return typedColor's Uint8 array as JavaScript Array.
-      # aFloat used to divide "a" by 255; css style
-      toArray: (aFloat = false)->
-        [@[0], @[1], @[2], if aFloat then @[3]/255 else @[3]]
       # Return string representation of typedColor, mainly console debugging.
-      toString: -> "#{@toArray().toString()}#{if @str then ":"+@str else ""}"
+      toString: -> "typedColor:#{Array(@...).toString()};css=#{@string ? null}"
       # Set the typed array; no need for getColor, it *is* the typed Uint8 array
       setColor: (r,g,b,a=255) ->
         [@[0], @[1], @[2], @[3]] = [r,g,b,a]
-        @str = null if @str # will be lazy evaluated via getString.
+        @string = null if @string # will be lazy evaluated via getString.
       # Set the pixel view, thus changing the array (Uint8) view
-      setPixel: (p)->
-        @pixelArray[0]=p
-        @str = null if @str # will be lazy evaluated via getString.
+      setPixel: (pixel)->
+        @pixelArray[0]=pixel
+        @string = null if @string # will be lazy evaluated via getString.
       # Get the pixel value, i.e. pixelArray[0]
       getPixel: -> @pixelArray[0]
       # Set both Typed Arrays to equivalent pixel/rgba values of the string.
-      # Does not set the @str, it will be lazily evaluated to its triString.
-      # Note if you set string to "red" or "rgb(255,0,0)",
-      # the triString value will be #f00
+      #
+      # Does *not* set the @string, it will be lazily evaluated to its
+      # triString. This lets the typedColor remain small without the
+      # color string until required by getters.
+      #
+      # Note if you set string to "red" or "rgb(255,0,0)", the resulting
+      # css string (triString) value will still return the standard #f00
       setString: (string) ->
         @setColor(Color.stringToUint8s(string)...)
-        # @getString()
-      # Return the triString for this typedColor, setting the @str value
+      # Return the triString for this typedColor, setting the @string value
       getString: (string) ->
-        @str = Color.triString(@...) unless @str
-        @str
+        @string = Color.triString(@...) unless @string
+        @string
     }
     # Set TypedColorProto proto to be Uint8ClampedArray's prototype
     TypedColorProto.__proto__ = Uint8ClampedArray.prototype
@@ -381,9 +392,14 @@ Color = {
         get: -> [@[0], @[1], @[2], @[3]]
         set: (val) -> @setColor(val...)
         enumerable: true # make visible in stack trace, remove after debugging
-    # css: get/set typedColor.str via @str property. Updates TypedArrays.
-    # Note the str getter property lazily sets @str.
+    # css: get/set typedColor.str via @string property. Updates TypedArrays.
+    # Note the str getter property lazily sets @string.
       "css":
+        get: -> @getString()
+        set: (val) -> @setString(val)
+        enumerable: true # make visible in stack trace, remove after debugging
+    # str: legacy usage, identical to css, will remove
+      "str":
         get: -> @getString()
         set: (val) -> @setString(val)
         enumerable: true # make visible in stack trace, remove after debugging
@@ -400,8 +416,9 @@ Color = {
   #   Ex: "Heat" may be mapped to a gradient from green to red.
   #
   # And you can simply make your own array of legal colors, works fine.
+  # And protoMap will even do prototype magic to turn your legal color array
+  # into a ColorMap.
 
-  # DataMap: class DataMap extends Array
   ColorMap: class ColorMap extends Array
     # colorsArray contains either arrays or legal colors.
     # The type arg specifies the colors in the map.
@@ -466,7 +483,8 @@ Color = {
     # Lookup color in map, returning index or undefined if not found
     lookup: (color) ->
       return @index[ @indexKey(color) ] if @index
-      return i if @colorsEqual(color, c) for c,i in @
+      for c,i in @
+        return i if @colorsEqual(color, c)
       undefined
 
     # Return the map index or color proportional to the value between min, max.
@@ -483,7 +501,7 @@ Color = {
     closestCubeIndex: (r, g, b) ->
       u.error "closestCubeIndex: not a color cube" if not @cube
       step = 255/(@cube-1)
-      [rLoc, gLoc, bLoc] = (Math.round(color/step) for color in [r, g, b])
+      [rLoc, gLoc, bLoc] = (Math.round(c/step) for c in [r, g, b])
       rLoc + gLoc*@cube + bLoc*@cube*@cube
     closestCubeColor: (r, g, b) -> @[ @closestCubeIndex r, g, b ]
 
@@ -491,7 +509,8 @@ Color = {
     # Note: slow for large maps unless color cube or in index or exact match.
     findClosestIndex: (r, g, b) -> # alpha not in rgbDistance function
       return @closestCubeIndex r, g, b if @cube
-      return ix if ( ix = @lookup(Color.arrayToColor [r, g, b]) )
+      return ix if ( ix=@lookup(Color.arrayToColor [r,g,b], @type) )
+      # return ix if @index and ( ix=@lookup(Color.arrayToColor [r,g,b], @type) )
       minDist = Infinity
       ixMin = 0
       for color, i in @
@@ -530,47 +549,47 @@ Color = {
   # These are typically 256 entries but can be smaller
   # by passing a size parameter.
   grayArray: (size = 256) -> ( [i,i,i] for i in u.aIntRamp 0, 255, size )
-  grayColorMap: (size=256, type="typed") ->
-    new ColorMap @grayArray(size), type
+  grayColorMap: (size=256, type="typed", indexToo=false) ->
+    new ColorMap @grayArray(size), type, indexToo
 
   # Create a colormap by rgb values. R, G, B can be either a number,
   # the number of steps beteen 0-255, or an array of values to use
   # for the color.  Ex: R = 3, corresponds to [0, 128, 255]
   # The resulting map permutes the R, G, V values.  Thus if
   # R=G=B=4, the resulting map has 4*4*4=64 colors.
-  rgbColorMap: (R, G=R, B=R, type="typed") ->
+  rgbColorMap: (R, G=R, B=R, type="typed", indexToo=true) ->
     if (typeof R is "number") and (R is G is B)
-      new ColorMap R, type # lets ColorMap know its a color cube
+      new ColorMap R, type, indexToo # lets ColorMap know its a color cube
     else
-      new ColorMap @permuteColors(R, G, B), type
+      new ColorMap @permuteColors(R, G, B), type, indexToo
 
   # Create an hsl map, inputs similar to above.  Convert the
   # HSL values to css, default to bright hue ramp.
-  hslColorMap: (H, S=1, L=1, type="css") ->
+  hslColorMap: (H, S=1, L=1, type="css", indexToo=false) ->
     hslArray = @permuteColors(H, S, L, [359,100,50])
     cssArray = (@hslString a... for a in hslArray)
-    new ColorMap cssArray, type
+    new ColorMap cssArray, type, indexToo
 
   # Use gradient to build an rgba array, then convert to colormap
-  gradientColorMap: (nColors, stops, locs, type="typed") ->
-    new ColorMap @gradientRgbaArray(nColors, stops, locs), type
+  gradientColorMap: (nColors, stops, locs, type="typed", indexToo=true) ->
+    new ColorMap @gradientRgbaArray(nColors, stops, locs), type, indexToo
 
   # Create a map with a random set of colors.
   # Sometimes useful to sort by intensity afterwards.
-  randomColorMap: (nColors, type="typed") ->
-    new ColorMap (@randomRgba() for i in [0...nColors]), type
+  randomColorMap: (nColors, type="typed", indexToo=false) ->
+    new ColorMap (@randomRgba() for i in [0...nColors]), type, indexToo
 
   # Create alpha map of the given base r,g,b color,
   # with nOpacity opacity values, default to all 256
-  alphaColorMap: (rgb, nOpacities = 256, type="typed") ->
+  alphaColorMap: (rgb, nOpacities = 256, type="typed", indexToo=true) ->
     alphaArray = ( u.clone(rgb).push a for a in u.aIntRamp 0, 255, nOpacities )
-    new ColorMap alphaArray rgb, nOpacities, type="typed"
+    new ColorMap alphaArray rgb, nOpacities, type, indexToo
 
 # ### Two prototype conversion primitive color maps.
 
   # Factory: convert JS array of valid colors to color map via prototype.
-  # Will have the type of the first element, and no index.
-  arrayToMap: (array) ->
+  # Will have the type of the first element, and no index nor be a color cube.
+  protoMap: (array) ->
     array.__proto__ = ColorMap.prototype
     array.type = @colorType(array[0])
     array # this is just the original array, returned for convenience.
@@ -578,15 +597,20 @@ Color = {
   # Create a color map via the 140 html standard colors
   # or any of the other forms of css color strings.
   # The input is an array of css strings.
-  nameColorMap: (strings) -> @arrayToMap strings
+  nameProtoMap: (strings) -> @protoMap strings
+  # Equivalent to ColorMap w/ these defaults. Use this for modifying options.
+  nameColorMap: (strings, type="css", indexToo=false) ->
+    new ColoMap strings, type, indexToo
 
   # Create a color map via an array of pixels, gradientPixelArray for example.
   # If you don't have pixel data, call rgbColorMap with type="pixel"
   # or simply create your own via:
   #
   #    pixels = ( rgbaToPixel rgba... for rgba in rgbas )
-  # pixelColorMap: (pixels) -> new ColorMap pixels, type="pixel"
-  pixelColorMap: (pixels) -> @arrayToMap pixels
+  pixelProtoMap: (pixels) -> @protoMap pixels
+  # Equivalent to ColorMap w/ these defaults. Use this for modifying options.
+  pixelColorMap: (pixels, type="pixel", indexToo=false) ->
+    new ColorMap pixels, type, indexToo
 
 };
 Color.initSharedPixel() # Initialize the shared buffer pixel/rgb view
