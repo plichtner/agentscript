@@ -104,18 +104,17 @@ class ABM.Mouse
         return link
 
   emitAgentEvent: (eventType, agent, mouseEvent) ->
-    @updateDraggingAgents(eventType, agent)
-    agent.emit(eventType, mouseEvent)
-
-  updateDraggingAgents: (eventType, agent) ->
     if eventType == 'dragstart'
       @draggingAgents.push(agent)
+    agent.breed.emit(eventType, mouseEvent)
+    if agent.breed.mainSet?
+      agent.breed.mainSet.emit(eventType, mouseEvent)
 
   delegateDragEvents: (x, y, e) =>
     for agent in @draggingAgents
       mouseEvent = @mouseEvent(agent, e)
-      if @moved then agent.emit('drag', mouseEvent)
-      if @dragEnd then agent.emit('dragend', mouseEvent)
+      if @moved then @emitAgentEvent('drag', agent, mouseEvent)
+      if @dragEnd then @emitAgentEvent('dragend', agent, mouseEvent)
     if @dragEnd
       @draggingAgents = []
       @dragEnd = false
@@ -135,14 +134,14 @@ class ABM.Mouse
         agentsHere[agent.breed.name] ?= {}
         agentsHere[agent.breed.name][agent.id] = agent
         if (not @lastAgentsHovered[agent.breed.name] or agent.id not of @lastAgentsHovered[agent.breed.name])
-          agent.emit('mouseover', @mouseEvent(agent, e))
+          @emitAgentEvent('mouseover', agent, @mouseEvent(agent, e))
 
     # mouseout
     for breedname of @lastAgentsHovered
       for agentId of @lastAgentsHovered[breedname]
         if (not agentsHere[breedname] or agentId not of agentsHere[breedname])
           agent = @lastAgentsHovered[breedname][agentId]
-          agent.emit('mouseout', @mouseEvent(agent, e))
+          @emitAgentEvent('mouseout', agent, @mouseEvent(agent, e))
 
     @lastAgentsHovered = agentsHere
 
