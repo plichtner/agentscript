@@ -50,6 +50,8 @@ class Agent
     @p.agents.push @ if @p.agents? # @model.patches.cacheAgentsHere
     @links = [] if @cacheLinks
 
+
+
   # Set agent color to `c` scaled by `s`. Usage: see patch.scaleColor
   scaleColor: (c, s) ->
     @color = u.clone @color unless @hasOwnProperty "color" # promote color to inst var
@@ -189,6 +191,10 @@ class Agent
   inCone: (aset, cone, radius, meToo=false) ->
     aset.inCone @p, @heading, cone, radius, meToo # REMIND: @p vs @?
 
+  # Return true if world coordinate falls on agent sprite
+  hitTest: (x, y) ->
+    @distanceXY(x, y) < @size
+
   # Return other end of link from me
   otherEnd: (l) -> if l.end1 is @ then l.end2 else l.end1
 
@@ -215,3 +221,5 @@ class Agent
   # Return other end of myOutinks
   outLinkNeighbors: ->
     l.end2 for l in @myLinks() when l.end1 is @
+
+
