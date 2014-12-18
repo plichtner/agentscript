@@ -139,6 +139,7 @@ This sub-array feature is how breeds are managed, see class <code>Model</code></
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">constructor</span>: <span class="hljs-function"><span class="hljs-params">(<span class="hljs-property">@model</span>, <span class="hljs-property">@agentClass</span>, <span class="hljs-property">@name</span>, <span class="hljs-property">@mainSet</span>)</span> -&gt;</span>
     <span class="hljs-keyword">super</span>(<span class="hljs-number">0</span>) <span class="hljs-comment"># doesn't yield empty array if already instances in the mainSet</span>
+    u.mixin(@, <span class="hljs-keyword">new</span> Evented())
     <span class="hljs-property">@breeds</span> = [] <span class="hljs-keyword">unless</span> <span class="hljs-property">@mainSet</span>?
     <span class="hljs-property">@agentClass</span>::breed = @ <span class="hljs-comment"># let the breed know I'm it's agentSet</span>
     <span class="hljs-property">@agentClass</span>::model = <span class="hljs-property">@model</span> <span class="hljs-comment"># let the breed know its model</span>

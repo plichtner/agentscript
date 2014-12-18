@@ -496,11 +496,12 @@ from me, and within cone radians of my heading using patch topology</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
-              <p>Return other end of link from me</p>
+              <p>Return true if world coordinate falls on agent sprite</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">otherEnd</span>: <span class="hljs-function"><span class="hljs-params">(l)</span> -&gt;</span> <span class="hljs-keyword">if</span> l.end1 <span class="hljs-keyword">is</span> @ <span class="hljs-keyword">then</span> l.end2 <span class="hljs-keyword">else</span> l.end1</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">hitTest</span>: <span class="hljs-function"><span class="hljs-params">(x, y)</span> -&gt;</span>
+    <span class="hljs-property">@distanceXY</span>(x, y) &lt; <span class="hljs-property">@size</span></pre></div></div>
             
         </li>
         
@@ -510,6 +511,21 @@ from me, and within cone radians of my heading using patch topology</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <p>Return other end of link from me</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">otherEnd</span>: <span class="hljs-function"><span class="hljs-params">(l)</span> -&gt;</span> <span class="hljs-keyword">if</span> l.end1 <span class="hljs-keyword">is</span> @ <span class="hljs-keyword">then</span> l.end2 <span class="hljs-keyword">else</span> l.end1</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-26">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
               <p>Return all links linked to me</p>
 
@@ -521,11 +537,11 @@ from me, and within cone radians of my heading using patch topology</p>
         </li>
         
         
-        <li id="section-26">
+        <li id="section-27">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
+                <a class="pilcrow" href="#section-27">&#182;</a>
               </div>
               <p>Return all agents linked to me.</p>
 
@@ -537,11 +553,11 @@ from me, and within cone radians of my heading using patch topology</p>
         </li>
         
         
-        <li id="section-27">
+        <li id="section-28">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
+                <a class="pilcrow" href="#section-28">&#182;</a>
               </div>
               <p>Return links where I am the “to” agent in links.create</p>
 
@@ -553,11 +569,11 @@ from me, and within cone radians of my heading using patch topology</p>
         </li>
         
         
-        <li id="section-28">
+        <li id="section-29">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
+                <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
               <p>Return other end of myInLinks</p>
 
@@ -569,11 +585,11 @@ from me, and within cone radians of my heading using patch topology</p>
         </li>
         
         
-        <li id="section-29">
+        <li id="section-30">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-30">&#182;</a>
               </div>
               <p>Return links where I am the “from” agent in links.create</p>
 
@@ -585,11 +601,11 @@ from me, and within cone radians of my heading using patch topology</p>
         </li>
         
         
-        <li id="section-30">
+        <li id="section-31">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
+                <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
               <p>Return other end of myOutinks</p>
 

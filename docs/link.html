@@ -141,7 +141,11 @@ is called with patch coordinate transform installed.</p>
     <span class="hljs-property">@breed</span>.remove @
     u.removeItem <span class="hljs-property">@end1</span>.links, @ <span class="hljs-keyword">if</span> <span class="hljs-property">@end1</span>.links?
     u.removeItem <span class="hljs-property">@end2</span>.links, @ <span class="hljs-keyword">if</span> <span class="hljs-property">@end2</span>.links?
-    <span class="hljs-literal">null</span></pre></div></div>
+    <span class="hljs-literal">null</span>
+
+  <span class="hljs-attribute">hitTest</span>: <span class="hljs-function"><span class="hljs-params">(x, y)</span> -&gt;</span>
+    distance = u.aSum (a.distanceXY x, y <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> <span class="hljs-property">@bothEnds</span>())
+    distance - <span class="hljs-property">@length</span>() &lt; <span class="hljs-number">0.05</span> / <span class="hljs-property">@model</span>.patches.size</pre></div></div>
             
         </li>
         
