@@ -301,6 +301,7 @@ class Model
   shapes  # deprecated
   Util
   Color
+  ColorMaps
   Shapes
   AgentSet
   Patch
