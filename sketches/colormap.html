@@ -2,6 +2,7 @@
   <head>
     <title>ColorMap</title>
     <script src="../lib/agentscript.js"></script>
+    <script src="../lib/rgbtohsl.js"></script>
     <script src="../tools/coffee-script.js"></script>
 <!--
     <script src="colorobject.coffee" type="text/coffeescript"></script>
@@ -104,7 +105,7 @@ window.c = window.Color = ABM.Color
 window.cm = window.ColorMaps = ABM.ColorMaps
 
 # Note: Aqua == Cyan and Fuchsia == Magenta
-# The 140 standard html colors are the X11 set
+# The 140 standard html colors are the X11 set; 138 unique
 namedColorString = "AliceBlue AntiqueWhite Aqua Aquamarine Azure Beige Bisque Black BlanchedAlmond Blue BlueViolet Brown BurlyWood CadetBlue Chartreuse Chocolate Coral CornflowerBlue Cornsilk Crimson Cyan DarkBlue DarkCyan DarkGoldenRod DarkGray DarkGreen DarkKhaki DarkMagenta DarkOliveGreen DarkOrange DarkOrchid DarkRed DarkSalmon DarkSeaGreen DarkSlateBlue DarkSlateGray DarkTurquoise DarkViolet DeepPink DeepSkyBlue DimGray DodgerBlue FireBrick FloralWhite ForestGreen Fuchsia Gainsboro GhostWhite Gold GoldenRod Gray Green GreenYellow HoneyDew HotPink IndianRed Indigo Ivory Khaki Lavender LavenderBlush LawnGreen LemonChiffon LightBlue LightCoral LightCyan LightGoldenRodYellow LightGray LightGreen LightPink LightSalmon LightSeaGreen LightSkyBlue LightSlateGray LightSteelBlue LightYellow Lime LimeGreen Linen Magenta Maroon MediumAquaMarine MediumBlue MediumOrchid MediumPurple MediumSeaGreen MediumSlateBlue MediumSpringGreen MediumTurquoise MediumVioletRed MidnightBlue MintCream MistyRose Moccasin NavajoWhite Navy OldLace Olive OliveDrab Orange OrangeRed Orchid PaleGoldenRod PaleGreen PaleTurquoise PaleVioletRed PapayaWhip PeachPuff Peru Pink Plum PowderBlue Purple Red RosyBrown RoyalBlue SaddleBrown Salmon SandyBrown SeaGreen SeaShell Sienna Silver SkyBlue SlateBlue SlateGray Snow SpringGreen SteelBlue Tan Teal Thistle Tomato Turquoise Violet Wheat White WhiteSmoke Yellow YellowGreen"
 namedColors = namedColorString.split(" ")
 namedPixels = (Color.convertColor str, "pixel" for str in namedColors)
@@ -116,11 +117,32 @@ simpleNamedColorString = "Aqua Aquamarine Azure Beige Bisque Black Blue Brown Ch
 simpleNamedColors = simpleNamedColorString.split(" ")
 simpleNamedPixels = (Color.convertColor str, "pixel" for str in simpleNamedColors)
 
-# Note: Aqua == Cyan and Fuchsia == Magenta
+# Note: Aqua == Cyan and Fuchsia == Magenta, 15 unique colors
 htmlColorsString = "Aqua Black Blue Fuchsia Gray Green Lime Maroon Navy Olive Orange Purple Red Silver Teal White Yellow"
 htmlColors = htmlColorsString.split(" ")
 
+# globals [colors]
+# to setup
+#   set colors (list "gray" "red" "orange" "brown" "yellow" "green" "lime" "turquoise" "cyan" "sky" "blue" "violet" "magenta" "pink")
+#   foreach colors [ show (word ? ": " extract-rgb read-from-string ?) ]
+# end
 netLogoColorsRgb = { # NL does not use the std rgb values for every name
+  gray: [141,141,141],
+  red: [215,50,41],
+  orange: [241,106,21],
+  brown: [157,110,72],
+  yellow: [237,237,49],
+  green: [89,176,60],
+  lime: [44,209,59],
+  turquoise: [29,159,120],
+  cyan: [84,196,196],
+  sky: [45,141,190],
+  blue: [52,93,169],
+  violet: [124,80,164],
+  magenta: [167,27,106],
+  pink: [224,127,150]
+}
+netLogoX11ColorsRgb = { # X11 versions of NL color names
   Gray: [128,128,128],
   Red: [255,0,0],
   Orange: [255,165,0],
@@ -228,12 +250,7 @@ class ColorTestModel extends ABM.Model
     @patches.setDefault "color", [0,0,0,0] # default: transparent
 
     window.map = @map =
-      if flags.map is "basicColorMap"
-        new ColorMaps.ColorMap flags.args, flags.type, flags.index
-      else if flags.map is "basicProtoMap"
-        ColorMaps.protoMap flags.args, flags.type, flags.index
-      else
-        ColorMaps[flags.map] flags.args..., flags.type, flags.index
+      ColorMaps[flags.map] flags.args..., flags.type, flags.index
     # window.map = @map = Color[flags.map] flags.args...
     @map.sort(flags.sortFcns[flags.key]) if flags.sort
     # console.log (c[flags.key] for c in @map) if flags.sort
@@ -244,7 +261,7 @@ class ColorTestModel extends ABM.Model
       # color = Color.convertColor color, "typed"
       # @patches[i].color = color.toArray(true)
     # @patches[i].color = Color.legacyColor(color) for color,i in @map
-    @patches[i].color = color for color,i in @map
+    @patches[i].color = color for color,i in @map # type = "typed" OK for legacy
 
 
     console.log "patches: #{@patches.length}; map: #{map.length}"

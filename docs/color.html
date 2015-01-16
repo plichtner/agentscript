@@ -27,17 +27,16 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-1">&#182;</a>
               </div>
-              <p>This module contains these color topics:</p>
+              <p>This module contains utilities for all browser color types.</p>
 <ul>
-<li>The two browser color types: pixels and strings</li>
+<li>The two basic browser color types: pixels and strings</li>
 <li>A typedColor: A Uint8 (clamped) r,g,b,a TypedArray
 with both rgba and pixel views onto the same buffer,
 and, optionally, the associated css string.</li>
-<li>A color map class and several colormap “factories”</li>
-<li>Several simple core color primitive functions</li>
+<li>Utilities for converting to and between these color types</li>
 </ul>
-<p>In the functions below, rgba values are ints in 0-255, including a.</p>
-<p>Note a is not in 0-1 as in css colors.</p>
+<p><em>Note</em>: In the functions below, rgba values are ints in 0-255, including a.
+I.e. a is not in 0-1 as in css colors.</p>
 <p>Naming convention: rgba/array is generally a 3 or 4 element JavaScript
 Array thus not a browser color.
 Instead, it is used internally for functions taking r, g, b, a=255
@@ -46,7 +45,7 @@ color values.</p>
 a TypedArray of 4 floats in 0-1 (webgl),
 and other odd mixtures of values, some in degrees, some in percentages.</p>
 <p>We restrict ourselves to css color strings, 32 bit integer pixels,
-and 4 element Uint8 TypedColors (in ColorTypes module)</p>
+and 4 element Uint8 TypedColors</p>
 
             </div>
             
@@ -79,7 +78,7 @@ Color = {</pre></div></div>
 and <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value">Mozilla’s Color Reference</a>
 and Doug Crockford’s <a href="http://www.crockford.com/wrrrld/color.html">interactive named colors</a> page
 as well as the <a href="http://dev.w3.org/csswg/css-color/">future CSS4</a> spec.</p>
-<p>The strings can be may forms:</p>
+<p>The strings can be one of 7 forms:</p>
 <ul>
 <li>Names: <a href="http://en.wikipedia.org/wiki/Web_colors#HTML_color_names">140 color case-insensitive names</a> like
 Red, Green, CadetBlue, and so on.</li>
@@ -454,10 +453,9 @@ Max distance is roughly 765 (3*255), between black &amp; white.</p>
                 <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
               <p>Scale a data value to an rgb color.
-value is in [min max], rgb’s are two colors.
-This can make simple, two color, gradient color maps.
-See ColorMap.scaleColor for related scaling method and
-ColorMap.gradientUint8Array for complex, MatLab-like, gradients.</p>
+value is in [min max], rgb’s are two colors.</p>
+<p>See ColorMap’s scaleColor for related scaling method and
+gradientColorMap for complex, MatLab-like, gradients.</p>
 
             </div>
             
@@ -543,8 +541,7 @@ If r is not a number but a typed array, use it for the typedColor.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">else</span>
-        ua = <span class="hljs-keyword">if</span> g <span class="hljs-keyword">then</span> <span class="hljs-keyword">new</span> Uint8ClampedArray([r,g,b,a]) <span class="hljs-keyword">else</span> r</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">else</span></pre></div></div>
             
         </li>
         
@@ -555,11 +552,12 @@ If r is not a number but a typed array, use it for the typedColor.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
-              <p>ua = if r.buffer then r else new Uint8ClampedArray([r,g,b,a])</p>
+              <p>ua = if g then new Uint8ClampedArray([r,g,b,a]) else r</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      ua.pixelArray = <span class="hljs-keyword">new</span> Uint32Array(ua.buffer, ua.byteOffset, <span class="hljs-number">1</span>)</pre></div></div>
+            <div class="content"><div class='highlight'><pre>        ua = <span class="hljs-keyword">if</span> r.buffer <span class="hljs-keyword">then</span> r <span class="hljs-keyword">else</span> <span class="hljs-keyword">new</span> Uint8ClampedArray([r,g,b,a])
+      ua.pixelArray = <span class="hljs-keyword">new</span> Uint32Array(ua.buffer, ua.byteOffset, <span class="hljs-number">1</span>)</pre></div></div>
             
         </li>
         
@@ -860,11 +858,11 @@ Use randomRgb &amp; randomGrayRgb to create random typed colors.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">colorToArray</span>: <span class="hljs-function"><span class="hljs-params">(color)</span> -&gt;</span>
-    type = <span class="hljs-property">@colorType</span>(color)
-    <span class="hljs-keyword">switch</span> type
+    <span class="hljs-keyword">switch</span> <span class="hljs-property">@colorType</span>(color)
       <span class="hljs-keyword">when</span> <span class="hljs-string">"css"</span>   <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> Color.stringToUint8s color
       <span class="hljs-keyword">when</span> <span class="hljs-string">"pixel"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> Color.pixelToUint8s color
       <span class="hljs-keyword">when</span> <span class="hljs-string">"typed"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> color <span class="hljs-comment"># already a (typed) array</span>
+    <span class="hljs-keyword">return</span> color <span class="hljs-keyword">if</span> u.isArray(color) <span class="hljs-keyword">or</span> color.buffer
     u.error <span class="hljs-string">"colorToArray: bad color: <span class="hljs-subst">#{color}</span>"</span></pre></div></div>
             
         </li>
@@ -876,8 +874,7 @@ Use randomRgb &amp; randomGrayRgb to create random typed colors.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-47">&#182;</a>
               </div>
-              <p>With arrayToColor &amp; colorToArray we can convert between all color types.
-Given a color and a type, convert color to that type.</p>
+              <p>Given a color or rgba array and a type, return color of that type.</p>
 
             </div>
             
@@ -915,7 +912,10 @@ Color.initSharedPixel() <span class="hljs-comment"># Initialize the shared buffe
 To include them in your model, use:</p>
 <pre><code>namedColorString = <span class="hljs-string">"AliceBlue AntiqueWhite Aqua Aquamarine Azure Beige Bisque Black BlanchedAlmond Blue BlueViolet Brown BurlyWood CadetBlue Chartreuse Chocolate Coral CornflowerBlue Cornsilk Crimson Cyan DarkBlue DarkCyan DarkGoldenRod DarkGray DarkGreen DarkKhaki DarkMagenta DarkOliveGreen DarkOrange DarkOrchid DarkRed DarkSalmon DarkSeaGreen DarkSlateBlue DarkSlateGray DarkTurquoise DarkViolet DeepPink DeepSkyBlue DimGray DodgerBlue FireBrick FloralWhite ForestGreen Fuchsia Gainsboro GhostWhite Gold GoldenRod Gray Green GreenYellow HoneyDew HotPink IndianRed Indigo Ivory Khaki Lavender LavenderBlush LawnGreen LemonChiffon LightBlue LightCoral LightCyan LightGoldenRodYellow LightGray LightGreen LightPink LightSalmon LightSeaGreen LightSkyBlue LightSlateGray LightSteelBlue LightYellow Lime LimeGreen Linen Magenta Maroon MediumAquaMarine MediumBlue MediumOrchid MediumPurple MediumSeaGreen MediumSlateBlue MediumSpringGreen MediumTurquoise MediumVioletRed MidnightBlue MintCream MistyRose Moccasin NavajoWhite Navy OldLace Olive OliveDrab Orange OrangeRed Orchid PaleGoldenRod PaleGreen PaleTurquoise PaleVioletRed PapayaWhip PeachPuff Peru Pink Plum PowderBlue Purple Red RosyBrown RoyalBlue SaddleBrown Salmon SandyBrown SeaGreen SeaShell Sienna Silver SkyBlue SlateBlue SlateGray Snow SpringGreen SteelBlue Tan Teal Thistle Tomato Turquoise Violet Wheat White WhiteSmoke Yellow YellowGreen"</span>
 namedColors = namedColorString.split(<span class="hljs-string">" "</span>)
-</code></pre>
+</code></pre><p>NetLogo’s 14 base colors names are:
+gray red orange brown yellow green lime turquoise cyan sky blue violet magenta pink
+but do not match exactly the css named colors.</p>
+
             </div>
             
         </li>

@@ -1,15 +1,13 @@
-# This module contains these color topics:
+# This module contains utilities for all browser color types.
 #
-# * The two browser color types: pixels and strings
+# * The two basic browser color types: pixels and strings
 # * A typedColor: A Uint8 (clamped) r,g,b,a TypedArray
 #   with both rgba and pixel views onto the same buffer,
 #   and, optionally, the associated css string.
-# * A color map class and several colormap "factories"
-# * Several simple core color primitive functions
+# * Utilities for converting to and between these color types
 #
-# In the functions below, rgba values are ints in 0-255, including a.
-#
-# Note a is not in 0-1 as in css colors.
+# *Note*: In the functions below, rgba values are ints in 0-255, including a.
+# I.e. a is not in 0-1 as in css colors.
 #
 # Naming convention: rgba/array is generally a 3 or 4 element JavaScript
 # Array thus not a browser color.
@@ -21,7 +19,7 @@
 # and other odd mixtures of values, some in degrees, some in percentages.
 #
 # We restrict ourselves to css color strings, 32 bit integer pixels,
-# and 4 element Uint8 TypedColors (in ColorTypes module)
+# and 4 element Uint8 TypedColors
 
 Color = {
 
@@ -35,7 +33,7 @@ Color = {
   # http://www.crockford.com/wrrrld/color.html) page
   # as well as the [future CSS4](http://dev.w3.org/csswg/css-color/) spec.
   #
-  # The strings can be may forms:
+  # The strings can be one of 7 forms:
   # * Names: [140 color case-insensitive names](
   #   http://en.wikipedia.org/wiki/Web_colors#HTML_color_names) like
   #   Red, Green, CadetBlue, and so on.
@@ -169,9 +167,9 @@ Color = {
 
   # Scale a data value to an rgb color.
   # value is in [min max], rgb's are two colors.
-  # This can make simple, two color, gradient color maps.
-  # See ColorMap.scaleColor for related scaling method and
-  # ColorMap.gradientUint8Array for complex, MatLab-like, gradients.
+  #
+  # See ColorMap's scaleColor for related scaling method and
+  # gradientColorMap for complex, MatLab-like, gradients.
   rgbLerp: (value, min, max, rgb1, rgb0 = [0,0,0]) ->
     scale = u.lerpScale value, min, max #(value - min)/(max - min)
     (Math.round(u.lerp(rgb0[i], rgb1[i], scale)) for i in [0..2])
@@ -211,8 +209,8 @@ Color = {
         ua.set [r,g,b,a]
         # ua.pixelArray = new Uint32Array(map.buffer, index*4, 1)
       else
-        ua = if g then new Uint8ClampedArray([r,g,b,a]) else r
-        # ua = if r.buffer then r else new Uint8ClampedArray([r,g,b,a])
+        # ua = if g then new Uint8ClampedArray([r,g,b,a]) else r
+        ua = if r.buffer then r else new Uint8ClampedArray([r,g,b,a])
       ua.pixelArray = new Uint32Array(ua.buffer, ua.byteOffset, 1)
       # lazy evaluation will set the css triString for this typed array.
       #
@@ -303,14 +301,13 @@ Color = {
     u.error "arrayToColor: incorrect type: #{type}"
   # Return array (either typed or Array) representing the color.
   colorToArray: (color) ->
-    type = @colorType(color)
-    switch type
+    switch @colorType(color)
       when "css"   then return Color.stringToUint8s color
       when "pixel" then return Color.pixelToUint8s color
       when "typed" then return color # already a (typed) array
+    return color if u.isArray(color) or color.buffer
     u.error "colorToArray: bad color: #{color}"
-  # With arrayToColor & colorToArray we can convert between all color types.
-  # Given a color and a type, convert color to that type.
+  # Given a color or rgba array and a type, return color of that type.
   convertColor: (color, type) ->
     # Return color if color is already of type.
     return color if @colorType(color) is type
@@ -324,3 +321,7 @@ Color.initSharedPixel() # Initialize the shared buffer pixel/rgb view
 #
 #     namedColorString = "AliceBlue AntiqueWhite Aqua Aquamarine Azure Beige Bisque Black BlanchedAlmond Blue BlueViolet Brown BurlyWood CadetBlue Chartreuse Chocolate Coral CornflowerBlue Cornsilk Crimson Cyan DarkBlue DarkCyan DarkGoldenRod DarkGray DarkGreen DarkKhaki DarkMagenta DarkOliveGreen DarkOrange DarkOrchid DarkRed DarkSalmon DarkSeaGreen DarkSlateBlue DarkSlateGray DarkTurquoise DarkViolet DeepPink DeepSkyBlue DimGray DodgerBlue FireBrick FloralWhite ForestGreen Fuchsia Gainsboro GhostWhite Gold GoldenRod Gray Green GreenYellow HoneyDew HotPink IndianRed Indigo Ivory Khaki Lavender LavenderBlush LawnGreen LemonChiffon LightBlue LightCoral LightCyan LightGoldenRodYellow LightGray LightGreen LightPink LightSalmon LightSeaGreen LightSkyBlue LightSlateGray LightSteelBlue LightYellow Lime LimeGreen Linen Magenta Maroon MediumAquaMarine MediumBlue MediumOrchid MediumPurple MediumSeaGreen MediumSlateBlue MediumSpringGreen MediumTurquoise MediumVioletRed MidnightBlue MintCream MistyRose Moccasin NavajoWhite Navy OldLace Olive OliveDrab Orange OrangeRed Orchid PaleGoldenRod PaleGreen PaleTurquoise PaleVioletRed PapayaWhip PeachPuff Peru Pink Plum PowderBlue Purple Red RosyBrown RoyalBlue SaddleBrown Salmon SandyBrown SeaGreen SeaShell Sienna Silver SkyBlue SlateBlue SlateGray Snow SpringGreen SteelBlue Tan Teal Thistle Tomato Turquoise Violet Wheat White WhiteSmoke Yellow YellowGreen"
 #     namedColors = namedColorString.split(" ")
+#
+# NetLogo's 14 base colors names are:
+# gray red orange brown yellow green lime turquoise cyan sky blue violet magenta pink
+# but do not match exactly the css named colors.
