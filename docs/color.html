@@ -27,17 +27,16 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-1">&#182;</a>
               </div>
-              <p>This module contains these color topics:</p>
+              <p>This module contains utilities for all browser color types.</p>
 <ul>
-<li>The two browser color types: pixels and strings</li>
+<li>The two basic browser color types: pixels and strings</li>
 <li>A typedColor: A Uint8 (clamped) r,g,b,a TypedArray
 with both rgba and pixel views onto the same buffer,
 and, optionally, the associated css string.</li>
-<li>A color map class and several colormap “factories”</li>
-<li>Several simple core color primitive functions</li>
+<li>Utilities for converting to and between these color types</li>
 </ul>
-<p>In the functions below, rgba values are ints in 0-255, including a.</p>
-<p>Note a is not in 0-1 as in css colors.</p>
+<p><em>Note</em>: In the functions below, rgba values are ints in 0-255, including a.
+I.e. a is not in 0-1 as in css colors.</p>
 <p>Naming convention: rgba/array is generally a 3 or 4 element JavaScript
 Array thus not a browser color.
 Instead, it is used internally for functions taking r, g, b, a=255
@@ -46,7 +45,7 @@ color values.</p>
 a TypedArray of 4 floats in 0-1 (webgl),
 and other odd mixtures of values, some in degrees, some in percentages.</p>
 <p>We restrict ourselves to css color strings, 32 bit integer pixels,
-and 4 element Uint8 TypedColors.</p>
+and 4 element Uint8 TypedColors</p>
 
             </div>
             
@@ -62,15 +61,9 @@ Color = {</pre></div></div>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
-              <p>These are the types of colors we support</p>
+              <h3 id="css-color-strings-">CSS Color Strings.</h3>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">ColorTypes</span>: {
-    <span class="hljs-attribute">css</span>: <span class="hljs-string">"css"</span>      <span class="hljs-comment"># a legal css color string</span>
-    <span class="hljs-attribute">pixel</span>: <span class="hljs-string">"pixel"</span>  <span class="hljs-comment"># a Uint32 r,g,b,a with correct endianness</span>
-    <span class="hljs-attribute">typed</span>: <span class="hljs-string">"typed"</span>  <span class="hljs-comment"># a Uint8 typed array with additional properties</span>
-  }</pre></div></div>
             
         </li>
         
@@ -81,191 +74,14 @@ Color = {</pre></div></div>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <p>Return the color type of a given color</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">colorType</span>: <span class="hljs-function"><span class="hljs-params">(color)</span> -&gt;</span>
-    <span class="hljs-keyword">if</span> u.isString color <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-string">"css"</span>
-    <span class="hljs-keyword">if</span> u.isInteger color <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-string">"pixel"</span>
-    <span class="hljs-keyword">if</span> color.pixelArray <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-string">"typed"</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-4">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-4">&#182;</a>
-              </div>
-              <p>safe to call with non-color; useful for testing if color <em>is</em> a color.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-literal">null</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-5">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-5">&#182;</a>
-              </div>
-              <p>Validate the color type</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">isValidType</span>: <span class="hljs-function"><span class="hljs-params">(type)</span> -&gt;</span> <span class="hljs-property">@ColorTypes</span>[type]?
-  <span class="hljs-attribute">checkType</span>: <span class="hljs-function"><span class="hljs-params">(type)</span> -&gt;</span>
-    u.error <span class="hljs-string">"Bad color type <span class="hljs-subst">#{type}</span>"</span> <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-property">@isValidType</span> type</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-6">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-6">&#182;</a>
-              </div>
-              <p>Validate “array” which can be standard or typed array of length 3 or 4</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">isValidArray</span>: <span class="hljs-function"><span class="hljs-params">(array)</span> -&gt;</span>
-    (u.isArray(array) <span class="hljs-keyword">or</span> array.buffer) <span class="hljs-keyword">and</span> (array.length <span class="hljs-keyword">in</span> [<span class="hljs-number">3.</span><span class="hljs-number">.4</span>])
-  <span class="hljs-attribute">checkArray</span>: <span class="hljs-function"><span class="hljs-params">(array)</span> -&gt;</span>
-    u.error <span class="hljs-string">"Bad array: <span class="hljs-subst">#{array}</span>/<span class="hljs-subst">#{array.length}</span>"</span> <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-property">@isValidArray</span> array</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-7">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-7">&#182;</a>
-              </div>
-              <p>Return new color of the given type, given an r,g,b,(a) array,
-where a defaults to opaque (255).
-The array can be a JavaScript Array, a TypedArray, or a TypedColor</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">arrayToColor</span>: <span class="hljs-function"><span class="hljs-params">(array, type)</span> -&gt;</span>
-    <span class="hljs-property">@checkArray</span>(array)
-    <span class="hljs-property">@checkType</span>(type)
-    <span class="hljs-keyword">switch</span> type
-      <span class="hljs-keyword">when</span> <span class="hljs-string">"css"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-property">@triString</span> array...
-      <span class="hljs-keyword">when</span> <span class="hljs-string">"pixel"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-property">@rgbaToPixel</span> array...
-      <span class="hljs-keyword">when</span> <span class="hljs-string">"typed"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-property">@typedColor</span> array...
-    u.error <span class="hljs-string">"arrayToColor problem"</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-8">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-8">&#182;</a>
-              </div>
-              <p>Return array (either typed or Array) representing the color.
-With this and the above, all color permutations are possible,
-i.e. a css string can be converted to a typed color:</p>
-<p>   Color.arrayToColor(Color.colorToArray(“red”), “typed”)</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">colorToArray</span>: <span class="hljs-function"><span class="hljs-params">(color)</span> -&gt;</span>
-    type = <span class="hljs-property">@colorType</span>(color)
-    <span class="hljs-keyword">switch</span> type
-      <span class="hljs-keyword">when</span> <span class="hljs-string">"css"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-property">@stringToUint8s</span> color <span class="hljs-comment"># @stringToRgba color</span>
-      <span class="hljs-keyword">when</span> <span class="hljs-string">"pixel"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-property">@pixelToRgba</span> color <span class="hljs-comment"># @stringToUint8s color # @stringToRgba color</span>
-      <span class="hljs-keyword">when</span> <span class="hljs-string">"typed"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> color <span class="hljs-comment"># already a (typed) array</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-9">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-9">&#182;</a>
-              </div>
-              <p>Speaking of which: Convert color to a color of a new type.
-Return color if color is already of type.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">convertColor</span>: <span class="hljs-function"><span class="hljs-params">(color, type)</span> -&gt;</span>
-    <span class="hljs-keyword">return</span> color <span class="hljs-keyword">if</span> <span class="hljs-property">@colorType</span>(color) <span class="hljs-keyword">is</span> type
-    <span class="hljs-property">@arrayToColor</span>(<span class="hljs-property">@colorToArray</span>(color), type)</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-10">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-10">&#182;</a>
-              </div>
-              <p>Return a random color of the given type</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">randomColor</span>: <span class="hljs-function"><span class="hljs-params">(type=<span class="hljs-string">"typed"</span>)</span> -&gt;</span> <span class="hljs-property">@arrayToColor</span>(<span class="hljs-property">@randomRgba</span>(), type)</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-11">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-11">&#182;</a>
-              </div>
-              <p>Hopefully temporary .. convert to 3 or 4 element array with alpha in 0-1</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">legacyColor</span>: <span class="hljs-function"><span class="hljs-params">(color)</span> -&gt;</span>
-    array = Array(<span class="hljs-property">@colorToArray</span>(color)...)
-    <span class="hljs-keyword">if</span> array[<span class="hljs-number">3</span>] <span class="hljs-keyword">is</span> <span class="hljs-number">255</span> <span class="hljs-keyword">then</span> array.pop() <span class="hljs-keyword">else</span> array[<span class="hljs-number">3</span>] /= <span class="hljs-number">255</span>
-    array</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-12">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-12">&#182;</a>
-              </div>
-              <h3 id="css-color-strings-">CSS Color Strings.</h3>
-
-            </div>
-            
-        </li>
-        
-        
-        <li id="section-13">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-13">&#182;</a>
-              </div>
               <p>CSS colors in HTML are strings, see <a href="http://www.w3schools.com/cssref/css_colors_legal.asp">legal CSS string colors</a>
 and <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value">Mozilla’s Color Reference</a>
-as wall as the <a href="http://dev.w3.org/csswg/css-color/">future CSS4</a> spec.</p>
-<p>The strings can be may forms:</p>
+and Doug Crockford’s <a href="http://www.crockford.com/wrrrld/color.html">interactive named colors</a> page
+as well as the <a href="http://dev.w3.org/csswg/css-color/">future CSS4</a> spec.</p>
+<p>The strings can be one of 7 forms:</p>
 <ul>
-<li>Names: <a href="http://en.wikipedia.org/wiki/Web_colors#HTML_color_names">140 color case-insensitive names</a> like CadetBlue</li>
+<li>Names: <a href="http://en.wikipedia.org/wiki/Web_colors#HTML_color_names">140 color case-insensitive names</a> like
+Red, Green, CadetBlue, and so on.</li>
 <li>Hex, short and long form: #0f0, #ff10a0</li>
 <li>RGB: rgb(255, 0, 0), rgba(255, 0, 0, 0.5)</li>
 <li>HSL: hsl(120, 100%, 50%), hsla(120, 100%, 50%, 0.8)</li>
@@ -276,30 +92,11 @@ as wall as the <a href="http://dev.w3.org/csswg/css-color/">future CSS4</a> spec
         </li>
         
         
-        <li id="section-14">
+        <li id="section-4">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-14">&#182;</a>
-              </div>
-              <p>Legacy: Check alpha to be int in 0-255, not float in (0-1].
-The name is the function, for clearer error message in console.
-This will be romoved after integration into a few applications</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">checkAlpha</span>: <span class="hljs-function"><span class="hljs-params">(name, a)</span> -&gt;</span>
-    <span class="hljs-keyword">if</span> <span class="hljs-number">0</span> &lt; a &lt;= <span class="hljs-number">1</span> <span class="hljs-comment"># well, 1 *could* be OK, it's in 0-255.</span>
-      <span class="hljs-built_in">console</span>.log <span class="hljs-string">"<span class="hljs-subst">#{name}</span>: a=<span class="hljs-subst">#{a}</span>. Alpha float in (0-1], not int in [0-255]"</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-15">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-15">&#182;</a>
+                <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
               <p>Convert 4 r,g,b,a ints in [0-255] to a css color string.
 Alpha “a” is int in [0-255], not the “other alpha” float in 0-1</p>
@@ -307,18 +104,17 @@ Alpha “a” is int in [0-255], not the “other alpha” float in 0-1</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">rgbaString</span>: <span class="hljs-function"><span class="hljs-params">(r, g, b, a=<span class="hljs-number">255</span>)</span> -&gt;</span>
-    <span class="hljs-property">@checkAlpha</span> <span class="hljs-string">"rgbaString"</span>, a
     a = a/<span class="hljs-number">255</span>; a4 = a.toPrecision(<span class="hljs-number">4</span>)
     <span class="hljs-keyword">if</span> a <span class="hljs-keyword">is</span> <span class="hljs-number">1</span> <span class="hljs-keyword">then</span> <span class="hljs-string">"rgb(<span class="hljs-subst">#{r}</span>,<span class="hljs-subst">#{g}</span>,<span class="hljs-subst">#{b}</span>)"</span> <span class="hljs-keyword">else</span> <span class="hljs-string">"rgba(<span class="hljs-subst">#{r}</span>,<span class="hljs-subst">#{g}</span>,<span class="hljs-subst">#{b}</span>,<span class="hljs-subst">#{a4}</span>)"</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-16">
+        <li id="section-5">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-16">&#182;</a>
+                <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
               <p>Convert 3 ints, h in [0-360], s,l in [0-100]% to a css color string.
 Alpha “a” is int in [0-255].</p>
@@ -327,18 +123,17 @@ Alpha “a” is int in [0-255].</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">hslString</span>: <span class="hljs-function"><span class="hljs-params">(h, s, l, a=<span class="hljs-number">255</span>)</span> -&gt;</span>
-    <span class="hljs-property">@checkAlpha</span> <span class="hljs-string">"hslString"</span>, a
     a = a/<span class="hljs-number">255</span>; a4 = a.toPrecision(<span class="hljs-number">4</span>)
     <span class="hljs-keyword">if</span> a <span class="hljs-keyword">is</span> <span class="hljs-number">1</span> <span class="hljs-keyword">then</span> <span class="hljs-string">"hsl(<span class="hljs-subst">#{h}</span>,<span class="hljs-subst">#{s}</span>%,<span class="hljs-subst">#{l}</span>%)"</span> <span class="hljs-keyword">else</span> <span class="hljs-string">"hsla(<span class="hljs-subst">#{h}</span>,<span class="hljs-subst">#{s}</span>%,<span class="hljs-subst">#{l}</span>%,<span class="hljs-subst">#{a4}</span>)"</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-17">
+        <li id="section-6">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-17">&#182;</a>
+                <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
               <p>Return a web/html/css hex color string for an r,g,b opaque color.
 Identical color will be drawn as if using rgbaString above
@@ -356,11 +151,11 @@ Default is to check for the short hex form: #nnn.</p>
         </li>
         
         
-        <li id="section-18">
+        <li id="section-7">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-18">&#182;</a>
+                <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
               <p>Return the 4 char short version of a hex color.  Each of the r,g,b values
 must be in [0-15].  The resulting color will be equivalent
@@ -378,15 +173,15 @@ to r<em>17, g</em>17, b*17, resulting in the values:</p>
         </li>
         
         
-        <li id="section-19">
+        <li id="section-8">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-19">&#182;</a>
+                <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
-              <p>This is a hybrid string and the generally our default.  It returns:</p>
+              <p>This is a hybrid string and generally our default.  It returns:</p>
 <ul>
-<li>rgbString if a not 255 (i.e. not opaque)</li>
+<li>rgbaString if a not 255 (i.e. not opaque)</li>
 <li>hexString otherwise</li>
 <li>with the hexShortString if appropriate</li>
 </ul>
@@ -394,17 +189,16 @@ to r<em>17, g</em>17, b*17, resulting in the values:</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">triString</span>: <span class="hljs-function"><span class="hljs-params">(r, g, b, a=<span class="hljs-number">255</span>)</span> -&gt;</span>
-    <span class="hljs-property">@checkAlpha</span> <span class="hljs-string">"triString"</span>, a
     <span class="hljs-keyword">if</span> a <span class="hljs-keyword">is</span> <span class="hljs-number">255</span> <span class="hljs-keyword">then</span> <span class="hljs-property">@hexString</span>(r, g, b, <span class="hljs-literal">true</span>) <span class="hljs-keyword">else</span> <span class="hljs-property">@rgbaString</span>(r, g, b, a)</pre></div></div>
             
         </li>
         
         
-        <li id="section-20">
+        <li id="section-9">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-20">&#182;</a>
+                <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
               <h3 id="css-string-conversions">CSS String Conversions</h3>
 
@@ -413,17 +207,17 @@ to r<em>17, g</em>17, b*17, resulting in the values:</p>
         </li>
         
         
-        <li id="section-21">
+        <li id="section-10">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
+                <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
               <p>Return 4 element array given any legal CSS string color
 <a href="http://www.w3schools.com/cssref/css_colors_legal.asp">legal CSS string color</a></p>
 <p>Legal strings vary widely: CadetBlue, #0f0, rgb(255,0,0), hsl(120,100%,50%)</p>
 <p>Note: The browser speaks for itself: we simply set a 1x1 canvas fillStyle
-to the string and create a pixel, returning the r,g,b,a typedColor
+to the string and create a pixel, returning the r,g,b,a Typed Array
 Odd results if string is not recognized by browser.</p>
 
             </div>
@@ -431,11 +225,11 @@ Odd results if string is not recognized by browser.</p>
         </li>
         
         
-        <li id="section-22">
+        <li id="section-11">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
               <p>The shared 1x1 canvas 2D context.</p>
 
@@ -446,18 +240,18 @@ Odd results if string is not recognized by browser.</p>
         </li>
         
         
-        <li id="section-23">
+        <li id="section-12">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-12">&#182;</a>
               </div>
-              <p>Convert css string to shared typed array</p>
+              <p>Convert css string to typed array.
+If you need a JavaScript Array, use uint8sToRgba</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">stringToUint8s</span>: <span class="hljs-function"><span class="hljs-params">(string)</span> -&gt;</span> <span class="hljs-comment"># string = string.toLowerCase()?</span>
-    <span class="hljs-property">@sharedCtx1x1</span>.clearRect <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span> <span class="hljs-comment"># is this needed?</span>
     <span class="hljs-property">@sharedCtx1x1</span>.fillStyle = string
     <span class="hljs-property">@sharedCtx1x1</span>.fillRect <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>
     <span class="hljs-property">@sharedCtx1x1</span>.getImageData(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>).data</pre></div></div>
@@ -465,92 +259,11 @@ Odd results if string is not recognized by browser.</p>
         </li>
         
         
-        <li id="section-24">
+        <li id="section-13">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
-              </div>
-              <p>Convert css string to JavaScript array</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">stringToRgba</span>: <span class="hljs-function"><span class="hljs-params">(string)</span> -&gt;</span>
-    <span class="hljs-keyword">new</span> Array <span class="hljs-property">@stringToUint8s</span>(string)...</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-25">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-25">&#182;</a>
-              </div>
-              <h1 id="convert-css-string-to-pixel">Convert css string to pixel</h1>
-<p>stringToPixel: (string) -&gt; @rgbaToPixel @stringToUint8s(string)…</p>
-
-            </div>
-            
-        </li>
-        
-        
-        <li id="section-26">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
-              </div>
-              <p>Similarly, ask the browser to use the canvas gradient feature
-to create nColors given the gradient color stops and locs.</p>
-<p>Stops are css strings or rgba arrays. Locs are floats from 0-1</p>
-<p>This is a really powerful technique, see:</p>
-<ul>
-<li><a href="https://developer.mozilla.org/en-US/docs/Web/CSS/linear-gradient">Mozilla Gradient Doc</a></li>
-<li><a href="http://www.colorzilla.com/gradient-editor/">Colorzilla Gradient Editor</a></li>
-<li><a href="https://github.com/bpostlethwaite/colormap">GitHub ColorMap Project</a></li>
-</ul>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>
-  <span class="hljs-attribute">gradientDataArray</span>: <span class="hljs-function"><span class="hljs-params">(nColors, stops, locs)</span> -&gt;</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-27">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
-              </div>
-              <p>Convert css versions of the stops if they are rgb arrays</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    stops = (<span class="hljs-property">@arrayToColor</span> a, <span class="hljs-string">"css"</span> <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> stops) <span class="hljs-keyword">if</span> u.isArray stops[<span class="hljs-number">0</span>]
-    locs = u.aRamp <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, stops.length <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> locs?
-    ctx = u.createCtx nColors, <span class="hljs-number">1</span>
-    grad = ctx.createLinearGradient <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, nColors, <span class="hljs-number">0</span>
-    grad.addColorStop locs[i], stops[i] <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>..stops.length]
-    ctx.fillStyle = grad
-    ctx.fillRect <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, nColors, <span class="hljs-number">1</span>
-    u.ctxToImageData(ctx).data
-  <span class="hljs-attribute">gradientRgbaArray</span>: <span class="hljs-function"><span class="hljs-params">(nColors, stops, locs)</span> -&gt;</span>
-    id = <span class="hljs-property">@gradientDataArray</span> nColors, stops, locs
-    ( [ id[i], id[i+<span class="hljs-number">1</span>], id[i+<span class="hljs-number">2</span>], id[i+<span class="hljs-number">3</span>] ] <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>..id.length] <span class="hljs-keyword">by</span> <span class="hljs-number">4</span>)
-  <span class="hljs-attribute">gradientPixelArray</span>: <span class="hljs-function"><span class="hljs-params">(nColors, stops, locs)</span> -&gt;</span>
-    <span class="hljs-keyword">new</span> Uint32Array( <span class="hljs-property">@gradientDataArray</span>(nColors, stops, locs).buffer )</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-28">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
+                <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
               <h3 id="pixel-colors-">Pixel Colors.</h3>
 
@@ -559,11 +272,11 @@ to create nColors given the gradient color stops and locs.</p>
         </li>
         
         
-        <li id="section-29">
+        <li id="section-14">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
               <p>Primitive Rgba&lt;&gt;Pixel manipulation.</p>
 <p>These use two views onto a 4 byte typed array buffer.
@@ -572,8 +285,7 @@ see why at <a href="http://goo.gl/qrHXwB">Stack Overflow</a></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>
-  <span class="hljs-attribute">sharedPixel</span>: <span class="hljs-literal">null</span>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">sharedPixel</span>: <span class="hljs-literal">null</span>
   <span class="hljs-attribute">sharedUint8s</span>: <span class="hljs-literal">null</span>
   <span class="hljs-attribute">initSharedPixel</span>:<span class="hljs-function"> -&gt;</span>
     <span class="hljs-property">@sharedPixel</span> = <span class="hljs-keyword">new</span> Uint32Array(<span class="hljs-number">1</span>)
@@ -582,62 +294,48 @@ see why at <a href="http://goo.gl/qrHXwB">Stack Overflow</a></p>
         </li>
         
         
-        <li id="section-30">
+        <li id="section-15">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
+                <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
               <p>Convert r,g,b,a to a single Uint32 pixel, correct endian format.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">rgbaToPixel</span>: <span class="hljs-function"><span class="hljs-params">(r, g, b, a=<span class="hljs-number">255</span>)</span> -&gt;</span>
-    <span class="hljs-property">@sharedUint8s</span>[i] = [r, g, b, a][i] <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span><span class="hljs-number">.3</span>]
+    <span class="hljs-property">@sharedUint8s</span>.set [r, g, b, a]
     <span class="hljs-property">@sharedPixel</span>[<span class="hljs-number">0</span>]</pre></div></div>
             
         </li>
         
         
-        <li id="section-31">
+        <li id="section-16">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-31">&#182;</a>
+                <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
-              <p>Convert a pixel to the shared rgba uInt8 typed view.
-Good for one-time computations like finding the pixel r,g,b,a values.
-Use pixelToRgba below if you need a persistant copy of the shared color</p>
+              <p>Convert a pixel to Uint8s via the shared typed views.
+sharedOK = true returns the sharedUint8s, useful
+for one-time computations like finding the pixel r,g,b,a values.
+Default is to clone the sharedUint8s.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">pixelToUint8s</span>: <span class="hljs-function"><span class="hljs-params">(pixel)</span> -&gt;</span>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">pixelToUint8s</span>: <span class="hljs-function"><span class="hljs-params">(pixel, sharedOK = <span class="hljs-literal">false</span>)</span> -&gt;</span>
     <span class="hljs-property">@sharedPixel</span>[<span class="hljs-number">0</span>] = pixel
-    <span class="hljs-property">@sharedUint8s</span></pre></div></div>
+    <span class="hljs-keyword">if</span> sharedOK <span class="hljs-keyword">then</span> <span class="hljs-property">@sharedUint8s</span> <span class="hljs-keyword">else</span> <span class="hljs-keyword">new</span> Uint8ClampedArray <span class="hljs-property">@sharedUint8s</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-32">
+        <li id="section-17">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-32">&#182;</a>
-              </div>
-              <p>Convert a pixel to a new JavaScript array</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">pixelToRgba</span>: <span class="hljs-function"><span class="hljs-params">(pixel)</span> -&gt;</span> <span class="hljs-keyword">new</span> Array(<span class="hljs-property">@pixelToUint8s</span>(pixel)...)</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-33">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
+                <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
               <h3 id="color-conversion-and-scaling-functions-">Color Conversion and Scaling Functions.</h3>
 
@@ -646,11 +344,60 @@ Use pixelToRgba below if you need a persistant copy of the shared color</p>
         </li>
         
         
-        <li id="section-34">
+        <li id="section-18">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>Return rgb array with 3 random ints in 0-255.
+Convert to random cssString or pixel via functions above.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">randomRgb</span>:<span class="hljs-function"> -&gt;</span> (u.randomInt(<span class="hljs-number">256</span>) <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span><span class="hljs-number">.2</span>])</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>Return random gray color, with intensities in [min,max).</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">randomGrayRgb</span>: <span class="hljs-function"><span class="hljs-params">(min = <span class="hljs-number">0</span>, max = <span class="hljs-number">256</span>)</span> -&gt;</span>
+    i = u.randomInt2 min, max
+    [i, i, i]</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>Convert Uint8s to Array (avoid “new Array”, better JS translation.)
+Useful after pixelToUint8s, stringToUint8s, hslToRgb</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">uint8sToRgba</span>: <span class="hljs-function"><span class="hljs-params">(uint8s)</span> -&gt;</span> Array uint8s...</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
               <p>Return the gray/intensity float value for a given r,g,b color
 Use Math.round to convert to 0-255 int for gray color value.
@@ -663,61 +410,13 @@ Use Math.round to convert to 0-255 int for gray color value.
         </li>
         
         
-        <li id="section-35">
+        <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
-              <p>RGB &lt;&gt; HSL (Hue, Saturation, Lightness) conversions.</p>
-<p>r,g,b are ints in [0-255], i.e. 3 unsigned bytes of a pixel.
-h int in [0-360] degrees; s,l ints [0-100] percents; (h=0 same as h=360)
-See <a href="http://en.wikipedia.org/wiki/HSV_color_space">Wikipedia</a>
-and <a href="http://axonflux.com/handy-rgb-to-hsl-and-rgb-to-hsv-color-model-c">Blog Post</a></p>
-<p>This is a <a href="http://dev.w3.org/csswg/css-color/#named-hue-examples">good table of hues</a>
-and this is the <a href="http://www.w3.org/TR/css3-color/#hsl-color">W3C HSL standard</a></p>
-<p>Note that HSL is <a href="http://en.wikipedia.org/wiki/HSL_and_HSV">not the same as HSB/HSV</a></p>
-
-            </div>
-            
-        </li>
-        
-        
-        <li id="section-36">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
-              </div>
-              <p>Convert r,g,b to [h,s,l] Array. Note opaque, no “a” value</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">rgbToHsl</span>: <span class="hljs-function"><span class="hljs-params">(r, g, b)</span> -&gt;</span>
-    r = r/<span class="hljs-number">255</span>; g = g/<span class="hljs-number">255</span>; b = b/<span class="hljs-number">255</span>
-    max = Math.max(r,g,b); min = Math.min(r,g,b)
-    sum = max + min; diff = max - min
-    l = sum/<span class="hljs-number">2</span> <span class="hljs-comment"># lightness is the average of the largest and smallest rgb's</span>
-    <span class="hljs-keyword">if</span> max <span class="hljs-keyword">is</span> min
-      h = s = <span class="hljs-number">0</span> <span class="hljs-comment"># achromatic, a shade of gray</span>
-    <span class="hljs-keyword">else</span>
-      s = <span class="hljs-keyword">if</span> l &gt; <span class="hljs-number">0.5</span> <span class="hljs-keyword">then</span> diff/(<span class="hljs-number">2</span>-sum) <span class="hljs-keyword">else</span> diff/sum
-      <span class="hljs-keyword">switch</span> max
-        <span class="hljs-keyword">when</span> r <span class="hljs-keyword">then</span> h = ((g - b) / diff) + (<span class="hljs-keyword">if</span> g &lt; b <span class="hljs-keyword">then</span> <span class="hljs-number">6</span> <span class="hljs-keyword">else</span> <span class="hljs-number">0</span>)
-        <span class="hljs-keyword">when</span> g <span class="hljs-keyword">then</span> h = ((b - r) / diff) + <span class="hljs-number">2</span>
-        <span class="hljs-keyword">when</span> b <span class="hljs-keyword">then</span> h = ((r - g) / diff) + <span class="hljs-number">4</span>
-    [Math.round(<span class="hljs-number">360</span>*h/<span class="hljs-number">6</span>), Math.round(s*<span class="hljs-number">100</span>), Math.round(l*<span class="hljs-number">100</span>)]</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-37">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
-              </div>
-              <p>Convert h,s,l to r,g,b Array via stringToUint8s</p>
+              <p>Convert h,s,l to r,g,b Typed subarray via stringToUint8s</p>
 
             </div>
             
@@ -728,11 +427,11 @@ and this is the <a href="http://www.w3.org/TR/css3-color/#hsl-color">W3C HSL sta
         </li>
         
         
-        <li id="section-38">
+        <li id="section-23">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-38">&#182;</a>
+                <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
               <p>Return a <a href="http://www.compuphase.com/cmetric.htm">distance metric</a> between two colors.
 Max distance is roughly 765 (3*255), between black &amp; white.</p>
@@ -747,63 +446,31 @@ Max distance is roughly 765 (3*255), between black &amp; white.</p>
         </li>
         
         
-        <li id="section-39">
+        <li id="section-24">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-39">&#182;</a>
+                <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
-              <p>A very crude way to scale a data value to an rgb color.
-value is in [min max], rgb’s are two colors.
-See ColorMap.scaleColor for preferred method</p>
+              <p>Scale a data value to an rgb color.
+value is in [min max], rgb’s are two colors.</p>
+<p>See ColorMap’s scaleColor for related scaling method and
+gradientColorMap for complex, MatLab-like, gradients.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">rgbLerp</span>: <span class="hljs-function"><span class="hljs-params">(value, min, max, rgb1, rgb0 = [<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>])</span> -&gt;</span>
     scale = u.lerpScale value, min, max <span class="hljs-comment">#(value - min)/(max - min)</span>
-    (Math.round(u.lerp(rgb0[i], rgb1[i], scale))) <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span><span class="hljs-number">.2</span>]</pre></div></div>
+    (Math.round(u.lerp(rgb0[i], rgb1[i], scale)) <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span><span class="hljs-number">.2</span>])</pre></div></div>
             
         </li>
         
         
-        <li id="section-40">
+        <li id="section-25">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-40">&#182;</a>
-              </div>
-              <p>Return rgb array with 3 random ints in 0-255.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">randomRgb</span>:<span class="hljs-function"> -&gt;</span> (u.randomInt(<span class="hljs-number">256</span>) <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span><span class="hljs-number">.2</span>])</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-41">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-41">&#182;</a>
-              </div>
-              <p>Return rgba array with random rgb values, with “a” a constant opacity</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">randomRgba</span>: <span class="hljs-function"><span class="hljs-params">(a=<span class="hljs-number">255</span>)</span>-&gt;</span>
-    color = <span class="hljs-property">@randomRgb</span>()
-    color.push a
-    color</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-42">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-42">&#182;</a>
+                <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
               <h3 id="typed-color">Typed Color</h3>
 
@@ -812,18 +479,18 @@ See ColorMap.scaleColor for preferred method</p>
         </li>
         
         
-        <li id="section-43">
+        <li id="section-26">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-43">&#182;</a>
+                <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
               <p>A typed color is a typed array with r,g,b,a in 0-255 and optional
 css string. As usual, a is in 0-255, <em>not</em> in 0-1 as in some color formats.</p>
 <p>Return a 4 element Uint8ClampedArray, with two properties:</p>
 <ul>
 <li>pixelArray: A single element Uint32Array view on the Uint8ClampedArray</li>
-<li>str: an optional, lazy evaluated, css color string.</li>
+<li>string: an optional, lazy evaluated, css color string.</li>
 </ul>
 <p>Any change to the typedColor r,g,b,a elements will dynamically change
 the pixel value as it is a view onto the same buffer.</p>
@@ -840,36 +507,68 @@ WebGL colors (4 rgba floats in 0-1), and in images.</p>
         </li>
         
         
-        <li id="section-44">
+        <li id="section-27">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-44">&#182;</a>
+                <a class="pilcrow" href="#section-27">&#182;</a>
               </div>
               <p>This <a href="http://goo.gl/FxVFe">IIFE (history)</a>
-creates a proto with an Uint proto, which is in turn
-set to the proto of the typedColor function.  Whew!
+creates a TypedColorProto with an Uint proto, which is in turn
+set to the proto of the typedColor returned value.  Whew!
 This allows TypedArrays to have prototype properties,
-including Object.defineProperties without enlarging them.
-typedColor = (r, g, b, a=255, stringToo=true) -&gt;</p>
+including Object.defineProperties without enlarging them.</p>
+<p>Experimental: The map &amp; index are for possible colormap use.
+If r is not a number but a typed array, use it for the typedColor.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-title">typedColor</span> = <span class="hljs-params">(r, g, b, a=<span class="hljs-number">255</span>)</span> -&gt;</span>
-      Color.checkAlpha <span class="hljs-string">"typedColor"</span>, a
-      ua = <span class="hljs-keyword">new</span> Uint8ClampedArray([r,g,b,a])
-      ua.pixelArray = <span class="hljs-keyword">new</span> Uint32Array(ua.buffer)</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-function"><span class="hljs-title">typedColor</span> = <span class="hljs-params">(r, g, b, a=<span class="hljs-number">255</span>, map, index)</span> -&gt;</span>
+      <span class="hljs-keyword">if</span> map <span class="hljs-comment"># assume Uint8ClampedArray rgba array</span>
+        ua = map.subarray index*<span class="hljs-number">4</span>, index*<span class="hljs-number">4</span> + <span class="hljs-number">4</span>
+        ua.set [r,g,b,a]</pre></div></div>
             
         </li>
         
         
-        <li id="section-45">
+        <li id="section-28">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-45">&#182;</a>
+                <a class="pilcrow" href="#section-28">&#182;</a>
               </div>
-              <p>lazy evaluation will set the css string for this typed array:</p>
+              <p>ua.pixelArray = new Uint32Array(map.buffer, index*4, 1)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">else</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-29">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
+              </div>
+              <p>ua = if g then new Uint8ClampedArray([r,g,b,a]) else r</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        ua = <span class="hljs-keyword">if</span> r.buffer <span class="hljs-keyword">then</span> r <span class="hljs-keyword">else</span> <span class="hljs-keyword">new</span> Uint8ClampedArray([r,g,b,a])
+      ua.pixelArray = <span class="hljs-keyword">new</span> Uint32Array(ua.buffer, ua.byteOffset, <span class="hljs-number">1</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-30">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-30">&#182;</a>
+              </div>
+              <p>lazy evaluation will set the css triString for this typed array.</p>
 <pre><code>ua.string = Color.triString(r, g, b, a)
 </code></pre><p>do not set the ua.string directly, will get typed values out of sync.</p>
 
@@ -878,11 +577,11 @@ typedColor = (r, g, b, a=255, stringToo=true) -&gt;</p>
         </li>
         
         
-        <li id="section-46">
+        <li id="section-31">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-46">&#182;</a>
+                <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
               <p>Make me an instance of TypedColorProto</p>
 
@@ -895,62 +594,63 @@ typedColor = (r, g, b, a=255, stringToo=true) -&gt;</p>
         </li>
         
         
-        <li id="section-47">
+        <li id="section-32">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-47">&#182;</a>
+                <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
-              <p>Return string representation of typedColor, mainly console debugging.</p>
+              <p>Set TypedColorProto proto to be Uint8ClampedArray’s prototype</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="hljs-attribute">toString</span>:<span class="hljs-function"> -&gt;</span> <span class="hljs-string">"typedColor:<span class="hljs-subst">#{Array(@...).toString()}</span>;css=<span class="hljs-subst">#{<span class="hljs-property">@string</span> ? <span class="hljs-literal">null</span>}</span>"</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-attribute">__proto__</span>: Uint8ClampedArray.prototype</pre></div></div>
             
         </li>
         
         
-        <li id="section-48">
+        <li id="section-33">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-48">&#182;</a>
+                <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
               <p>Set the typed array; no need for getColor, it <em>is</em> the typed Uint8 array</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>      <span class="hljs-attribute">setColor</span>: <span class="hljs-function"><span class="hljs-params">(r,g,b,a=<span class="hljs-number">255</span>)</span> -&gt;</span>
-        [@[<span class="hljs-number">0</span>], @[<span class="hljs-number">1</span>], @[<span class="hljs-number">2</span>], @[<span class="hljs-number">3</span>]] = [r,g,b,a]
-        <span class="hljs-property">@string</span> = <span class="hljs-literal">null</span> <span class="hljs-keyword">if</span> <span class="hljs-property">@string</span> <span class="hljs-comment"># will be lazy evaluated via getString.</span></pre></div></div>
+        <span class="hljs-property">@string</span> = <span class="hljs-literal">null</span> <span class="hljs-keyword">if</span> <span class="hljs-property">@string</span> <span class="hljs-comment"># will be lazy evaluated via getString.</span>
+        @[<span class="hljs-number">0</span>]=r; @[<span class="hljs-number">1</span>]=g; @[<span class="hljs-number">2</span>]=b; @[<span class="hljs-number">3</span>]=a
+        @</pre></div></div>
             
         </li>
         
         
-        <li id="section-49">
+        <li id="section-34">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-49">&#182;</a>
+                <a class="pilcrow" href="#section-34">&#182;</a>
               </div>
-              <p>Set the pixel view, thus changing the array (Uint8) view</p>
+              <p>Set the pixel view, changing the shared array (Uint8) view too</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>      <span class="hljs-attribute">setPixel</span>: <span class="hljs-function"><span class="hljs-params">(pixel)</span>-&gt;</span>
-        <span class="hljs-property">@pixelArray</span>[<span class="hljs-number">0</span>]=pixel
-        <span class="hljs-property">@string</span> = <span class="hljs-literal">null</span> <span class="hljs-keyword">if</span> <span class="hljs-property">@string</span> <span class="hljs-comment"># will be lazy evaluated via getString.</span></pre></div></div>
+        <span class="hljs-property">@string</span> = <span class="hljs-literal">null</span> <span class="hljs-keyword">if</span> <span class="hljs-property">@string</span> <span class="hljs-comment"># will be lazy evaluated via getString.</span>
+        <span class="hljs-property">@pixelArray</span>[<span class="hljs-number">0</span>]=pixel</pre></div></div>
             
         </li>
         
         
-        <li id="section-50">
+        <li id="section-35">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-50">&#182;</a>
+                <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
-              <p>Get the pixel value, i.e. pixelArray[0]</p>
+              <p>Get the pixel value</p>
 
             </div>
             
@@ -959,18 +659,18 @@ typedColor = (r, g, b, a=255, stringToo=true) -&gt;</p>
         </li>
         
         
-        <li id="section-51">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-51">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
-              <p>Set both Typed Arrays to equivalent pixel/rgba values of the string.</p>
-<p>Does <em>not</em> set the @string, it will be lazily evaluated to its
+              <p>Set both Typed Arrays to equivalent pixel/rgba values of the css string.</p>
+<p>Does <em>not</em> set the chached @string, it will be lazily evaluated to its
 triString. This lets the typedColor remain small without the
-color string until required by getters.</p>
+color string until required by its getter.</p>
 <p>Note if you set string to “red” or “rgb(255,0,0)”, the resulting
-css string (triString) value will still return the standard #f00</p>
+css string (triString) value will return the triString #f00 value.</p>
 
             </div>
             
@@ -980,13 +680,13 @@ css string (triString) value will still return the standard #f00</p>
         </li>
         
         
-        <li id="section-52">
+        <li id="section-37">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-52">&#182;</a>
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
-              <p>Return the triString for this typedColor, setting the @string value</p>
+              <p>Return the triString for this typedColor, cached in the @string value</p>
 
             </div>
             
@@ -998,29 +698,17 @@ css string (triString) value will still return the standard #f00</p>
         </li>
         
         
-        <li id="section-53">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-53">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
-              <p>Set TypedColorProto proto to be Uint8ClampedArray’s prototype</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    TypedColorProto.__proto__ = Uint8ClampedArray.prototype</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-54">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-54">&#182;</a>
-              </div>
-              <p>Sugar for pixel, rgba, string properties.
-Note these are in TypedColorProto, not in the typedColor, thus shared.</p>
+              <p>Sugar for converting getter/setters into properties.
+Somewhat slower than getter/setter functions.
+Frequent rgba property setter very poor performance due to GC overhead.
+These are in TypedColorProto, not in the typedColor,
+thus shared and take no space in the color itself.</p>
 
             </div>
             
@@ -1029,11 +717,11 @@ Note these are in TypedColorProto, not in the typedColor, thus shared.</p>
         </li>
         
         
-        <li id="section-55">
+        <li id="section-39">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-55">&#182;</a>
+                <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
               <p>pixel: get/set typedColor.pixelArray[0] via pixel property</p>
 
@@ -1047,32 +735,31 @@ Note these are in TypedColorProto, not in the typedColor, thus shared.</p>
         </li>
         
         
-        <li id="section-56">
+        <li id="section-40">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-56">&#182;</a>
+                <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
-              <p>rgba: get/set Uint8 values via JavaScript Array</p>
+              <p>uints: set Uint8 values via JavaScript or Typed Array. Getter not needed.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="hljs-string">"rgba"</span>:
-        <span class="hljs-attribute">get</span>:<span class="hljs-function"> -&gt;</span> [@[<span class="hljs-number">0</span>], @[<span class="hljs-number">1</span>], @[<span class="hljs-number">2</span>], @[<span class="hljs-number">3</span>]]
-        <span class="hljs-attribute">set</span>: <span class="hljs-function"><span class="hljs-params">(val)</span> -&gt;</span> <span class="hljs-property">@setColor</span>(val...)
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-string">"uints"</span>:
+        <span class="hljs-attribute">get</span>:<span class="hljs-function"> -&gt;</span> @ <span class="hljs-comment">#.. not needed, already array</span>
+        <span class="hljs-attribute">set</span>: <span class="hljs-function"><span class="hljs-params">(val)</span> -&gt;</span> <span class="hljs-property">@setColor</span>(val...) <span class="hljs-comment"># beware! array GC slows this down.</span>
         <span class="hljs-attribute">enumerable</span>: <span class="hljs-literal">true</span> <span class="hljs-comment"># make visible in stack trace, remove after debugging</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-57">
+        <li id="section-41">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-57">&#182;</a>
+                <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
-              <p>css: get/set typedColor.str via @string property. Updates TypedArrays.
-Note the str getter property lazily sets @string.</p>
+              <p>css: get/set typedColor.str via @string property. Updates TypedArrays.</p>
 
             </div>
             
@@ -1084,575 +771,130 @@ Note the str getter property lazily sets @string.</p>
         </li>
         
         
-        <li id="section-58">
+        <li id="section-42">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-58">&#182;</a>
+                <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
-              <p>str: legacy usage, identical to css, will remove</p>
+              <p>str: Legacy usage, identical to css getter property, will remove asap</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>      <span class="hljs-string">"str"</span>:
         <span class="hljs-attribute">get</span>:<span class="hljs-function"> -&gt;</span> <span class="hljs-property">@getString</span>()
-        <span class="hljs-attribute">set</span>: <span class="hljs-function"><span class="hljs-params">(val)</span> -&gt;</span> <span class="hljs-property">@setString</span>(val)
         <span class="hljs-attribute">enumerable</span>: <span class="hljs-literal">true</span> <span class="hljs-comment"># make visible in stack trace, remove after debugging</span>
     typedColor</pre></div></div>
             
         </li>
         
         
-        <li id="section-59">
+        <li id="section-43">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-59">&#182;</a>
+                <a class="pilcrow" href="#section-43">&#182;</a>
               </div>
-              <h3 id="color-maps">Color Maps</h3>
+              <h3 id="color-types">Color Types</h3>
+<p>We support these color types: css, pixel, uint8s, typed</p>
 
             </div>
             
         </li>
         
         
-        <li id="section-60">
+        <li id="section-44">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-60">&#182;</a>
+                <a class="pilcrow" href="#section-44">&#182;</a>
               </div>
-              <p>A colormap is an array of colors. Maps are extremely useful:</p>
-<ul>
-<li>Performance: Maps are created once, reducing the calls to primitives
-whenever a color is changed.</li>
-<li>Space Effeciency: They <em>vastly</em> reduce the number of colors used.</li>
-<li>Data: Their index provides a MatLab/NumPy/NetLogo “color as data” feature.
-Ex: “Heat” may be mapped to a gradient from green to red.</li>
-</ul>
-<p>And you can simply make your own array of legal colors, works fine.
-And protoMap will even do prototype magic to turn your legal color array
-into a ColorMap.</p>
+              <p>Return the color type of a given color, null if not a color.
+null useful for testing if color <em>is</em> a color.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>
-  <span class="hljs-attribute">ColorMap</span>: <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ColorMap</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Array</span></span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">colorType</span>: <span class="hljs-function"><span class="hljs-params">(color)</span> -&gt;</span>
+    <span class="hljs-keyword">if</span> u.isString color  <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-string">"css"</span>
+    <span class="hljs-keyword">if</span> u.isInteger color <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-string">"pixel"</span>
+    <span class="hljs-keyword">if</span> color.pixelArray  <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-string">"typed"</span>
+    <span class="hljs-literal">null</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-61">
+        <li id="section-45">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-61">&#182;</a>
+                <a class="pilcrow" href="#section-45">&#182;</a>
               </div>
-              <p>colorsArray contains either arrays or legal colors.
-The type arg specifies the colors in the map.</p>
-<p>If the special case of colorsArray = a number, an rgb
-color cube of that dimension will be created.</p>
-<p>If indexToo then create an object lookup table for direct finding
-of the color’s index in the map. Also, TypedColors have two additional
-properties: this colormap and the index of the color in the map.</p>
-<p>If colorsArray contains colors, not an array, and the type differs from
-the desired type, conversion of the color to the desired color will occur
-but with a warning message in the console.</p>
+              <p>Return new color of the given type, given an r,g,b,(a) array,
+where a defaults to opaque (255).
+The array can be a JavaScript Array, a TypedArray, or a TypedColor.
+Use randomRgb &amp; randomGrayRgb to create random typed colors.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-attribute">constructor</span>: <span class="hljs-function"><span class="hljs-params">( colorsArray, <span class="hljs-property">@type</span>=<span class="hljs-string">"typed"</span>, indexToo=(type <span class="hljs-keyword">is</span> <span class="hljs-string">"typed"</span>) )</span>-&gt;</span>
-      <span class="hljs-keyword">super</span>(<span class="hljs-number">0</span>)
-      <span class="hljs-property">@index</span> = {} <span class="hljs-keyword">if</span> indexToo
-      <span class="hljs-keyword">if</span> <span class="hljs-keyword">typeof</span> colorsArray <span class="hljs-keyword">is</span> <span class="hljs-string">"number"</span>
-        <span class="hljs-property">@cube</span> = colorsArray
-        colorsArray = Color.permuteColors <span class="hljs-property">@cube</span>
-      type0 = Color.colorType(colorsArray[<span class="hljs-number">0</span>])
-      <span class="hljs-keyword">if</span> type0 <span class="hljs-keyword">and</span> (type0 <span class="hljs-keyword">isnt</span> type)
-        <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Primitive color conversion in color map. OK?"</span>
-        colorsArray = (Color.colorToArray(c) <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> colorsArray)</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">arrayToColor</span>: <span class="hljs-function"><span class="hljs-params">(array, type)</span> -&gt;</span>
+    <span class="hljs-keyword">switch</span> type
+      <span class="hljs-keyword">when</span> <span class="hljs-string">"css"</span>   <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> Color.triString array...
+      <span class="hljs-keyword">when</span> <span class="hljs-string">"pixel"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> Color.rgbaToPixel array...
+      <span class="hljs-keyword">when</span> <span class="hljs-string">"typed"</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">if</span> array.buffer <span class="hljs-keyword">then</span> <span class="hljs-property">@typedColor</span> array <span class="hljs-keyword">else</span> <span class="hljs-property">@typedColor</span> array...
+    u.error <span class="hljs-string">"arrayToColor: incorrect type: <span class="hljs-subst">#{type}</span>"</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-62">
+        <li id="section-46">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-62">&#182;</a>
+                <a class="pilcrow" href="#section-46">&#182;</a>
               </div>
-              <p>After this, colorsArray has arrays or colors matching type</p>
+              <p>Return array (either typed or Array) representing the color.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="hljs-property">@appendColor</span> color, type <span class="hljs-keyword">for</span> color <span class="hljs-keyword">in</span> colorsArray</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">colorToArray</span>: <span class="hljs-function"><span class="hljs-params">(color)</span> -&gt;</span>
+    <span class="hljs-keyword">switch</span> <span class="hljs-property">@colorType</span>(color)
+      <span class="hljs-keyword">when</span> <span class="hljs-string">"css"</span>   <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> Color.stringToUint8s color
+      <span class="hljs-keyword">when</span> <span class="hljs-string">"pixel"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> Color.pixelToUint8s color
+      <span class="hljs-keyword">when</span> <span class="hljs-string">"typed"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> color <span class="hljs-comment"># already a (typed) array</span>
+    <span class="hljs-keyword">return</span> color <span class="hljs-keyword">if</span> u.isArray(color) <span class="hljs-keyword">or</span> color.buffer
+    u.error <span class="hljs-string">"colorToArray: bad color: <span class="hljs-subst">#{color}</span>"</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-63">
+        <li id="section-47">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-63">&#182;</a>
+                <a class="pilcrow" href="#section-47">&#182;</a>
               </div>
-              <p>Append a color to the the map. color is either an array or a valid color.
-If index object exists keep an index entry pointing to the color index.
-If type is “typed” add map, index properties to each typedColor.</p>
+              <p>Given a color or rgba array and a type, return color of that type.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-attribute">appendColor</span>: <span class="hljs-function"><span class="hljs-params">(color)</span> -&gt;</span>
-      <span class="hljs-keyword">if</span> Color.isValidArray color <span class="hljs-comment"># ToDo: better to use type comparison?</span>
-        color = Color.arrayToColor color, <span class="hljs-property">@type</span>
-      <span class="hljs-property">@index</span>[ <span class="hljs-property">@indexKey</span>(color) ] = <span class="hljs-property">@length</span> <span class="hljs-keyword">if</span> <span class="hljs-property">@index</span>
-      <span class="hljs-keyword">if</span> <span class="hljs-property">@type</span> <span class="hljs-keyword">is</span> <span class="hljs-string">"typed"</span>
-        color.ix = <span class="hljs-property">@length</span>
-        color.map = @
-      <span class="hljs-property">@push</span> color
-      color <span class="hljs-comment"># was null</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">convertColor</span>: <span class="hljs-function"><span class="hljs-params">(color, type)</span> -&gt;</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-64">
+        <li id="section-48">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-64">&#182;</a>
+                <a class="pilcrow" href="#section-48">&#182;</a>
               </div>
-              <p>Given a color in the map, return the key it uses in the index object.
-The value will be the index of the color in the map/array.</p>
+              <p>Return color if color is already of type.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-attribute">indexKey</span>: <span class="hljs-function"><span class="hljs-params">(color)</span> -&gt;</span> <span class="hljs-comment"># make css strings lower case?</span>
-      <span class="hljs-keyword">if</span> <span class="hljs-property">@type</span> <span class="hljs-keyword">is</span> <span class="hljs-string">"typed"</span> <span class="hljs-keyword">then</span> color.pixel <span class="hljs-keyword">else</span> color</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-65">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-65">&#182;</a>
-              </div>
-              <p>Use the indexKey to test two map color’s equality.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-attribute">colorsEqual</span>: <span class="hljs-function"><span class="hljs-params">(color1, color2)</span> -&gt;</span>
-      <span class="hljs-property">@indexKey</span>(color1) <span class="hljs-keyword">is</span> <span class="hljs-property">@indexKey</span>(color2)</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-66">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-66">&#182;</a>
-              </div>
-              <p>Get a random index or color from this map</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-attribute">randomIndex</span>:<span class="hljs-function"> -&gt;</span> u.randomInt <span class="hljs-property">@length</span>
-    <span class="hljs-attribute">randomColor</span>:<span class="hljs-function"> -&gt;</span> @[ <span class="hljs-property">@randomIndex</span>() ]</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-67">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-67">&#182;</a>
-              </div>
-              <p>Use Array.sort, augmented by updating index if present
-and color.ix for typedColors</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-attribute">sort</span>: <span class="hljs-function"><span class="hljs-params">(compareFcn)</span> -&gt;</span>
-      <span class="hljs-keyword">return</span> <span class="hljs-keyword">if</span> <span class="hljs-property">@length</span> <span class="hljs-keyword">is</span> <span class="hljs-number">0</span>
-      <span class="hljs-keyword">super</span> compareFcn
-      <span class="hljs-keyword">if</span> <span class="hljs-property">@index</span> <span class="hljs-keyword">then</span> <span class="hljs-property">@index</span>[ <span class="hljs-property">@indexKey</span>(color) ] = i <span class="hljs-keyword">for</span> color,i <span class="hljs-keyword">in</span> @
-      color.ix = i <span class="hljs-keyword">for</span> color,i <span class="hljs-keyword">in</span> @ <span class="hljs-keyword">if</span> @[<span class="hljs-number">0</span>].ix
-      <span class="hljs-literal">null</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-68">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-68">&#182;</a>
-              </div>
-              <p>Lookup color in map, returning index or undefined if not found</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-attribute">lookup</span>: <span class="hljs-function"><span class="hljs-params">(color)</span> -&gt;</span>
-      <span class="hljs-keyword">return</span> <span class="hljs-property">@index</span>[ <span class="hljs-property">@indexKey</span>(color) ] <span class="hljs-keyword">if</span> <span class="hljs-property">@index</span>
-      <span class="hljs-keyword">for</span> c,i <span class="hljs-keyword">in</span> @
-        <span class="hljs-keyword">return</span> i <span class="hljs-keyword">if</span> <span class="hljs-property">@colorsEqual</span>(color, c)
-      <span class="hljs-literal">undefined</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-69">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-69">&#182;</a>
-              </div>
-              <p>Return the map index or color proportional to the value between min, max.
-This is a linear interpolation based on the map indices.
-The optional minColor, maxColor args are for using a subset of the map.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-attribute">scaleIndex</span>: <span class="hljs-function"><span class="hljs-params">(number, min, max, minColor = <span class="hljs-number">0</span>, maxColor = <span class="hljs-property">@length</span>-<span class="hljs-number">1</span>)</span> -&gt;</span>
-      scale = u.lerpScale number, min, max <span class="hljs-comment"># (number-min)/(max-min)</span>
-      Math.round(u.lerp minColor, maxColor, scale)
-    <span class="hljs-attribute">scaleColor</span>: <span class="hljs-function"><span class="hljs-params">(number, min, max, minColor = <span class="hljs-number">0</span>, maxColor = <span class="hljs-property">@length</span>-<span class="hljs-number">1</span>)</span> -&gt;</span>
-      @[ <span class="hljs-property">@scaleIndex</span> number, min, max, minColor, maxColor ]</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-70">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-70">&#182;</a>
-              </div>
-              <p>Find closest index/value in an RGB color cube by direct lookup in cube.
-Much faster than more general findClosest. Error if not cube</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-attribute">closestCubeIndex</span>: <span class="hljs-function"><span class="hljs-params">(r, g, b)</span> -&gt;</span>
-      u.error <span class="hljs-string">"closestCubeIndex: not a color cube"</span> <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> <span class="hljs-property">@cube</span>
-      step = <span class="hljs-number">255</span>/(<span class="hljs-property">@cube</span>-<span class="hljs-number">1</span>)
-      [rLoc, gLoc, bLoc] = (Math.round(c/step) <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> [r, g, b])
-      rLoc + gLoc*<span class="hljs-property">@cube</span> + bLoc*<span class="hljs-property">@cube</span>*<span class="hljs-property">@cube</span>
-    <span class="hljs-attribute">closestCubeColor</span>: <span class="hljs-function"><span class="hljs-params">(r, g, b)</span> -&gt;</span> @[ <span class="hljs-property">@closestCubeIndex</span> r, g, b ]</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-71">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-71">&#182;</a>
-              </div>
-              <p>Find the index/color closest to this r,g,b; using Color.rgbDistance.
-Note: slow for large maps unless color cube or in index or exact match.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-attribute">findClosestIndex</span>: <span class="hljs-function"><span class="hljs-params">(r, g, b)</span> -&gt;</span> <span class="hljs-comment"># alpha not in rgbDistance function</span>
-      <span class="hljs-keyword">return</span> <span class="hljs-property">@closestCubeIndex</span> r, g, b <span class="hljs-keyword">if</span> <span class="hljs-property">@cube</span>
-      <span class="hljs-keyword">return</span> ix <span class="hljs-keyword">if</span> ( ix=<span class="hljs-property">@lookup</span>(Color.arrayToColor [r,g,b], <span class="hljs-property">@type</span>) )</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-72">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-72">&#182;</a>
-              </div>
-              <p>return ix if @index and ( ix=@lookup(Color.arrayToColor [r,g,b], @type) )</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      minDist = Infinity
-      ixMin = <span class="hljs-number">0</span>
-      <span class="hljs-keyword">for</span> color, i <span class="hljs-keyword">in</span> @
-        [r0, g0, b0] = Color.colorToArray color
-        d = Color.rgbDistance r0, g0, b0, r, g, b
-        <span class="hljs-keyword">if</span> d &lt; minDist
-          minDist = d
-          ixMin = i
-      ixMin
-    <span class="hljs-attribute">findClosestColor</span>: <span class="hljs-function"><span class="hljs-params">(r, g, b)</span> -&gt;</span>  @[ <span class="hljs-property">@findClosestIndex</span> r, g, b ]</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-73">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-73">&#182;</a>
-              </div>
-              <p>Utilities for creating color maps, inspired <a href="https://github.com/bpostlethwaite/colormap">by this repo</a>.</p>
-
-            </div>
-            
-        </li>
-        
-        
-        <li id="section-74">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-74">&#182;</a>
-              </div>
-              <p>Utility to permute 3 arrays.</p>
-<ul>
-<li>If any arg is array, no change made.</li>
-<li>If any arg is 1, replace with [max].</li>
-<li>If any arg is n&gt;1, replace with u.aIntRamp(0,max,n).</li>
-</ul>
-<p>Resulting array is an array of arrays of len 3 permuting A1, A2, A3
-Used by rgbColorMap and hslColorMap</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">permuteColors</span>: <span class="hljs-function"><span class="hljs-params">(A1, A2=A1, A3=A2, max=[<span class="hljs-number">255</span>,<span class="hljs-number">255</span>,<span class="hljs-number">255</span>])</span> -&gt;</span>
-    [A1, A2, A3] = <span class="hljs-keyword">for</span> A, i <span class="hljs-keyword">in</span> [A1, A2, A3] <span class="hljs-comment"># multi-line comprehension</span>
-      <span class="hljs-keyword">if</span> <span class="hljs-keyword">typeof</span> A <span class="hljs-keyword">is</span> <span class="hljs-string">"number"</span>
-        <span class="hljs-keyword">if</span> A <span class="hljs-keyword">is</span> <span class="hljs-number">1</span> <span class="hljs-keyword">then</span> [max[i]] <span class="hljs-keyword">else</span> u.aIntRamp(<span class="hljs-number">0</span>, max[i], A)
-      <span class="hljs-keyword">else</span> A
-    <span class="hljs-property">@permuteArrays</span> A1, A2, A3</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-75">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-75">&#182;</a>
-              </div>
-              <p>Permute simple arrays w/o conversions above.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">permuteArrays</span>: <span class="hljs-function"><span class="hljs-params">(A1, A2=A1, A3=A2)</span> -&gt;</span>
-    array = []
-    ((array.push [a1,a2,a3] <span class="hljs-keyword">for</span> a1 <span class="hljs-keyword">in</span> A1) <span class="hljs-keyword">for</span> a2 <span class="hljs-keyword">in</span> A2) <span class="hljs-keyword">for</span> a3 <span class="hljs-keyword">in</span> A3
-    array</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-76">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-76">&#182;</a>
-              </div>
-              <p>Create a gray map of gray values (gray: r=g=b)
-These are typically 256 entries but can be smaller
-by passing a size parameter.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">grayArray</span>: <span class="hljs-function"><span class="hljs-params">(size = <span class="hljs-number">256</span>)</span> -&gt;</span> ( [i,i,i] <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> u.aIntRamp <span class="hljs-number">0</span>, <span class="hljs-number">255</span>, size )
-  <span class="hljs-attribute">grayColorMap</span>: <span class="hljs-function"><span class="hljs-params">(size=<span class="hljs-number">256</span>, type=<span class="hljs-string">"typed"</span>, indexToo=<span class="hljs-literal">false</span>)</span> -&gt;</span>
-    <span class="hljs-keyword">new</span> ColorMap <span class="hljs-property">@grayArray</span>(size), type, indexToo</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-77">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-77">&#182;</a>
-              </div>
-              <p>Create a colormap by rgb values. R, G, B can be either a number,
-the number of steps beteen 0-255, or an array of values to use
-for the color.  Ex: R = 3, corresponds to [0, 128, 255]
-The resulting map permutes the R, G, V values.  Thus if
-R=G=B=4, the resulting map has 4<em>4</em>4=64 colors.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">rgbColorMap</span>: <span class="hljs-function"><span class="hljs-params">(R, G=R, B=R, type=<span class="hljs-string">"typed"</span>, indexToo=<span class="hljs-literal">true</span>)</span> -&gt;</span>
-    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> R <span class="hljs-keyword">is</span> <span class="hljs-string">"number"</span>) <span class="hljs-keyword">and</span> (R <span class="hljs-keyword">is</span> G <span class="hljs-keyword">is</span> B)
-      <span class="hljs-keyword">new</span> ColorMap R, type, indexToo <span class="hljs-comment"># lets ColorMap know its a color cube</span>
-    <span class="hljs-keyword">else</span>
-      <span class="hljs-keyword">new</span> ColorMap <span class="hljs-property">@permuteColors</span>(R, G, B), type, indexToo</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-78">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-78">&#182;</a>
-              </div>
-              <p>Create an hsl map, inputs similar to above.  Convert the
-HSL values to css, default to bright hue ramp.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">hslColorMap</span>: <span class="hljs-function"><span class="hljs-params">(H, S=<span class="hljs-number">1</span>, L=<span class="hljs-number">1</span>, type=<span class="hljs-string">"css"</span>, indexToo=<span class="hljs-literal">false</span>)</span> -&gt;</span>
-    hslArray = <span class="hljs-property">@permuteColors</span>(H, S, L, [<span class="hljs-number">359</span>,<span class="hljs-number">100</span>,<span class="hljs-number">50</span>])
-    cssArray = (<span class="hljs-property">@hslString</span> a... <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> hslArray)
-    <span class="hljs-keyword">new</span> ColorMap cssArray, type, indexToo</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-79">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-79">&#182;</a>
-              </div>
-              <p>Use gradient to build an rgba array, then convert to colormap</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">gradientColorMap</span>: <span class="hljs-function"><span class="hljs-params">(nColors, stops, locs, type=<span class="hljs-string">"typed"</span>, indexToo=<span class="hljs-literal">true</span>)</span> -&gt;</span>
-    <span class="hljs-keyword">new</span> ColorMap <span class="hljs-property">@gradientRgbaArray</span>(nColors, stops, locs), type, indexToo</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-80">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-80">&#182;</a>
-              </div>
-              <p>Create a map with a random set of colors.
-Sometimes useful to sort by intensity afterwards.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">randomColorMap</span>: <span class="hljs-function"><span class="hljs-params">(nColors, type=<span class="hljs-string">"typed"</span>, indexToo=<span class="hljs-literal">false</span>)</span> -&gt;</span>
-    <span class="hljs-keyword">new</span> ColorMap (<span class="hljs-property">@randomRgba</span>() <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>..nColors]), type, indexToo</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-81">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-81">&#182;</a>
-              </div>
-              <p>Create alpha map of the given base r,g,b color,
-with nOpacity opacity values, default to all 256</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">alphaColorMap</span>: <span class="hljs-function"><span class="hljs-params">(rgb, nOpacities = <span class="hljs-number">256</span>, type=<span class="hljs-string">"typed"</span>, indexToo=<span class="hljs-literal">true</span>)</span> -&gt;</span>
-    alphaArray = ( u.clone(rgb).push a <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> u.aIntRamp <span class="hljs-number">0</span>, <span class="hljs-number">255</span>, nOpacities )
-    <span class="hljs-keyword">new</span> ColorMap alphaArray rgb, nOpacities, type, indexToo</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-82">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-82">&#182;</a>
-              </div>
-              <h3 id="two-prototype-conversion-primitive-color-maps-">Two prototype conversion primitive color maps.</h3>
-
-            </div>
-            
-        </li>
-        
-        
-        <li id="section-83">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-83">&#182;</a>
-              </div>
-              <p>Factory: convert JS array of valid colors to color map via prototype.
-Will have the type of the first element, and no index nor be a color cube.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">protoMap</span>: <span class="hljs-function"><span class="hljs-params">(array)</span> -&gt;</span>
-    array.__proto__ = ColorMap.prototype
-    array.type = <span class="hljs-property">@colorType</span>(array[<span class="hljs-number">0</span>])
-    array <span class="hljs-comment"># this is just the original array, returned for convenience.</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-84">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-84">&#182;</a>
-              </div>
-              <p>Create a color map via the 140 html standard colors
-or any of the other forms of css color strings.
-The input is an array of css strings.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">nameProtoMap</span>: <span class="hljs-function"><span class="hljs-params">(strings)</span> -&gt;</span> <span class="hljs-property">@protoMap</span> strings</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-85">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-85">&#182;</a>
-              </div>
-              <p>Equivalent to ColorMap w/ these defaults. Use this for modifying options.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">nameColorMap</span>: <span class="hljs-function"><span class="hljs-params">(strings, type=<span class="hljs-string">"css"</span>, indexToo=<span class="hljs-literal">false</span>)</span> -&gt;</span>
-    <span class="hljs-keyword">new</span> ColoMap strings, type, indexToo</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-86">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-86">&#182;</a>
-              </div>
-              <p>Create a color map via an array of pixels, gradientPixelArray for example.
-If you don’t have pixel data, call rgbColorMap with type=”pixel”
-or simply create your own via:</p>
-<p>   pixels = ( rgbaToPixel rgba… for rgba in rgbas )</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">pixelProtoMap</span>: <span class="hljs-function"><span class="hljs-params">(pixels)</span> -&gt;</span> <span class="hljs-property">@protoMap</span> pixels</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-87">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-87">&#182;</a>
-              </div>
-              <p>Equivalent to ColorMap w/ these defaults. Use this for modifying options.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">pixelColorMap</span>: <span class="hljs-function"><span class="hljs-params">(pixels, type=<span class="hljs-string">"pixel"</span>, indexToo=<span class="hljs-literal">false</span>)</span> -&gt;</span>
-    <span class="hljs-keyword">new</span> ColorMap pixels, type, indexToo
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">return</span> color <span class="hljs-keyword">if</span> <span class="hljs-property">@colorType</span>(color) <span class="hljs-keyword">is</span> type
+    <span class="hljs-property">@arrayToColor</span>(<span class="hljs-property">@colorToArray</span>(color), type)
 
 };
 Color.initSharedPixel() <span class="hljs-comment"># Initialize the shared buffer pixel/rgb view</span></pre></div></div>
@@ -1660,17 +902,20 @@ Color.initSharedPixel() <span class="hljs-comment"># Initialize the shared buffe
         </li>
         
         
-        <li id="section-88">
+        <li id="section-49">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-88">&#182;</a>
+                <a class="pilcrow" href="#section-49">&#182;</a>
               </div>
               <p>Here are the 140 case insensitive legal color names (the X11 set)
 To include them in your model, use:</p>
 <pre><code>namedColorString = <span class="hljs-string">"AliceBlue AntiqueWhite Aqua Aquamarine Azure Beige Bisque Black BlanchedAlmond Blue BlueViolet Brown BurlyWood CadetBlue Chartreuse Chocolate Coral CornflowerBlue Cornsilk Crimson Cyan DarkBlue DarkCyan DarkGoldenRod DarkGray DarkGreen DarkKhaki DarkMagenta DarkOliveGreen DarkOrange DarkOrchid DarkRed DarkSalmon DarkSeaGreen DarkSlateBlue DarkSlateGray DarkTurquoise DarkViolet DeepPink DeepSkyBlue DimGray DodgerBlue FireBrick FloralWhite ForestGreen Fuchsia Gainsboro GhostWhite Gold GoldenRod Gray Green GreenYellow HoneyDew HotPink IndianRed Indigo Ivory Khaki Lavender LavenderBlush LawnGreen LemonChiffon LightBlue LightCoral LightCyan LightGoldenRodYellow LightGray LightGreen LightPink LightSalmon LightSeaGreen LightSkyBlue LightSlateGray LightSteelBlue LightYellow Lime LimeGreen Linen Magenta Maroon MediumAquaMarine MediumBlue MediumOrchid MediumPurple MediumSeaGreen MediumSlateBlue MediumSpringGreen MediumTurquoise MediumVioletRed MidnightBlue MintCream MistyRose Moccasin NavajoWhite Navy OldLace Olive OliveDrab Orange OrangeRed Orchid PaleGoldenRod PaleGreen PaleTurquoise PaleVioletRed PapayaWhip PeachPuff Peru Pink Plum PowderBlue Purple Red RosyBrown RoyalBlue SaddleBrown Salmon SandyBrown SeaGreen SeaShell Sienna Silver SkyBlue SlateBlue SlateGray Snow SpringGreen SteelBlue Tan Teal Thistle Tomato Turquoise Violet Wheat White WhiteSmoke Yellow YellowGreen"</span>
 namedColors = namedColorString.split(<span class="hljs-string">" "</span>)
-</code></pre>
+</code></pre><p>NetLogo’s 14 base colors names are:
+gray red orange brown yellow green lime turquoise cyan sky blue violet magenta pink
+but do not match exactly the css named colors.</p>
+
             </div>
             
         </li>

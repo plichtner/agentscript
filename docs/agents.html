@@ -218,7 +218,17 @@ from me, using patch topology</p>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">inRadius</span>: <span class="hljs-function"><span class="hljs-params">(a, radius, meToo=<span class="hljs-literal">false</span>)</span>-&gt;</span>
     as = <span class="hljs-property">@inRect</span> a, radius, radius, <span class="hljs-literal">true</span>
-    <span class="hljs-keyword">super</span> a, radius, meToo <span class="hljs-comment"># as.inRadius a, radius, meToo</span></pre></div></div>
+    <span class="hljs-keyword">super</span> a, radius, meToo <span class="hljs-comment"># as.inRadius a, radius, meToo</span>
+
+  <span class="hljs-attribute">setDraggable</span>:<span class="hljs-function"> -&gt;</span> 
+    <span class="hljs-property">@on</span> <span class="hljs-string">'dragstart'</span>, <span class="hljs-function"><span class="hljs-params">(mouseEvent)</span> =&gt;</span>
+      mouseEvent.target.dragging = <span class="hljs-literal">true</span>
+
+    <span class="hljs-property">@on</span> <span class="hljs-string">'dragend'</span>, <span class="hljs-function"><span class="hljs-params">(mouseEvent)</span> =&gt;</span>
+      mouseEvent.target.dragging = <span class="hljs-literal">false</span>
+
+    <span class="hljs-property">@on</span> <span class="hljs-string">'drag'</span>, <span class="hljs-function"><span class="hljs-params">(mouseEvent)</span> =&gt;</span>
+      mouseEvent.target.setXY(mouseEvent.patchX, mouseEvent.patchY)</pre></div></div>
             
         </li>
         
