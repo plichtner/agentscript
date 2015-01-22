@@ -253,7 +253,7 @@ Returns new heading.</p>
     <span class="hljs-keyword">if</span> (s=sprite)?
       <span class="hljs-property">@sprite</span> = s; <span class="hljs-property">@color</span> = s.color; <span class="hljs-property">@strokeColor</span> = s.strokeColor; <span class="hljs-property">@shape</span> = s.shape; <span class="hljs-property">@size</span> = s.size
     <span class="hljs-keyword">else</span>
-      <span class="hljs-property">@color</span> = u.randomColor <span class="hljs-keyword">unless</span> <span class="hljs-property">@color</span>?
+      <span class="hljs-property">@color</span> = u.randomColor() <span class="hljs-keyword">unless</span> <span class="hljs-property">@color</span>?
       <span class="hljs-property">@sprite</span> = Shapes.shapeToSprite <span class="hljs-property">@shape</span>, <span class="hljs-property">@color</span>, <span class="hljs-property">@model</span>.patches.toBits(<span class="hljs-property">@size</span>), <span class="hljs-property">@strokeColor</span></pre></div></div>
             
         </li>

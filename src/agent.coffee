@@ -114,7 +114,7 @@ class Agent
     if (s=sprite)?
       @sprite = s; @color = s.color; @strokeColor = s.strokeColor; @shape = s.shape; @size = s.size
     else
-      @color = u.randomColor unless @color?
+      @color = u.randomColor() unless @color?
       @sprite = Shapes.shapeToSprite @shape, @color, @model.patches.toBits(@size), @strokeColor
 
   # Draw the agent on the drawing layer, leaving permanent image.
@@ -221,5 +221,3 @@ class Agent
   # Return other end of myOutinks
   outLinkNeighbors: ->
     l.end2 for l in @myLinks() when l.end1 is @
-
-

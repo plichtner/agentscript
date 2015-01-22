@@ -1,48 +1,29 @@
-# This module contains utilities for all browser color types.
+# Utilities for browser color types: css color strings, 32 bit integer pixels,
+# and 4 element Uint8 TypedColors
 #
-# * The two basic browser color types: pixels and strings
-# * A typedColor: A Uint8 (clamped) r,g,b,a TypedArray
-#   with both rgba and pixel views onto the same buffer,
-#   and, optionally, the associated css string.
-# * Utilities for converting to and between these color types
-#
-# *Note*: In the functions below, rgba values are ints in 0-255, including a.
+# The rgba values below are ints in 0-255, including a (alpha).
 # I.e. a is not in 0-1 as in css colors.
 #
-# Naming convention: rgba/array is generally a 3 or 4 element JavaScript
-# Array thus not a browser color.
-# Instead, it is used internally for functions taking r, g, b, a=255
-# color values.
-#
-# There are *many* other common color representations, such as
-# a TypedArray of 4 floats in 0-1 (webgl),
-# and other odd mixtures of values, some in degrees, some in percentages.
-#
-# We restrict ourselves to css color strings, 32 bit integer pixels,
-# and 4 element Uint8 TypedColors
+# Naming convention: `rgba` or `array` is generally a 3 or 4 element JavaScript
+# Array, not a browser color, used for functions taking r,g,b,a=255 values.
 
 Color = {
 
 # ### CSS Color Strings.
 
-  # CSS colors in HTML are strings, see [legal CSS string colors](
-  # http://www.w3schools.com/cssref/css_colors_legal.asp)
-  # and [Mozilla's Color Reference](
-  # https://developer.mozilla.org/en-US/docs/Web/CSS/color_value)
-  # and Doug Crockford's [interactive named colors](
-  # http://www.crockford.com/wrrrld/color.html) page
-  # as well as the [future CSS4](http://dev.w3.org/csswg/css-color/) spec.
+  # CSS colors in HTML are strings, see [Mozilla's Color Reference](
+  # https://developer.mozilla.org/en-US/docs/Web/CSS/color_value),
+  # taking one of 7 forms:
   #
-  # The strings can be one of 7 forms:
   # * Names: [140 color case-insensitive names](
   #   http://en.wikipedia.org/wiki/Web_colors#HTML_color_names) like
-  #   Red, Green, CadetBlue, and so on.
+  #   Red, Green, CadetBlue, etc.
   # * Hex, short and long form: #0f0, #ff10a0
   # * RGB: rgb(255, 0, 0), rgba(255, 0, 0, 0.5)
   # * HSL: hsl(120, 100%, 50%), hsla(120, 100%, 50%, 0.8)
 
   # Convert 4 r,g,b,a ints in [0-255] to a css color string.
-  # Alpha "a" is int in [0-255], not the "other alpha" float in 0-1
+  # Alpha "a" is int in [0-255], not float in 0-1
   rgbaString: (r, g, b, a=255) ->
     a = a/255; a4 = a.toPrecision(4)
     if a is 1 then "rgb(#{r},#{g},#{b})" else "rgba(#{r},#{g},#{b},#{a4})"
@@ -55,9 +36,9 @@ Color = {
     a = a/255; a4 = a.toPrecision(4)
     if a is 1 then "hsl(#{h},#{s}%,#{l}%)" else "hsla(#{h},#{s}%,#{l}%,#{a4})"
 
-  # Return a web/html/css hex color string for an r,g,b opaque color.
-  # Identical color will be drawn as if using rgbaString above
-  # but without an alpha capability. Both #nnn and #nnnnnn forms supported.
+  # Return a web/html/css hex color string for an r,g,b opaque color (a=255)
+  #
+  # Both #nnn and #nnnnnn forms supported.
   # Default is to check for the short hex form: #nnn.
   hexString: (r, g, b, shortOK=true) ->
     if shortOK
@@ -66,7 +47,7 @@ Color = {
     "#" + (0x1000000 | (b | g << 8 | r << 16)).toString(16).slice(-6)
   # Return the 4 char short version of a hex color.  Each of the r,g,b values
   # must be in [0-15].  The resulting color will be equivalent
-  # to r*17, g*17, b*17, resulting in the values:
+  # to `r*17`, `g*17`, `b*17`, resulting in the values:
   #
   #     0, 17, 34, 51, 68, 85, 102, 119, 136, 153, 170, 187, 204, 221, 238, 255
   #
@@ -86,31 +67,29 @@ Color = {
 
 # ### CSS String Conversions
 
-  # Return 4 element array given any legal CSS string color
-  # [legal CSS string color](
-  # http://www.w3schools.com/cssref/css_colors_legal.asp)
+  # Return 4 element array given any legal CSS string color.
   #
   # Legal strings vary widely: CadetBlue, #0f0, rgb(255,0,0), hsl(120,100%,50%)
   #
   # Note: The browser speaks for itself: we simply set a 1x1 canvas fillStyle
-  # to the string and create a pixel, returning the r,g,b,a Typed Array
-  # Odd results if string is not recognized by browser.
+  # to the string and create a pixel, returning the r,g,b,a TypedArray.
 
   # The shared 1x1 canvas 2D context.
   sharedCtx1x1: u.createCtx 1, 1 # share across calls.
-  # Convert css string to typed array.
-  # If you need a JavaScript Array, use uint8sToRgba
-  stringToUint8s: (string) -> # string = string.toLowerCase()?
+  # Convert css string to TypedArray.
+  # If you need a JavaScript Array, use uint8sToRgba below
+  stringToUint8s: (string) ->
     @sharedCtx1x1.fillStyle = string
     @sharedCtx1x1.fillRect 0, 0, 1, 1
     @sharedCtx1x1.getImageData(0, 0, 1, 1).data
 
 # ### Pixel Colors.
 
-  # Primitive Rgba<>Pixel manipulation.
+  # Primitive Rgba <-> Pixel manipulation.
   #
-  # These use two views onto a 4 byte typed array buffer.
-  # initSharedPixel called after Color literal object exists,
+  # These use two views onto a 4 byte TypedArray buffer.
+  #
+  # initSharedPixel called after Color module object exists,
   # see why at [Stack Overflow](http://goo.gl/qrHXwB)
   sharedPixel: null
   sharedUint8s: null
@@ -141,25 +120,24 @@ Color = {
     i = u.randomInt2 min, max
     [i, i, i]
 
-  # Convert Uint8s to Array (avoid "new Array", better JS translation.)
-  # Useful after pixelToUint8s, stringToUint8s, hslToRgb
+  # Convert Uint8s to Array.
+  # Useful after pixelToUint8s, stringToUint8s, hslToRgb.
+  # (Use `Array` not `new Array`, better Coffee translation.)
   uint8sToRgba: (uint8s) -> Array uint8s...
 
-  # Return the gray/intensity float value for a given r,g,b color
-  # Use Math.round to convert to 0-255 int for gray color value.
-  # [Good post on image filters](
-  # http://www.html5rocks.com/en/tutorials/canvas/imagefilters/)
+  # Return the gray/intensity float value for a given r,g,b color.
+  # Round to 0-255 int for gray values.
   rgbIntensity: (r, g, b) -> 0.2126*r + 0.7152*g + 0.0722*b
 
 
-  # Convert h,s,l to r,g,b Typed subarray via stringToUint8s
+  # Convert h,s,l to r,g,b TypedArray
   hslToRgb: (h, s, l) ->
     str = @hslString(h, s, l)
     @stringToUint8s(str).subarray(0,3) # a 3 byte view onto the 4 byte buffer.
 
   # Return a [distance metric](
   # http://www.compuphase.com/cmetric.htm) between two colors.
-  # Max distance is roughly 765 (3*255), between black & white.
+  # Max distance is roughly 765 (3*255), for black & white.
   rgbDistance: (r1, g1, b1, r2, g2, b2) ->
     rMean = Math.round( (r1 + r2) / 2 )
     [dr, dg, db] = [r1 - r2, g1 - g2, b1 - b2]
@@ -175,56 +153,41 @@ Color = {
     (Math.round(u.lerp(rgb0[i], rgb1[i], scale)) for i in [0..2])
 
 # ### Typed Color
+# A typedColor is a 4 element Uint8ClampedArray, with two properties:
+#
+# * pixelArray: A single element Uint32Array view on the Uint8ClampedArray
+# * string: an optional, lazy evaluated, css color string.
+#
+# TypedColors are used in canvas's [ImageData pixels](
+# https://developer.mozilla.org/en-US/docs/Web/API/ImageData),
+# WebGL colors (4 rgba floats in 0-1), and in images.
 
-  # A typed color is a typed array with r,g,b,a in 0-255 and optional
-  # css string. As usual, a is in 0-255, *not* in 0-1 as in some color formats.
-  #
-  # Return a 4 element Uint8ClampedArray, with two properties:
-  #
-  # * pixelArray: A single element Uint32Array view on the Uint8ClampedArray
-  # * string: an optional, lazy evaluated, css color string.
-  #
-  # Any change to the typedColor r,g,b,a elements will dynamically change
-  # the pixel value as it is a view onto the same buffer.
-  #
-  # Setting the pixelArray[0] also dynamically changes all 4 r,g,b,a, values.
-  # See [Mozilla Docs](http://goo.gl/3OOQzy)
-  #
-  # TypedColors are used in canvas's [ImageData pixels](
-  # https://developer.mozilla.org/en-US/docs/Web/API/ImageData),
-  # WebGL colors (4 rgba floats in 0-1), and in images.
-
-  typedColor: do () ->
-    # This [IIFE (history)](http://goo.gl/FxVFe)
-    # creates a TypedColorProto with an Uint proto, which is in turn
-    # set to the proto of the typedColor returned value.  Whew!
-    # This allows TypedArrays to have prototype properties,
-    # including Object.defineProperties without enlarging them.
+  typedColor: do () -> # IIFE returns typedColor function.
+    # Return a 4 element typedColor.
     #
-    # Experimental: The map & index are for possible colormap use.
-    # If r is not a number but a typed array, use it for the typedColor.
+    # Any change to the typedColor r,g,b,a elements will dynamically change
+    # the pixel value as it is a view onto the same buffer, and vice versa.
+    # See Mozilla [TypedArray Docs](http://goo.gl/3OOQzy).
+    # If r is not a number but a TypedArray, use it for the typedColor.
     typedColor = (r, g, b, a=255, map, index) ->
+      # Experimental: The map & index are for possible colormap use.
       if map # assume Uint8ClampedArray rgba array
         ua = map.subarray index*4, index*4 + 4
         ua.set [r,g,b,a]
-        # ua.pixelArray = new Uint32Array(map.buffer, index*4, 1)
       else
-        # ua = if g then new Uint8ClampedArray([r,g,b,a]) else r
         ua = if r.buffer then r else new Uint8ClampedArray([r,g,b,a])
       ua.pixelArray = new Uint32Array(ua.buffer, ua.byteOffset, 1)
-      # lazy evaluation will set the css triString for this typed array.
-      #
-      #     ua.string = Color.triString(r, g, b, a)
-      #
-      # do not set the ua.string directly, will get typed values out of sync.
-
-      # Make me an instance of TypedColorProto
+      # Make this an instance of TypedColorProto
       ua.__proto__ = TypedColorProto
       ua
+
+    # Prototypal Inheritance: TypedColorProto has an Uint8ClampedArray
+    # prototype. This allows TypedArrays to have prototype setters/getters,
+    # including Object.defineProperties without enlarging the typedColor.
     TypedColorProto = {
-      # Set TypedColorProto proto to be Uint8ClampedArray's prototype
+      # Set TypedColorProto prototype to Uint8ClampedArray's prototype
       __proto__: Uint8ClampedArray.prototype
-      # Set the typed array; no need for getColor, it *is* the typed Uint8 array
+      # Set the TypedArray; no need for getColor, it *is* the typed Uint8 array
       setColor: (r,g,b,a=255) ->
         @string = null if @string # will be lazy evaluated via getString.
         @[0]=r; @[1]=g; @[2]=b; @[3]=a
@@ -235,14 +198,14 @@ Color = {
         @pixelArray[0]=pixel
       # Get the pixel value
       getPixel: -> @pixelArray[0]
-      # Set both Typed Arrays to equivalent pixel/rgba values of the css string.
+      # Set pixel/rgba values to equivalent of the css string.
       #
-      # Does *not* set the chached @string, it will be lazily evaluated to its
-      # triString. This lets the typedColor remain small without the
+      # Does *not* set the chached @string, which will be lazily evaluated
+      # to its triString. This lets the typedColor remain small without the
       # color string until required by its getter.
       #
       # Note if you set string to "red" or "rgb(255,0,0)", the resulting
-      # css string (triString) value will return the triString #f00 value.
+      # css string will return the triString #f00 value.
       setString: (string) ->
         @setColor(Color.stringToUint8s(string)...)
       # Return the triString for this typedColor, cached in the @string value
@@ -250,8 +213,7 @@ Color = {
         @string = Color.triString(@...) unless @string
         @string
     }
-    # Sugar for converting getter/setters into properties.
-    # Somewhat slower than getter/setter functions.
+    # Experiment: Sugar for converting getter/setters into properties.
     # Frequent rgba property setter very poor performance due to GC overhead.
     # These are in TypedColorProto, not in the typedColor,
     # thus shared and take no space in the color itself.
@@ -261,7 +223,7 @@ Color = {
         get: -> @pixelArray[0]
         set: (val) -> @setPixel(val)
         enumerable: true # make visible in stack trace, remove after debugging
-    # uints: set Uint8 values via JavaScript or Typed Array. Getter not needed.
+    # uints: set Uint8 values via JavaScript or TypedArray. Getter not needed.
       "uints":
         get: -> @ #.. not needed, already array
         set: (val) -> @setColor(val...) # beware! array GC slows this down.
@@ -279,7 +241,7 @@ Color = {
 
 # ### Color Types
 #
-# We support these color types: css, pixel, uint8s, typed
+# Utilities for color types: css, pixel, typed
 
   # Return the color type of a given color, null if not a color.
   # null useful for testing if color *is* a color.
@@ -291,7 +253,7 @@ Color = {
   # Return new color of the given type, given an r,g,b,(a) array,
   # where a defaults to opaque (255).
   # The array can be a JavaScript Array, a TypedArray, or a TypedColor.
-  # Use randomRgb & randomGrayRgb to create random typed colors.
+  # Use randomRgb & randomGrayRgb arrays to create random valid colors.
   arrayToColor: (array, type) ->
     switch type
       when "css"   then return Color.triString array...
@@ -308,8 +270,8 @@ Color = {
     return color if u.isArray(color) or color.buffer
     u.error "colorToArray: bad color: #{color}"
   # Given a color or rgba array and a type, return color of that type.
+  # Return color if color is already of type.
   convertColor: (color, type) ->
-    # Return color if color is already of type.
     return color if @colorType(color) is type
     @arrayToColor(@colorToArray(color), type)
 
@@ -323,5 +285,8 @@ Color.initSharedPixel() # Initialize the shared buffer pixel/rgb view
 #     namedColors = namedColorString.split(" ")
 #
 # NetLogo's 14 base colors names are:
-# gray red orange brown yellow green lime turquoise cyan sky blue violet magenta pink
-# but do not match exactly the css named colors.
+#
+#     gray red orange brown yellow green lime turquoise cyan sky blue violet magenta pink
+# but do not match exactly the css named colors:
+#
+#     netLogoColors={gray:[141,141,141], red:[215,50,41], orange:[241,106,21], brown:[157,110,72], yellow:[237,237,49], green:[89,176,60], lime:[44,209,59], turquoise:[29,159,120], cyan:[84,196,196], sky:[45,141,190], blue:[52,93,169], violet:[124,80,164], magenta:[167,27,106], pink:[224,127,150]}
