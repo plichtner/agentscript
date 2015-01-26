@@ -155,22 +155,32 @@ class Model
     @step()
     @emit('step')
 
-# Creates a spotlight effect on an agent, so we can follow it throughout the model.
-# Use:
-#
-#     @setSpotliight breed.oneOf()
-#
-# to draw one of a random breed. Remove spotlight by passing `null`
+#### Misc Rendering
+
+  # Creates a spotlight effect on an agent, so we can follow it throughout the model.
+  # Use:
+  #
+  #     @setSpotliight breed.oneOf()
+  #
+  # to draw one of a random breed. Remove spotlight by passing `null`
   setSpotlight: (@spotlightAgent) ->
-    u.clearCtx @contexts.spotlight unless @spotlightAgent?
+    @view.setSpotlight @spotlightAgent
 
-  drawSpotlight: (agent, ctx) ->
-    u.clearCtx ctx
-    u.fillCtx ctx, [0,0,0,0.6]
-    ctx.beginPath()
-    ctx.arc agent.x, agent.y, 3, 0, 2*Math.PI, false
-    ctx.fill()
+  # Draws, or "imports" an image URL into the drawing layer.
+  # The image is scaled to fit the drawing layer.
+  #
+  # This is an async load, see this
+  # [new Image()](http://javascript.mfields.org/2011/creating-an-image-in-javascript/)
+  # tutorial.  We draw the image into the drawing layer as
+  # soon as the onload callback executes.
+  importDrawing: (imageSrc, f) ->
+    u.importImage imageSrc, (img) => # fat arrow, this context
+      @installDrawing img
+      f() if f?
 
+  # Direct install image into the given context, not async.
+  # Alias for the view's particular implementation.
+  installDrawing: @view.installDrawing
 
 # ### Breeds
 

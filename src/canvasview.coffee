@@ -73,6 +73,23 @@ class CanvasView
     @model.agents.draw  @contexts.agents   if force or @refreshAgents  or @anim.draws is 1
     @drawSpotlight @model.spotlightAgent, @contexts.spotlight  if @model.spotlightAgent?
 
+  # Direct install image into the given context, not async.
+  installDrawing: (img, ctx=@contexts.drawing) ->
+    u.setIdentity ctx
+    ctx.drawImage img, 0, 0, ctx.canvas.width, ctx.canvas.height
+    ctx.restore() # restore patch transform
+
+  # Creates a spotlight effect on an agent, so we can follow it throughout the model.
+  setSpotlight: (spotlightAgent) ->
+    u.clearCtx @contexts.spotlight unless spotlightAgent?
+
+  drawSpotlight: (agent, ctx) ->
+    u.clearCtx ctx
+    u.fillCtx ctx, [0,0,0,0.6]
+    ctx.beginPath()
+    ctx.arc agent.x, agent.y, 3, 0, 2*Math.PI, false
+    ctx.fill()
+
   # Initialize/reset world parameters.
   setWorld: (opts) ->
     w = defaults = { size: 13, minX: -16, maxX: 16, minY: -16, maxY: 16, isTorus: false, hasNeighbors: true, isHeadless: false }
