@@ -139,7 +139,7 @@ class Model
     @setRootVars() if @debugging
     @start() if restart
 
-#### Animation.
+#### Animation
 
 # Called by animator.
   draw: (force=@anim.stopped) ->
