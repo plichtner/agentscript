@@ -253,7 +253,7 @@ Returns new heading.</p>
     <span class="hljs-keyword">if</span> (s=sprite)?
       <span class="hljs-property">@sprite</span> = s; <span class="hljs-property">@color</span> = s.color; <span class="hljs-property">@strokeColor</span> = s.strokeColor; <span class="hljs-property">@shape</span> = s.shape; <span class="hljs-property">@size</span> = s.size
     <span class="hljs-keyword">else</span>
-      <span class="hljs-property">@color</span> = u.randomColor <span class="hljs-keyword">unless</span> <span class="hljs-property">@color</span>?
+      <span class="hljs-property">@color</span> = u.randomColor() <span class="hljs-keyword">unless</span> <span class="hljs-property">@color</span>?
       <span class="hljs-property">@sprite</span> = Shapes.shapeToSprite <span class="hljs-property">@shape</span>, <span class="hljs-property">@color</span>, <span class="hljs-property">@model</span>.patches.toBits(<span class="hljs-property">@size</span>), <span class="hljs-property">@strokeColor</span></pre></div></div>
             
         </li>
@@ -449,11 +449,11 @@ proc is called on the new agent after inserting in its agentSet.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">hatch</span>: <span class="hljs-function"><span class="hljs-params">(num = <span class="hljs-number">1</span>, breed = <span class="hljs-property">@model</span>.agents, init = -&gt;)</span> -&gt;</span>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">hatch</span>: <span class="hljs-function"><span class="hljs-params">(num = <span class="hljs-number">1</span>, breed = <span class="hljs-property">@breed</span>, init = -&gt;)</span> -&gt;</span>
     breed.create num, <span class="hljs-function"><span class="hljs-params">(a)</span> =&gt;</span> <span class="hljs-comment"># fat arrow so that @ = this agent</span>
       a.setXY <span class="hljs-property">@x</span>, <span class="hljs-property">@y</span> <span class="hljs-comment"># for side effects like patches.agentsHere</span>
-      a[k] = v <span class="hljs-keyword">for</span> own k, v <span class="hljs-keyword">of</span> @ <span class="hljs-keyword">when</span> k <span class="hljs-keyword">isnt</span> <span class="hljs-string">"id"</span>
-      init(a); a <span class="hljs-comment"># Important: init called after object inserted in agent set</span></pre></div></div>
+      a.color = <span class="hljs-property">@color</span>
+      a[k] = @[k] <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> breed.ownVariables <span class="hljs-keyword">when</span> a[k] <span class="hljs-keyword">is</span> <span class="hljs-literal">null</span> <span class="hljs-comment"># hatched agent inherits parents' breed properties</span></pre></div></div>
             
         </li>
         
@@ -463,6 +463,21 @@ proc is called on the new agent after inserting in its agentSet.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p>possible alternative: a[k] = @[k] for k, v in a when v is null</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      init(a); a <span class="hljs-comment"># Important: init called after object inserted in agent set</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
               <p>Return the members of the given agentset that are within radius distance
 from me, and within cone radians of my heading using patch topology</p>
@@ -475,11 +490,27 @@ from me, and within cone radians of my heading using patch topology</p>
         </li>
         
         
-        <li id="section-23">
+        <li id="section-24">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>Return true if world coordinate falls on agent sprite</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">hitTest</span>: <span class="hljs-function"><span class="hljs-params">(x, y)</span> -&gt;</span>
+    <span class="hljs-property">@distanceXY</span>(x, y) &lt; <span class="hljs-property">@size</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
               <p>Return other end of link from me</p>
 
@@ -490,11 +521,11 @@ from me, and within cone radians of my heading using patch topology</p>
         </li>
         
         
-        <li id="section-24">
+        <li id="section-26">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
+                <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
               <p>Return all links linked to me</p>
 
@@ -506,11 +537,11 @@ from me, and within cone radians of my heading using patch topology</p>
         </li>
         
         
-        <li id="section-25">
+        <li id="section-27">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-25">&#182;</a>
+                <a class="pilcrow" href="#section-27">&#182;</a>
               </div>
               <p>Return all agents linked to me.</p>
 
@@ -522,11 +553,11 @@ from me, and within cone radians of my heading using patch topology</p>
         </li>
         
         
-        <li id="section-26">
+        <li id="section-28">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
+                <a class="pilcrow" href="#section-28">&#182;</a>
               </div>
               <p>Return links where I am the “to” agent in links.create</p>
 
@@ -538,11 +569,11 @@ from me, and within cone radians of my heading using patch topology</p>
         </li>
         
         
-        <li id="section-27">
+        <li id="section-29">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
+                <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
               <p>Return other end of myInLinks</p>
 
@@ -554,11 +585,11 @@ from me, and within cone radians of my heading using patch topology</p>
         </li>
         
         
-        <li id="section-28">
+        <li id="section-30">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
+                <a class="pilcrow" href="#section-30">&#182;</a>
               </div>
               <p>Return links where I am the “from” agent in links.create</p>
 
@@ -570,11 +601,11 @@ from me, and within cone radians of my heading using patch topology</p>
         </li>
         
         
-        <li id="section-29">
+        <li id="section-31">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
               <p>Return other end of myOutinks</p>
 

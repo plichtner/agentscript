@@ -661,20 +661,20 @@ not usable due to the patches being prebuilt.  Stay tuned.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>
-  <span class="hljs-attribute">createBreeds</span>: <span class="hljs-function"><span class="hljs-params">(s, agentClass, breedSet)</span> -&gt;</span>
+  <span class="hljs-attribute">createBreeds</span>: <span class="hljs-function"><span class="hljs-params">(breedNames, baseClass, baseSet)</span> -&gt;</span>
     breeds = []; breeds.classes = {}; breeds.sets = {}
-    <span class="hljs-keyword">for</span> b <span class="hljs-keyword">in</span> s.split(<span class="hljs-string">" "</span>)
-      cname = b.charAt(<span class="hljs-number">0</span>).toUpperCase() + b.substr(<span class="hljs-number">1</span>)
-      c = u.cloneClass agentClass, cname <span class="hljs-comment"># c = class Breed extends agentClass</span>
-      breed = @[b] = <span class="hljs-comment"># add @&lt;breed&gt; to local scope</span>
-        <span class="hljs-keyword">new</span> breedSet @, c, b, <span class="hljs-attribute">agentClass</span>::breed <span class="hljs-comment"># create subset agentSet</span>
+    <span class="hljs-keyword">for</span> breedName <span class="hljs-keyword">in</span> breedNames.split(<span class="hljs-string">" "</span>)
+      className = breedName.charAt(<span class="hljs-number">0</span>).toUpperCase() + breedName.substr(<span class="hljs-number">1</span>)
+      breedClass = u.cloneClass baseClass, className <span class="hljs-comment"># breedClass = class Breed extends baseClass</span>
+      breed = @[breedName] = <span class="hljs-comment"># add @&lt;breed&gt; to local scope</span>
+        <span class="hljs-keyword">new</span> baseSet @, breedClass, breedName, <span class="hljs-attribute">baseClass</span>::breed <span class="hljs-comment"># create subset agentSet</span>
       breeds.push breed
-      breeds.sets[b] = breed
-      breeds.classes[<span class="hljs-string">"<span class="hljs-subst">#{b}</span>Class"</span>] = c
+      breeds.sets[breedName] = breed
+      breeds.classes[<span class="hljs-string">"<span class="hljs-subst">#{breedName}</span>Class"</span>] = breedClass
     breeds
-  <span class="hljs-attribute">patchBreeds</span>: <span class="hljs-function"><span class="hljs-params">(s)</span> -&gt;</span> <span class="hljs-property">@patches</span>.breeds = <span class="hljs-property">@createBreeds</span> s, <span class="hljs-property">@Patch</span>, <span class="hljs-property">@Patches</span>
-  <span class="hljs-attribute">agentBreeds</span>: <span class="hljs-function"><span class="hljs-params">(s)</span> -&gt;</span> <span class="hljs-property">@agents</span>.breeds  = <span class="hljs-property">@createBreeds</span> s, <span class="hljs-property">@Agent</span>, <span class="hljs-property">@Agents</span>
-  <span class="hljs-attribute">linkBreeds</span>:  <span class="hljs-function"><span class="hljs-params">(s)</span> -&gt;</span> <span class="hljs-property">@links</span>.breeds   = <span class="hljs-property">@createBreeds</span> s, <span class="hljs-property">@Link</span>,  <span class="hljs-property">@Links</span></pre></div></div>
+  <span class="hljs-attribute">patchBreeds</span>: <span class="hljs-function"><span class="hljs-params">(breedNames)</span> -&gt;</span> <span class="hljs-property">@patches</span>.breeds = <span class="hljs-property">@createBreeds</span> breedNames, <span class="hljs-property">@Patch</span>, <span class="hljs-property">@Patches</span>
+  <span class="hljs-attribute">agentBreeds</span>: <span class="hljs-function"><span class="hljs-params">(breedNames)</span> -&gt;</span> <span class="hljs-property">@agents</span>.breeds  = <span class="hljs-property">@createBreeds</span> breedNames, <span class="hljs-property">@Agent</span>, <span class="hljs-property">@Agents</span>
+  <span class="hljs-attribute">linkBreeds</span>:  <span class="hljs-function"><span class="hljs-params">(breedNames)</span> -&gt;</span> <span class="hljs-property">@links</span>.breeds   = <span class="hljs-property">@createBreeds</span> breedNames, <span class="hljs-property">@Link</span>,  <span class="hljs-property">@Links</span></pre></div></div>
             
         </li>
         
@@ -754,6 +754,7 @@ Thus @ABM is placed in the global scope.
   shapes  <span class="hljs-comment"># deprecated</span>
   Util
   Color
+  ColorMaps
   Shapes
   AgentSet
   Patch

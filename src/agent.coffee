@@ -50,6 +50,8 @@ class Agent
     @p.agents.push @ if @p.agents? # @model.patches.cacheAgentsHere
     @links = [] if @cacheLinks
 
+
+
   # Set agent color to `c` scaled by `s`. Usage: see patch.scaleColor
   scaleColor: (c, s) ->
     @color = u.clone @color unless @hasOwnProperty "color" # promote color to inst var
@@ -112,7 +114,7 @@ class Agent
     if (s=sprite)?
       @sprite = s; @color = s.color; @strokeColor = s.strokeColor; @shape = s.shape; @size = s.size
     else
-      @color = u.randomColor unless @color?
+      @color = u.randomColor() unless @color?
       @sprite = Shapes.shapeToSprite @shape, @color, @model.patches.toBits(@size), @strokeColor
 
   # Draw the agent on the drawing layer, leaving permanent image.
@@ -188,6 +190,10 @@ class Agent
   # from me, and within cone radians of my heading using patch topology
   inCone: (aset, cone, radius, meToo=false) ->
     aset.inCone @p, @heading, cone, radius, meToo # REMIND: @p vs @?
+
+  # Return true if world coordinate falls on agent sprite
+  hitTest: (x, y) ->
+    @distanceXY(x, y) < @size
 
   # Return other end of link from me
   otherEnd: (l) -> if l.end1 is @ then l.end2 else l.end1
