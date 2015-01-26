@@ -180,7 +180,8 @@ class Model
 
   # Direct install image into the given context, not async.
   # Alias for the view's particular implementation.
-  installDrawing: @view.installDrawing
+  installDrawing: (img, ctx) ->
+    @view.installDrawing(img, ctx)
 
 # ### Breeds
 
