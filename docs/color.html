@@ -674,7 +674,7 @@ thus shared and take no space in the color itself.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="hljs-string">"pixel"</span>:
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-attribute">pixel</span>:
         <span class="hljs-attribute">get</span>:<span class="hljs-function"> -&gt;</span> <span class="hljs-property">@pixelArray</span>[<span class="hljs-number">0</span>]
         <span class="hljs-attribute">set</span>: <span class="hljs-function"><span class="hljs-params">(val)</span> -&gt;</span> <span class="hljs-property">@setPixel</span>(val)
         <span class="hljs-attribute">enumerable</span>: <span class="hljs-literal">true</span> <span class="hljs-comment"># make visible in stack trace, remove after debugging</span></pre></div></div>
@@ -692,7 +692,7 @@ thus shared and take no space in the color itself.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="hljs-string">"uints"</span>:
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-attribute">uints</span>:
         <span class="hljs-attribute">get</span>:<span class="hljs-function"> -&gt;</span> @ <span class="hljs-comment">#.. not needed, already array</span>
         <span class="hljs-attribute">set</span>: <span class="hljs-function"><span class="hljs-params">(val)</span> -&gt;</span> <span class="hljs-property">@setColor</span>(val...) <span class="hljs-comment"># beware! array GC slows this down.</span>
         <span class="hljs-attribute">enumerable</span>: <span class="hljs-literal">true</span> <span class="hljs-comment"># make visible in stack trace, remove after debugging</span></pre></div></div>
@@ -710,7 +710,7 @@ thus shared and take no space in the color itself.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="hljs-string">"css"</span>:
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-attribute">css</span>:
         <span class="hljs-attribute">get</span>:<span class="hljs-function"> -&gt;</span> <span class="hljs-property">@getString</span>()
         <span class="hljs-attribute">set</span>: <span class="hljs-function"><span class="hljs-params">(val)</span> -&gt;</span> <span class="hljs-property">@setString</span>(val)
         <span class="hljs-attribute">enumerable</span>: <span class="hljs-literal">true</span> <span class="hljs-comment"># make visible in stack trace, remove after debugging</span></pre></div></div>
@@ -728,7 +728,7 @@ thus shared and take no space in the color itself.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="hljs-string">"str"</span>:
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-attribute">str</span>:
         <span class="hljs-attribute">get</span>:<span class="hljs-function"> -&gt;</span> <span class="hljs-property">@getString</span>()
         <span class="hljs-attribute">enumerable</span>: <span class="hljs-literal">true</span> <span class="hljs-comment"># make visible in stack trace, remove after debugging</span>
     typedColor</pre></div></div>
