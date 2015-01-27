@@ -61,20 +61,20 @@ pw=64&ph=64&ps=10&map=rgb&args=16
 pw=64&ph=64&ps=10&map=rgb&args=16&sort&key=hue
 pw=96&ph=32&ps=8&map=rgb&args=10
 
-pw=11&ph=5&ps=32&map=css&args=[simpleNamedColors]
-pw=11&ph=5&ps=32&map=css&args=[simpleNamedColors]&sort
-pw=10&ph=14&ps=32&map=css&args=[namedColors]
-pw=10&ph=14&ps=32&map=css&args=[namedColors]&sort
-# pw=6&ph=1&ps=128&map=css&args=[namedRainbowObj]
-pw=5&ph=6&ps=32&map=css&args=[triColors]&sort
-pw=8&ph=8&ps=32&map=css&args=[quadColors]&sort
-pw=8&ph=8&ps=32&map=css&args=[quadColors]&sort
+pw=11&ph=5&ps=32&map=basic&args=[simpleNamedColors]
+pw=11&ph=5&ps=32&map=basic&args=[simpleNamedColors]&sort
+pw=10&ph=14&ps=32&map=basic&args=[namedColors]
+pw=10&ph=14&ps=32&map=basic&args=[namedColors]&sort
+# pw=6&ph=1&ps=128&map=basic&args=[namedRainbowObj]
+pw=5&ph=6&ps=32&map=basic&args=[triColors]&sort
+pw=8&ph=8&ps=32&map=basic&args=[quadColors]&sort
+pw=8&ph=8&ps=32&map=basic&args=[quadColors]&sort
 
-pw=14&ph=20&ps=32&map=css&args=[namedColors]
+pw=14&ph=20&ps=32&map=basic&args=[namedColors]
 
 
-pw=10&ph=14&ps=32&map=pixel&args=[namedPixels]
-pw=11&ph=5&ps=32&map=pixel&args=[simpleNamedPixels]
+pw=10&ph=14&ps=32&map=basic&args=[namedPixels]
+pw=11&ph=5&ps=32&map=basic&args=[simpleNamedPixels]
 
 
 pw=16&ph=16&ps=32&map=random&args=256
@@ -209,14 +209,12 @@ window.flags =
   pw: 64
   ph: 1
   ps: 12
-  pnum: null
   map: "gradient"
-  type: "typed" # "css" "pixel" "typed"
   args: [64,[[255,255,0],[0,255,255]]]
   sort: false
-  proto: false
-  index: false
   key: "intensity"
+  type: "typed" # "css" "pixel" "typed"
+  index: false
   sortFcns:
     intensity: (a,b) ->
       a = Color.colorToArray a; b = Color.colorToArray b
@@ -230,14 +228,13 @@ window.flags =
 # w: 16/4, h: 4, s: 50, map: "gradient"
 # Use query string to update flags.
 flags[k] = v for k,v of u.parseQueryString()
-flags.pnum = flags.pw * flags.ph
 flags.args = eval flags.args if typeof flags.args is "string"
 flags.args = [flags.args] if not Array.isArray(flags.args)
 flags.args.push null if (flags.map is "gradient") and (flags.args.length is 2)
 if flags.args.length is 1 and flags.map is "rgb"
   cube = flags.args[0]
   flags.args = [cube, cube, cube]
-flags.map = flags.map + if flags.proto then "ProtoMap" else "ColorMap"
+flags.map = flags.map + "ColorMap"
 console.log k,v for k,v of flags
 
 # Color.basicColorMap = (array) -> new Color.ColorMap array
@@ -251,18 +248,8 @@ class ColorTestModel extends ABM.Model
 
     window.map = @map =
       ColorMaps[flags.map] flags.args..., flags.type, flags.index
-    # window.map = @map = Color[flags.map] flags.args...
     @map.sort(flags.sortFcns[flags.key]) if flags.sort
-    # console.log (c[flags.key] for c in @map) if flags.sort
-
-    # debugger;
-    # @patches[i].color = color.toArray(true) for color,i in @map
-    # for color,i in @map
-      # color = Color.convertColor color, "typed"
-      # @patches[i].color = color.toArray(true)
-    # @patches[i].color = Color.legacyColor(color) for color,i in @map
     @patches[i].color = color for color,i in @map # type = "typed" OK for legacy
-
 
     console.log "patches: #{@patches.length}; map: #{map.length}"
     if @map.index

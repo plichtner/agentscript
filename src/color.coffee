@@ -219,22 +219,22 @@ Color = {
     # thus shared and take no space in the color itself.
     Object.defineProperties TypedColorProto,
     # pixel: get/set typedColor.pixelArray[0] via pixel property
-      "pixel":
+      pixel:
         get: -> @pixelArray[0]
         set: (val) -> @setPixel(val)
         enumerable: true # make visible in stack trace, remove after debugging
     # uints: set Uint8 values via JavaScript or TypedArray. Getter not needed.
-      "uints":
+      uints:
         get: -> @ #.. not needed, already array
         set: (val) -> @setColor(val...) # beware! array GC slows this down.
         enumerable: true # make visible in stack trace, remove after debugging
     # css: get/set typedColor.str via @string property. Updates TypedArrays.
-      "css":
+      css:
         get: -> @getString()
         set: (val) -> @setString(val)
         enumerable: true # make visible in stack trace, remove after debugging
     # str: Legacy usage, identical to css getter property, will remove asap
-      "str":
+      str:
         get: -> @getString()
         enumerable: true # make visible in stack trace, remove after debugging
     typedColor
