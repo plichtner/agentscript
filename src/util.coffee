@@ -114,7 +114,7 @@ Util = util = u = # TODO: "util" deprecated in favor of Util
     result.str = null if result.str?
     if rgba.length == 3
     then rgba.push(1)
-    result[3] = @clamp((rgba[3]*scale),0,1).toFixed(3)
+    result[3] = parseFloat(@clamp((rgba[3]*scale),0,1).toFixed(3))
     result
 
   # Return HTML color as used by canvas element.  Can include Alpha
