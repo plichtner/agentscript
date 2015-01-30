@@ -443,7 +443,7 @@ Modifying an existing array minimizes GC overhead</p>
     result.str = <span class="hljs-literal">null</span> <span class="hljs-keyword">if</span> result.str?
     <span class="hljs-keyword">if</span> rgba.length == <span class="hljs-number">3</span>
     <span class="hljs-keyword">then</span> rgba.push(<span class="hljs-number">1</span>)
-    result[<span class="hljs-number">3</span>] = <span class="hljs-property">@clamp</span>((rgba[<span class="hljs-number">3</span>]*scale),<span class="hljs-number">0</span>,<span class="hljs-number">1</span>).toFixed(<span class="hljs-number">3</span>)
+    result[<span class="hljs-number">3</span>] = parseFloat(<span class="hljs-property">@clamp</span>((rgba[<span class="hljs-number">3</span>]*scale),<span class="hljs-number">0</span>,<span class="hljs-number">1</span>).toFixed(<span class="hljs-number">3</span>))
     result</pre></div></div>
             
         </li>
