@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>colormixin.coffee</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>colormixin.coffee</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <p>Experimental: A function performing a dynamic mixin for a new color.
+To add a new color to a class, like “labelColor”, the following is created:</p>
+<ul>
+<li>A defineProperty for labelColor which calls a setter/getter pair:</li>
+<li>.. named: setLableColor/getLabelColor</li>
+<li>.. which manage a property: labelColorProp</li>
+<li>.. defaulted to the supplied default color</li>
+<li>A colormap property is created, labelColorMap, w/ no setter/getter</li>
+<li>A private colorType is associated with labelColor, within the closure</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">colorMixin</span> = <span class="hljs-params">(obj, colorName, colorDefault, colorMap=<span class="hljs-literal">null</span>, colorType=<span class="hljs-string">"typed"</span>)</span> -&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>If obj is a class, use its prototype</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  proto = obj.prototype ? obj</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Capitolize 1st char of colorName for creating property names</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  colorTitle = colorName[<span class="hljs-number">0</span>].toUpperCase() + colorName.slice(<span class="hljs-number">1</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Names we’re adding to the prototype.
+We don’t add colorType, its in this closure.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  colorPropName = colorName+<span class="hljs-string">"Prop"</span>
+  colorMapName = colorName + <span class="hljs-string">"Map"</span>
+  getterName = <span class="hljs-string">"get<span class="hljs-subst">#{colorTitle}</span>"</span>
+  setterName = <span class="hljs-string">"set<span class="hljs-subst">#{colorTitle}</span>"</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Add names to proto.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  proto[colorPropName] = colorDefault <span class="hljs-comment"># check type?</span>
+  proto[colorMapName] = colorMap
+  <span class="hljs-keyword">unless</span> proto[setterName]
+    proto[setterName] = <span class="hljs-function"><span class="hljs-params">(r,g,b,a=<span class="hljs-number">255</span>)</span> -&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Setter: If a single argument given, its a valid color</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">if</span> g <span class="hljs-keyword">is</span> <span class="hljs-literal">undefined</span>
+        color = r <span class="hljs-comment"># type check/conversion?</span>
+      <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> @[colorMapName]</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>If a colormap exists, use the closest map color</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        color = @[colorMapName].findClosestColor r, g, b, a
+      <span class="hljs-keyword">else</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>If no colormap, set the color to the r,g,b,a values</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">if</span> <span class="hljs-property">@hasOwnProperty</span>(colorPropName) <span class="hljs-keyword">and</span> colorType <span class="hljs-keyword">is</span> <span class="hljs-string">"typed"</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>If a typed color already created, use it</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>          color = @[colorPropName]
+          color.setColor r,g,b,a
+        <span class="hljs-keyword">else</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>.. otherwise create a new one</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>          color = Color.typedColor r, g, b, a
+      @[colorPropName] = color</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>Getter: return the colorPropName’s value</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    proto[getterName] =<span class="hljs-function"> -&gt;</span> @[colorPropName]</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>define the color property</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  Object.defineProperty proto, colorName,
+    <span class="hljs-attribute">get</span>:<span class="hljs-function"> -&gt;</span> <span class="hljs-built_in">console</span>.log <span class="hljs-string">"getter"</span>; @[getterName]()
+    <span class="hljs-attribute">set</span>: <span class="hljs-function"><span class="hljs-params">(val)</span> -&gt;</span> <span class="hljs-built_in">console</span>.log <span class="hljs-string">"setter"</span>;  @[setterName](val...)
+    <span class="hljs-attribute">enumerable</span>: <span class="hljs-literal">true</span> <span class="hljs-comment"># make visible in stack trace, remove after debugging</span>
+  proto</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

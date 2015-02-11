@@ -16,7 +16,7 @@ class Patches extends AgentSet
   # Constructor: super creates the empty AgentSet instance and installs
   # the agentClass (breed) variable shared by all the Patches in this set.
   # Patches are created from top-left to bottom-right to match data sets.
-  constructor: -> # agentClass, name, mainSet
+  constructor: -> # model, agentClass, name, mainSet
     super # call super with all the args I was called with
     @monochrome = false # set to true to optimize patches all default color
     @[k] = v for own k,v of @model.world # add world items to patches

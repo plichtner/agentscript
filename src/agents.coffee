@@ -5,7 +5,7 @@
 class Agents extends AgentSet
   # Constructor creates the empty AgentSet instance and installs
   # the agentClass (breed) variable shared by all the Agents in this set.
-  constructor: -> # agentClass, name, mainSet
+  constructor: -> # model, agentClass, name, mainSet
     super # call super with all the args I was called with
     @useSprites = false
 
@@ -54,7 +54,7 @@ class Agents extends AgentSet
     as = @inRect a, radius, radius, true
     super a, radius, meToo # as.inRadius a, radius, meToo
 
-  setDraggable: -> 
+  setDraggable: ->
     @on 'dragstart', (mouseEvent) =>
       mouseEvent.target.dragging = true
 

@@ -332,7 +332,8 @@ Default is to clone the sharedUint8s.</p>
                 <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
               <p>Return rgb array with 3 random ints in 0-255.
-Convert to random cssString or pixel via functions above.</p>
+Convert to random cssString or pixel via functions above
+or arrayToColor below</p>
 
             </div>
             
@@ -688,11 +689,11 @@ thus shared and take no space in the color itself.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
-              <p>uints: set Uint8 values via JavaScript or TypedArray. Getter not needed.</p>
+              <p>rgba: set Uint8 values via JavaScript or TypedArray. Getter not needed.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="hljs-attribute">uints</span>:
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-attribute">rgba</span>:
         <span class="hljs-attribute">get</span>:<span class="hljs-function"> -&gt;</span> @ <span class="hljs-comment">#.. not needed, already array</span>
         <span class="hljs-attribute">set</span>: <span class="hljs-function"><span class="hljs-params">(val)</span> -&gt;</span> <span class="hljs-property">@setColor</span>(val...) <span class="hljs-comment"># beware! array GC slows this down.</span>
         <span class="hljs-attribute">enumerable</span>: <span class="hljs-literal">true</span> <span class="hljs-comment"># make visible in stack trace, remove after debugging</span></pre></div></div>
@@ -756,6 +757,19 @@ thus shared and take no space in the color itself.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
+              <p>REMIND: WHY Color. RATHER THAN @??</p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-43">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-43">&#182;</a>
+              </div>
               <p>Return the color type of a given color, null if not a color.
 null useful for testing if color <em>is</em> a color.</p>
 
@@ -770,11 +784,11 @@ null useful for testing if color <em>is</em> a color.</p>
         </li>
         
         
-        <li id="section-43">
+        <li id="section-44">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-43">&#182;</a>
+                <a class="pilcrow" href="#section-44">&#182;</a>
               </div>
               <p>Return new color of the given type, given an r,g,b,(a) array,
 where a defaults to opaque (255).
@@ -783,7 +797,7 @@ Use randomRgb &amp; randomGrayRgb arrays to create random valid colors.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">arrayToColor</span>: <span class="hljs-function"><span class="hljs-params">(array, type)</span> -&gt;</span>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">arrayToColor</span>: <span class="hljs-function"><span class="hljs-params">(array, type = <span class="hljs-string">"typed"</span>)</span> -&gt;</span>
     <span class="hljs-keyword">switch</span> type
       <span class="hljs-keyword">when</span> <span class="hljs-string">"css"</span>   <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> Color.triString array...
       <span class="hljs-keyword">when</span> <span class="hljs-string">"pixel"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> Color.rgbaToPixel array...
@@ -794,13 +808,13 @@ Use randomRgb &amp; randomGrayRgb arrays to create random valid colors.</p>
         </li>
         
         
-        <li id="section-44">
+        <li id="section-45">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-44">&#182;</a>
+                <a class="pilcrow" href="#section-45">&#182;</a>
               </div>
-              <p>Return array (either typed or Array) representing the color.</p>
+              <p>Return rgba array (either typed or Array) representing the color.</p>
 
             </div>
             
@@ -815,11 +829,11 @@ Use randomRgb &amp; randomGrayRgb arrays to create random valid colors.</p>
         </li>
         
         
-        <li id="section-45">
+        <li id="section-46">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-45">&#182;</a>
+                <a class="pilcrow" href="#section-46">&#182;</a>
               </div>
               <p>Given a color or rgba array and a type, return color of that type.
 Return color if color is already of type.</p>
@@ -829,6 +843,12 @@ Return color if color is already of type.</p>
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">convertColor</span>: <span class="hljs-function"><span class="hljs-params">(color, type)</span> -&gt;</span>
     <span class="hljs-keyword">return</span> color <span class="hljs-keyword">if</span> <span class="hljs-property">@colorType</span>(color) <span class="hljs-keyword">is</span> type
     <span class="hljs-property">@arrayToColor</span>(<span class="hljs-property">@colorToArray</span>(color), type)
+  <span class="hljs-attribute">rgbaToColor</span>: <span class="hljs-function"><span class="hljs-params">(r, g, b, a=<span class="hljs-number">255</span>, type = <span class="hljs-string">"typed"</span>)</span> -&gt;</span>
+    <span class="hljs-keyword">switch</span> type
+      <span class="hljs-keyword">when</span> <span class="hljs-string">"css"</span>   <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> Color.triString r,g,b,a
+      <span class="hljs-keyword">when</span> <span class="hljs-string">"pixel"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> Color.rgbaToPixel r,g,b,a
+      <span class="hljs-keyword">when</span> <span class="hljs-string">"typed"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-property">@typedColor</span> r,g,b,a
+    u.error <span class="hljs-string">"rgbaToColor: incorrect type: <span class="hljs-subst">#{type}</span>"</span>
 
 };
 Color.initSharedPixel() <span class="hljs-comment"># Initialize the shared buffer pixel/rgb view</span></pre></div></div>
@@ -836,16 +856,15 @@ Color.initSharedPixel() <span class="hljs-comment"># Initialize the shared buffe
         </li>
         
         
-        <li id="section-46">
+        <li id="section-47">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-46">&#182;</a>
+                <a class="pilcrow" href="#section-47">&#182;</a>
               </div>
               <p>Here are the 140 case insensitive legal color names (the X11 set)
 To include them in your model, use:</p>
-<pre><code>namedColorString = <span class="hljs-string">"AliceBlue AntiqueWhite Aqua Aquamarine Azure Beige Bisque Black BlanchedAlmond Blue BlueViolet Brown BurlyWood CadetBlue Chartreuse Chocolate Coral CornflowerBlue Cornsilk Crimson Cyan DarkBlue DarkCyan DarkGoldenRod DarkGray DarkGreen DarkKhaki DarkMagenta DarkOliveGreen DarkOrange DarkOrchid DarkRed DarkSalmon DarkSeaGreen DarkSlateBlue DarkSlateGray DarkTurquoise DarkViolet DeepPink DeepSkyBlue DimGray DodgerBlue FireBrick FloralWhite ForestGreen Fuchsia Gainsboro GhostWhite Gold GoldenRod Gray Green GreenYellow HoneyDew HotPink IndianRed Indigo Ivory Khaki Lavender LavenderBlush LawnGreen LemonChiffon LightBlue LightCoral LightCyan LightGoldenRodYellow LightGray LightGreen LightPink LightSalmon LightSeaGreen LightSkyBlue LightSlateGray LightSteelBlue LightYellow Lime LimeGreen Linen Magenta Maroon MediumAquaMarine MediumBlue MediumOrchid MediumPurple MediumSeaGreen MediumSlateBlue MediumSpringGreen MediumTurquoise MediumVioletRed MidnightBlue MintCream MistyRose Moccasin NavajoWhite Navy OldLace Olive OliveDrab Orange OrangeRed Orchid PaleGoldenRod PaleGreen PaleTurquoise PaleVioletRed PapayaWhip PeachPuff Peru Pink Plum PowderBlue Purple Red RosyBrown RoyalBlue SaddleBrown Salmon SandyBrown SeaGreen SeaShell Sienna Silver SkyBlue SlateBlue SlateGray Snow SpringGreen SteelBlue Tan Teal Thistle Tomato Turquoise Violet Wheat White WhiteSmoke Yellow YellowGreen"</span>
-namedColors = namedColorString.split(<span class="hljs-string">" "</span>)
+<pre><code>namedColors = <span class="hljs-string">"AliceBlue AntiqueWhite Aqua Aquamarine Azure Beige Bisque Black BlanchedAlmond Blue BlueViolet Brown BurlyWood CadetBlue Chartreuse Chocolate Coral CornflowerBlue Cornsilk Crimson Cyan DarkBlue DarkCyan DarkGoldenRod DarkGray DarkGreen DarkKhaki DarkMagenta DarkOliveGreen DarkOrange DarkOrchid DarkRed DarkSalmon DarkSeaGreen DarkSlateBlue DarkSlateGray DarkTurquoise DarkViolet DeepPink DeepSkyBlue DimGray DodgerBlue FireBrick FloralWhite ForestGreen Fuchsia Gainsboro GhostWhite Gold GoldenRod Gray Green GreenYellow HoneyDew HotPink IndianRed Indigo Ivory Khaki Lavender LavenderBlush LawnGreen LemonChiffon LightBlue LightCoral LightCyan LightGoldenRodYellow LightGray LightGreen LightPink LightSalmon LightSeaGreen LightSkyBlue LightSlateGray LightSteelBlue LightYellow Lime LimeGreen Linen Magenta Maroon MediumAquaMarine MediumBlue MediumOrchid MediumPurple MediumSeaGreen MediumSlateBlue MediumSpringGreen MediumTurquoise MediumVioletRed MidnightBlue MintCream MistyRose Moccasin NavajoWhite Navy OldLace Olive OliveDrab Orange OrangeRed Orchid PaleGoldenRod PaleGreen PaleTurquoise PaleVioletRed PapayaWhip PeachPuff Peru Pink Plum PowderBlue Purple Red RosyBrown RoyalBlue SaddleBrown Salmon SandyBrown SeaGreen SeaShell Sienna Silver SkyBlue SlateBlue SlateGray Snow SpringGreen SteelBlue Tan Teal Thistle Tomato Turquoise Violet Wheat White WhiteSmoke Yellow YellowGreen"</span>.split(<span class="hljs-string">" "</span>)
 </code></pre><p>NetLogo’s 14 base colors names are:</p>
 <pre><code>gray red orange brown yellow green lime turquoise cyan sky blue violet magenta pink
 </code></pre><p>but do not match exactly the css named colors:</p>

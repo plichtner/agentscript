@@ -61,6 +61,11 @@ pw=64&ph=64&ps=10&map=rgb&args=16
 pw=64&ph=64&ps=10&map=rgb&args=16&sort&key=hue
 pw=96&ph=32&ps=8&map=rgb&args=10
 
+pw=16&ph=16&ps=32&map=rgb&args=[6,6,7]
+# http://en.wikipedia.org/wiki/8-bit_color
+# http://en.wikipedia.org/wiki/List_of_color_palettes
+pw=16&ph=16&ps=32&map=rgb&args=[8,8,4]
+
 pw=11&ph=5&ps=32&map=basic&args=[simpleNamedColors]
 pw=11&ph=5&ps=32&map=basic&args=[simpleNamedColors]&sort
 pw=10&ph=14&ps=32&map=basic&args=[namedColors]
@@ -215,6 +220,7 @@ window.flags =
   key: "intensity"
   type: "typed" # "css" "pixel" "typed"
   index: false
+  compare: false
   sortFcns:
     intensity: (a,b) ->
       a = Color.colorToArray a; b = Color.colorToArray b
@@ -224,6 +230,8 @@ window.flags =
       b = Color.convertColor b, "pixel"
       a.pixel - b.pixel
     hue: (a,b) -> Color.rgbToHsl(a...)[0] - Color.rgbToHsl(b...)[0]
+    random: (a,b) -> 0.5 - Math.random()
+
 
 # w: 16/4, h: 4, s: 50, map: "gradient"
 # Use query string to update flags.
@@ -249,7 +257,10 @@ class ColorTestModel extends ABM.Model
     window.map = @map =
       ColorMaps[flags.map] flags.args..., flags.type, flags.index
     @map.sort(flags.sortFcns[flags.key]) if flags.sort
-    @patches[i].color = color for color,i in @map # type = "typed" OK for legacy
+    if flags.compare
+      @compareRandomColors()
+    else
+      @patches[i].color = color for color,i in @map # type = "typed" OK
 
     console.log "patches: #{@patches.length}; map: #{map.length}"
     if @map.index
@@ -306,23 +317,23 @@ class ColorTestModel extends ABM.Model
     console.log "comparing #{n} random colors"
     for i in [0...n]
       randomRgb = Color.randomRgb()
-      closestRgb = Color.colorToArray (map.findClosestColor randomRgb...)
-      ps[i*2].color = Color.legacyColor closestRgb
-      ps[i*2+1].color = randomRgb
-    console.log "drawing"
-    app.draw()
+      closestRgb = map.findClosestColor randomRgb...
+      @patches[i*2].color = closestRgb
+      @patches[i*2+1].color = randomRgb
+    console.log "drawing: closest map color left, random right"
+    @draw()
     null
 
   memoryTest: -> # two cubes of 64 steps per axis, 262,144 colors
     console.log "building maps of each type w/ 262,144 colors"
     console.log "fatPixelMap start (pixels, no index)"
-    window.fatPixelMap = new ColorMaps.ColorMap 64, "pixel", false
+    window.fatPixelMap = ColorMaps.rgbColorCube 64, "pixel", false
     console.log "fatPixelMap done: size = #{u.tls fatPixelMap.length}"
     console.log "fatCsslMap start (css strings, no index)"
-    window.fatCsslMap = new ColorMaps.ColorMap 64, "css", false
+    window.fatCsslMap = ColorMaps.rgbColorCube 64, "css", false
     console.log "fatCsslMap done: size = #{u.tls fatCsslMap.length}"
     console.log "fatTypedMap start (typed colors, w/ css and index)"
-    window.fatTypedMap = new ColorMaps.ColorMap 64, "typed", true
+    window.fatTypedMap = ColorMaps.rgbColorCube 64, "typed", true
     tc.css for tc in fatTypedMap # promote css strings
     console.log "fatTypedMap done: size = #{u.tls fatTypedMap.length}"
     null
