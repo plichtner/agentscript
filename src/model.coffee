@@ -297,11 +297,12 @@ class Model
 
 
 @ABM = {
-  util    # deprecated
-  shapes  # deprecated
+  util    # deprecated, Util
+  shapes  # deprecated, Shapes
   Util
   Color
   ColorMaps
+  colorMixin
   Shapes
   AgentSet
   Patch

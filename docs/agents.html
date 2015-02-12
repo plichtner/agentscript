@@ -61,7 +61,7 @@ the agentClass (breed) variable shared by all the Agents in this set.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">constructor</span>:<span class="hljs-function"> -&gt;</span> <span class="hljs-comment"># agentClass, name, mainSet</span>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">constructor</span>:<span class="hljs-function"> -&gt;</span> <span class="hljs-comment"># model, agentClass, name, mainSet</span>
     <span class="hljs-keyword">super</span> <span class="hljs-comment"># call super with all the args I was called with</span>
     <span class="hljs-property">@useSprites</span> = <span class="hljs-literal">false</span></pre></div></div>
             
@@ -220,7 +220,7 @@ from me, using patch topology</p>
     as = <span class="hljs-property">@inRect</span> a, radius, radius, <span class="hljs-literal">true</span>
     <span class="hljs-keyword">super</span> a, radius, meToo <span class="hljs-comment"># as.inRadius a, radius, meToo</span>
 
-  <span class="hljs-attribute">setDraggable</span>:<span class="hljs-function"> -&gt;</span> 
+  <span class="hljs-attribute">setDraggable</span>:<span class="hljs-function"> -&gt;</span>
     <span class="hljs-property">@on</span> <span class="hljs-string">'dragstart'</span>, <span class="hljs-function"><span class="hljs-params">(mouseEvent)</span> =&gt;</span>
       mouseEvent.target.dragging = <span class="hljs-literal">true</span>
 

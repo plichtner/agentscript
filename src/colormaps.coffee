@@ -98,7 +98,7 @@ ColorMaps  = {
 
   # Use prototypal inheritance for converting array to colormap.
   ColorMapProto: {
-    __proto__: Array
+    __proto__: Array.prototype
     # Initialize array to be colormap. Create an index object for
     # direct lookup of color in array if indexToo. If color type is "typed"
     # add properties for map and index in map.
@@ -148,16 +148,17 @@ ColorMaps  = {
     scaleColor: (number, min, max, minColor = 0, maxColor = @length-1) ->
       @[ @scaleIndex number, min, max, minColor, maxColor ]
 
-    # Find the index/color closest to this r,g,b
+    # Find the index/color closest to this r,g,b,a.
+    # Alpha only used for exact lookup optimization.
     # Note: slow for large maps unless color cube or exact match.
-    findClosestIndex: (r, g, b) -> # alpha not in rgbDistance function
+    findClosestIndex: (r, g, b, a=255) -> # alpha not in rgbDistance function
       # First directly find if rgb cube
       if @cube
         step = 255/(@cube-1)
         [rLoc, gLoc, bLoc] = (Math.round(c/step) for c in [r, g, b])
         return rLoc + gLoc*@cube + bLoc*@cube*@cube
-      # Then check if is exact match
-      return ix if ix = @lookup [r,g,b]
+      # Then check if is exact match. Only use of alpha for opacity maps
+      return ix if ix = @lookup [r,g,b,a]
       # Finally use color distance to find closest color
       minDist = Infinity; ixMin = 0
       for color, i in @
@@ -165,8 +166,7 @@ ColorMaps  = {
         d = Color.rgbDistance r0, g0, b0, r, g, b
         if d < minDist then minDist = d; ixMin = i
       ixMin
-
-    findClosestColor: (r, g, b) ->  @[ @findClosestIndex r, g, b ]
+    findClosestColor: (r, g, b, a=255) ->  @[ @findClosestIndex r, g, b, a ]
   }
 
 # ### ColorMap Utilities
@@ -204,6 +204,8 @@ ColorMaps  = {
     array = @permuteColors(R, G, B)
     array.cube = R if (typeof R is "number") and (R is G is B)
     @colorMap @arrayToColors(array, type), indexToo
+  rgbColorCube: (cubeSide, type="typed", indexToo=false) ->
+    @rgbColorMap cubeSide, cubeSide, cubeSide, type, indexToo
 
   # Create an hsl map, inputs similar to above.  Convert the
   # HSL values to css, default to bright hue ramp.

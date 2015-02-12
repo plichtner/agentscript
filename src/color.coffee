@@ -113,7 +113,8 @@ Color = {
 # ### Color Conversion and Scaling Functions.
 
   # Return rgb array with 3 random ints in 0-255.
-  # Convert to random cssString or pixel via functions above.
+  # Convert to random cssString or pixel via functions above
+  # or arrayToColor below
   randomRgb: -> (u.randomInt(256) for i in [0..2])
   # Return random gray color, with intensities in [min,max).
   randomGrayRgb: (min = 0, max = 256) ->
@@ -223,8 +224,8 @@ Color = {
         get: -> @pixelArray[0]
         set: (val) -> @setPixel(val)
         enumerable: true # make visible in stack trace, remove after debugging
-    # uints: set Uint8 values via JavaScript or TypedArray. Getter not needed.
-      uints:
+    # rgba: set Uint8 values via JavaScript or TypedArray. Getter not needed.
+      rgba:
         get: -> @ #.. not needed, already array
         set: (val) -> @setColor(val...) # beware! array GC slows this down.
         enumerable: true # make visible in stack trace, remove after debugging
@@ -243,6 +244,8 @@ Color = {
 #
 # Utilities for color types: css, pixel, typed
 
+# REMIND: WHY Color. RATHER THAN @??
+
   # Return the color type of a given color, null if not a color.
   # null useful for testing if color *is* a color.
   colorType: (color) ->
@@ -254,14 +257,14 @@ Color = {
   # where a defaults to opaque (255).
   # The array can be a JavaScript Array, a TypedArray, or a TypedColor.
   # Use randomRgb & randomGrayRgb arrays to create random valid colors.
-  arrayToColor: (array, type) ->
+  arrayToColor: (array, type = "typed") ->
     switch type
       when "css"   then return Color.triString array...
       when "pixel" then return Color.rgbaToPixel array...
       when "typed"
         return if array.buffer then @typedColor array else @typedColor array...
     u.error "arrayToColor: incorrect type: #{type}"
-  # Return array (either typed or Array) representing the color.
+  # Return rgba array (either typed or Array) representing the color.
   colorToArray: (color) ->
     switch @colorType(color)
       when "css"   then return Color.stringToUint8s color
@@ -274,6 +277,12 @@ Color = {
   convertColor: (color, type) ->
     return color if @colorType(color) is type
     @arrayToColor(@colorToArray(color), type)
+  rgbaToColor: (r, g, b, a=255, type = "typed") ->
+    switch type
+      when "css"   then return Color.triString r,g,b,a
+      when "pixel" then return Color.rgbaToPixel r,g,b,a
+      when "typed" then return @typedColor r,g,b,a
+    u.error "rgbaToColor: incorrect type: #{type}"
 
 };
 Color.initSharedPixel() # Initialize the shared buffer pixel/rgb view
@@ -281,8 +290,7 @@ Color.initSharedPixel() # Initialize the shared buffer pixel/rgb view
 # Here are the 140 case insensitive legal color names (the X11 set)
 # To include them in your model, use:
 #
-#     namedColorString = "AliceBlue AntiqueWhite Aqua Aquamarine Azure Beige Bisque Black BlanchedAlmond Blue BlueViolet Brown BurlyWood CadetBlue Chartreuse Chocolate Coral CornflowerBlue Cornsilk Crimson Cyan DarkBlue DarkCyan DarkGoldenRod DarkGray DarkGreen DarkKhaki DarkMagenta DarkOliveGreen DarkOrange DarkOrchid DarkRed DarkSalmon DarkSeaGreen DarkSlateBlue DarkSlateGray DarkTurquoise DarkViolet DeepPink DeepSkyBlue DimGray DodgerBlue FireBrick FloralWhite ForestGreen Fuchsia Gainsboro GhostWhite Gold GoldenRod Gray Green GreenYellow HoneyDew HotPink IndianRed Indigo Ivory Khaki Lavender LavenderBlush LawnGreen LemonChiffon LightBlue LightCoral LightCyan LightGoldenRodYellow LightGray LightGreen LightPink LightSalmon LightSeaGreen LightSkyBlue LightSlateGray LightSteelBlue LightYellow Lime LimeGreen Linen Magenta Maroon MediumAquaMarine MediumBlue MediumOrchid MediumPurple MediumSeaGreen MediumSlateBlue MediumSpringGreen MediumTurquoise MediumVioletRed MidnightBlue MintCream MistyRose Moccasin NavajoWhite Navy OldLace Olive OliveDrab Orange OrangeRed Orchid PaleGoldenRod PaleGreen PaleTurquoise PaleVioletRed PapayaWhip PeachPuff Peru Pink Plum PowderBlue Purple Red RosyBrown RoyalBlue SaddleBrown Salmon SandyBrown SeaGreen SeaShell Sienna Silver SkyBlue SlateBlue SlateGray Snow SpringGreen SteelBlue Tan Teal Thistle Tomato Turquoise Violet Wheat White WhiteSmoke Yellow YellowGreen"
-#     namedColors = namedColorString.split(" ")
+#     namedColors = "AliceBlue AntiqueWhite Aqua Aquamarine Azure Beige Bisque Black BlanchedAlmond Blue BlueViolet Brown BurlyWood CadetBlue Chartreuse Chocolate Coral CornflowerBlue Cornsilk Crimson Cyan DarkBlue DarkCyan DarkGoldenRod DarkGray DarkGreen DarkKhaki DarkMagenta DarkOliveGreen DarkOrange DarkOrchid DarkRed DarkSalmon DarkSeaGreen DarkSlateBlue DarkSlateGray DarkTurquoise DarkViolet DeepPink DeepSkyBlue DimGray DodgerBlue FireBrick FloralWhite ForestGreen Fuchsia Gainsboro GhostWhite Gold GoldenRod Gray Green GreenYellow HoneyDew HotPink IndianRed Indigo Ivory Khaki Lavender LavenderBlush LawnGreen LemonChiffon LightBlue LightCoral LightCyan LightGoldenRodYellow LightGray LightGreen LightPink LightSalmon LightSeaGreen LightSkyBlue LightSlateGray LightSteelBlue LightYellow Lime LimeGreen Linen Magenta Maroon MediumAquaMarine MediumBlue MediumOrchid MediumPurple MediumSeaGreen MediumSlateBlue MediumSpringGreen MediumTurquoise MediumVioletRed MidnightBlue MintCream MistyRose Moccasin NavajoWhite Navy OldLace Olive OliveDrab Orange OrangeRed Orchid PaleGoldenRod PaleGreen PaleTurquoise PaleVioletRed PapayaWhip PeachPuff Peru Pink Plum PowderBlue Purple Red RosyBrown RoyalBlue SaddleBrown Salmon SandyBrown SeaGreen SeaShell Sienna Silver SkyBlue SlateBlue SlateGray Snow SpringGreen SteelBlue Tan Teal Thistle Tomato Turquoise Violet Wheat White WhiteSmoke Yellow YellowGreen".split(" ")
 #
 # NetLogo's 14 base colors names are:
 #

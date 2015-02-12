@@ -330,7 +330,7 @@ Returns the original array, just for convenience.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">ColorMapProto</span>: {
-    <span class="hljs-attribute">__proto__</span>: Array</pre></div></div>
+    <span class="hljs-attribute">__proto__</span>: Array.prototype</pre></div></div>
             
         </li>
         
@@ -475,12 +475,13 @@ The optional minColor, maxColor args are for using a subset of the map.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
-              <p>Find the index/color closest to this r,g,b
+              <p>Find the index/color closest to this r,g,b,a.
+Alpha only used for exact lookup optimization.
 Note: slow for large maps unless color cube or exact match.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-attribute">findClosestIndex</span>: <span class="hljs-function"><span class="hljs-params">(r, g, b)</span> -&gt;</span> <span class="hljs-comment"># alpha not in rgbDistance function</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-attribute">findClosestIndex</span>: <span class="hljs-function"><span class="hljs-params">(r, g, b, a=<span class="hljs-number">255</span>)</span> -&gt;</span> <span class="hljs-comment"># alpha not in rgbDistance function</span></pre></div></div>
             
         </li>
         
@@ -509,11 +510,11 @@ Note: slow for large maps unless color cube or exact match.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-28">&#182;</a>
               </div>
-              <p>Then check if is exact match</p>
+              <p>Then check if is exact match. Only use of alpha for opacity maps</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">return</span> ix <span class="hljs-keyword">if</span> ix = <span class="hljs-property">@lookup</span> [r,g,b]</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">return</span> ix <span class="hljs-keyword">if</span> ix = <span class="hljs-property">@lookup</span> [r,g,b,a]</pre></div></div>
             
         </li>
         
@@ -534,8 +535,7 @@ Note: slow for large maps unless color cube or exact match.</p>
         d = Color.rgbDistance r0, g0, b0, r, g, b
         <span class="hljs-keyword">if</span> d &lt; minDist <span class="hljs-keyword">then</span> minDist = d; ixMin = i
       ixMin
-
-    <span class="hljs-attribute">findClosestColor</span>: <span class="hljs-function"><span class="hljs-params">(r, g, b)</span> -&gt;</span>  @[ <span class="hljs-property">@findClosestIndex</span> r, g, b ]
+    <span class="hljs-attribute">findClosestColor</span>: <span class="hljs-function"><span class="hljs-params">(r, g, b, a=<span class="hljs-number">255</span>)</span> -&gt;</span>  @[ <span class="hljs-property">@findClosestIndex</span> r, g, b, a ]
   }</pre></div></div>
             
         </li>
@@ -628,7 +628,9 @@ R=G=B=4, the resulting map has <code>4*4*4=64</code> colors.</p>
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">rgbColorMap</span>: <span class="hljs-function"><span class="hljs-params">(R, G=R, B=R, type=<span class="hljs-string">"typed"</span>, indexToo=<span class="hljs-literal">true</span>)</span> -&gt;</span>
     array = <span class="hljs-property">@permuteColors</span>(R, G, B)
     array.cube = R <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> R <span class="hljs-keyword">is</span> <span class="hljs-string">"number"</span>) <span class="hljs-keyword">and</span> (R <span class="hljs-keyword">is</span> G <span class="hljs-keyword">is</span> B)
-    <span class="hljs-property">@colorMap</span> <span class="hljs-property">@arrayToColors</span>(array, type), indexToo</pre></div></div>
+    <span class="hljs-property">@colorMap</span> <span class="hljs-property">@arrayToColors</span>(array, type), indexToo
+  <span class="hljs-attribute">rgbColorCube</span>: <span class="hljs-function"><span class="hljs-params">(cubeSide, type=<span class="hljs-string">"typed"</span>, indexToo=<span class="hljs-literal">false</span>)</span> -&gt;</span>
+    <span class="hljs-property">@rgbColorMap</span> cubeSide, cubeSide, cubeSide, type, indexToo</pre></div></div>
             
         </li>
         
