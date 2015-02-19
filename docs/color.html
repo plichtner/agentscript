@@ -843,7 +843,7 @@ Return color if color is already of type.</p>
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">convertColor</span>: <span class="hljs-function"><span class="hljs-params">(color, type)</span> -&gt;</span>
     <span class="hljs-keyword">return</span> color <span class="hljs-keyword">if</span> <span class="hljs-property">@colorType</span>(color) <span class="hljs-keyword">is</span> type
     <span class="hljs-property">@arrayToColor</span>(<span class="hljs-property">@colorToArray</span>(color), type)
-  <span class="hljs-attribute">rgbaToColor</span>: <span class="hljs-function"><span class="hljs-params">(r, g, b, a=<span class="hljs-number">255</span>, type = <span class="hljs-string">"typed"</span>)</span> -&gt;</span>
+  <span class="hljs-attribute">rgbaToColor</span>: <span class="hljs-function"><span class="hljs-params">(r, g, b, a=<span class="hljs-number">255</span>, type=<span class="hljs-string">"typed"</span>)</span> -&gt;</span>
     <span class="hljs-keyword">switch</span> type
       <span class="hljs-keyword">when</span> <span class="hljs-string">"css"</span>   <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> Color.triString r,g,b,a
       <span class="hljs-keyword">when</span> <span class="hljs-string">"pixel"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> Color.rgbaToPixel r,g,b,a

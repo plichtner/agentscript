@@ -247,6 +247,9 @@ console.log k,v for k,v of flags
 
 # Color.basicColorMap = (array) -> new Color.ColorMap array
 
+ABM.colorMixin(ABM.Patch, "fooColor", "black")
+console.log ABM.Patch.prototype
+
 class ColorTestModel extends ABM.Model
   startup: ->
   setup: ->
