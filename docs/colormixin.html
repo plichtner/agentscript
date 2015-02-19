@@ -70,7 +70,7 @@ To add a new color to a class, like “labelColor”, the following is created:<
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  colorTitle = colorName[<span class="hljs-number">0</span>].toUpperCase() + colorName.slice(<span class="hljs-number">1</span>)</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  colorTitle = u.upperCamelCase colorName</pre></div></div>
             
         </li>
         
@@ -104,7 +104,7 @@ We don’t add colorType, its in this closure.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  proto[colorPropName] = colorDefault <span class="hljs-comment"># check type?</span>
+            <div class="content"><div class='highlight'><pre>  proto[colorPropName] = Color.convertColor colorDefault, colorType
   proto[colorMapName] = colorMap
   <span class="hljs-keyword">unless</span> proto[setterName]
     proto[setterName] = <span class="hljs-function"><span class="hljs-params">(r,g,b,a=<span class="hljs-number">255</span>)</span> -&gt;</span></pre></div></div>
@@ -118,12 +118,12 @@ We don’t add colorType, its in this closure.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
-              <p>Setter: If a single argument given, its a valid color</p>
+              <p>Setter: If a single argument given, convert to a valid color</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">if</span> g <span class="hljs-keyword">is</span> <span class="hljs-literal">undefined</span>
-        color = r <span class="hljs-comment"># type check/conversion?</span>
+        color = Color.convertColor r, colorType <span class="hljs-comment"># type check/conversion</span>
       <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> @[colorMapName]</pre></div></div>
             
         </li>
@@ -135,7 +135,8 @@ We don’t add colorType, its in this closure.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
-              <p>If a colormap exists, use the closest map color</p>
+              <p>If a colormap exists, use the closest map color.
+Assume map is of correct colorType.</p>
 
             </div>
             
@@ -187,7 +188,7 @@ We don’t add colorType, its in this closure.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>          color = Color.typedColor r, g, b, a
+            <div class="content"><div class='highlight'><pre>          color = Color.rgbaToColor r, g, b, a, colorType
       @[colorPropName] = color</pre></div></div>
             
         </li>
@@ -219,9 +220,8 @@ We don’t add colorType, its in this closure.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  Object.defineProperty proto, colorName,
-    <span class="hljs-attribute">get</span>:<span class="hljs-function"> -&gt;</span> <span class="hljs-built_in">console</span>.log <span class="hljs-string">"getter"</span>; @[getterName]()
-    <span class="hljs-attribute">set</span>: <span class="hljs-function"><span class="hljs-params">(val)</span> -&gt;</span> <span class="hljs-built_in">console</span>.log <span class="hljs-string">"setter"</span>;  @[setterName](val...)
-    <span class="hljs-attribute">enumerable</span>: <span class="hljs-literal">true</span> <span class="hljs-comment"># make visible in stack trace, remove after debugging</span>
+    <span class="hljs-attribute">get</span>:<span class="hljs-function"> -&gt;</span> @[getterName]()
+    <span class="hljs-attribute">set</span>: <span class="hljs-function"><span class="hljs-params">(val)</span> -&gt;</span> @[setterName](val)
   proto</pre></div></div>
             
         </li>

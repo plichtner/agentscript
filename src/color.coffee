@@ -277,7 +277,7 @@ Color = {
   convertColor: (color, type) ->
     return color if @colorType(color) is type
     @arrayToColor(@colorToArray(color), type)
-  rgbaToColor: (r, g, b, a=255, type = "typed") ->
+  rgbaToColor: (r, g, b, a=255, type="typed") ->
     switch type
       when "css"   then return Color.triString r,g,b,a
       when "pixel" then return Color.rgbaToPixel r,g,b,a

@@ -73,6 +73,10 @@ Util = util = u = # TODO: "util" deprecated in favor of Util
   # Return localized string for number, with commas etc
   tls: (n) -> n.toLocaleString()
 
+# ### String Operations
+
+  # Convert camelCase to CamelCase, capitolizing first character
+  upperCamelCase: (str) -> str.charAt(0).toUpperCase() + str.substr(1)
 
 # ### Color and Angle Operations
 # Our colors are r,g,b,[a] arrays, with an optional color.str HTML
@@ -213,11 +217,12 @@ Util = util = u = # TODO: "util" deprecated in favor of Util
   # Return a copy of an object, with the prototype also set in the copy
   # when the object has a prototype other than Object.prototype
   cloneObject: (obj) ->
-    newObj = {}
-    newObj[key] = obj[key] for own key, value of obj
-    if (obj.__proto__ isnt Object.prototype)
-      console.log "cloneObject, setting proto"
-      newObj.__proto__ = obj.__proto__
+    newObj = Object.create({}, Object.getPrototypeOf(obj))
+    # Get *all* own props, not just enumerable.
+    keys = Object.getOwnPropertyNames(obj)
+    for key in keys
+      prop = Object.getOwnPropertyDescriptor(obj, key)
+      Object.defineProperty(newObj, key, prop)
     newObj
   # Clone a class (a constructor function) including
   # a copied prototype.  This is used when we have multiple
@@ -226,11 +231,8 @@ Util = util = u = # TODO: "util" deprecated in favor of Util
     ctorStr = oldClass.toString().replace(/^/, "var ctor = ")
     if newName
       ctorStr = ctorStr.replace(/function.*(?=\()/, "function #{newName}")
-    # eval(oldClass.toString().replace(/^/, "var ctor = "))
     eval(ctorStr)
     ctor.prototype = @cloneObject(oldClass.prototype)
-    ctor.constructor = oldClass.constructor
-    ctor.prototype.constructor = oldClass.prototype.constructor
     ctor
   # Mix the attributes from one class into another;
   # an alternative to prototypal inheritance. Similar to extend, but

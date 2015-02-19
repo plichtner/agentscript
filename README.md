@@ -16,6 +16,8 @@ Currently the documentation is hosted directly on our [GitHub Pages](http://back
 
 [**shapes.coffee**](docs/shapes.html) A simple agent shapes module containing the default shapes and a few functions for getting at named shapes and adding your own shapes.
 
+[**evented.coffee**](docs/evented.html) Our tiny and elegant Pub/Sub event module.
+
 [**agentset.coffee**](docs/agentset.html) The core Array subclass used by Patches, Agents, and Links.
 
 [**patch.coffee**](docs/patch.html) The Patch class. Patches represent autonomous regions of space that other agents can read/write to. Patches are commonly treated as grid cells in cellular automata models.
