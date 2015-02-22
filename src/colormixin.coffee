@@ -1,12 +1,11 @@
 # Experimental: A function performing a dynamic mixin for a new color.
 # To add a new color to a class, like "labelColor", the following is created:
 #
-# * A defineProperty for labelColor which calls a setter/getter pair:
-# * .. named: setLableColor/getLabelColor
-# * .. which manage a property: labelColorProp
-# * .. defaulted to the supplied default color
-# * A colormap property is created, labelColorMap, w/ no setter/getter
-# * A private colorType is associated with labelColor, within the closure
+# * labelColor: A defineProperty which uses a setter/getter method pair:
+# * setLableColor/getLabelColor: (will not be overridden if present)
+# * labelColorProp: the property used by set/get, defaulted to colorDefault
+# * labelColorMap: The colormap property, labelColorMap, w/ no setter/getter
+# * colorType: the type associated with labelColor, private within the closure
 colorMixin = (obj, colorName, colorDefault, colorMap=null, colorType="typed") ->
   # If obj is a class, use its prototype
   proto = obj.prototype ? obj
@@ -40,6 +39,7 @@ colorMixin = (obj, colorName, colorDefault, colorMap=null, colorType="typed") ->
           # .. otherwise create a new one
           color = Color.rgbaToColor r, g, b, a, colorType
       @[colorPropName] = color
+  unless proto[getterName]
     # Getter: return the colorPropName's value
     proto[getterName] = -> @[colorPropName]
   # define the color property
