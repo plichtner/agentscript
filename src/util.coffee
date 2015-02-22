@@ -214,16 +214,19 @@ Util = util = u = # TODO: "util" deprecated in favor of Util
   ownVarKeys: (obj) -> (key for own key, value of obj when not @isFunction value)
   ownValues: (obj) -> (value for own key, value of obj)
 
+  # Mix the attributes from one object into another
+  mixinObject: (destObj, srcObject) ->
+    # Get *all* own props, not just enumerable.
+    keys = Object.getOwnPropertyNames(srcObject)
+    for key in keys
+      prop = Object.getOwnPropertyDescriptor(srcObject, key)
+      Object.defineProperty(destObj, key, prop)
+    destObj
   # Return a copy of an object, with the prototype also set in the copy
   # when the object has a prototype other than Object.prototype
   cloneObject: (obj) ->
-    newObj = Object.create({}, Object.getPrototypeOf(obj))
-    # Get *all* own props, not just enumerable.
-    keys = Object.getOwnPropertyNames(obj)
-    for key in keys
-      prop = Object.getOwnPropertyDescriptor(obj, key)
-      Object.defineProperty(newObj, key, prop)
-    newObj
+    newObj = Object.create(Object.getPrototypeOf(obj))
+    @mixinObject newObj, obj
   # Clone a class (a constructor function) including
   # a copied prototype.  This is used when we have multiple
   # models in a page when the prototype has global variables.
