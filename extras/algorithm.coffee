@@ -20,23 +20,23 @@
 #   floodFunc = floodFunc() while floodFunc
 
 class ABM.FloodFill
-  constructor: (@startingSet, @fCandidate, @fJoin, @fNeighbors) ->
-    @nextStep = () => @floodFillOnce @startingSet, @fCandidate, @fJoin, @fNeighbors
+  constructor: (startingSet, @fCandidate, @fJoin, @fNeighbors) ->
+    @nextStep = () => @floodFillOnce()
+    @nextFront = startingSet
+    @prevFront = []
 
-  floodFillOnce: (aset, fCandidate, fJoin, fNeighbors, asetLast=[]) =>
-    fJoin p, asetLast for p in aset
+  floodFillOnce: () =>
+    @fJoin p, @prevFront for p in @nextFront
     asetNext = []
-    for p in aset
-      for n in fNeighbors(p) when fCandidate n, aset
+    for p in @nextFront
+      for n in @fNeighbors(p) when @fCandidate n, @nextFront
         asetNext.push n if asetNext.indexOf(n) < 0
     
-    if asetNext.length is 0
-      @nextStep = null
-    else
-      @nextStep = () => @floodFillOnce asetNext, fCandidate, fJoin, fNeighbors, aset
-    
-    @prevFront = aset
+    @prevFront = @nextFront
     @nextFront = asetNext
+
+    if @nextFront.length is 0
+      @nextStep = null
 
 class ABM.Patches.FloodFill extends ABM.FloodFill
   constructor: (@startingSet, @fCandidate, @fJoin, @fNeighbors = ((patch) -> patch.n)) ->
