@@ -115,34 +115,6 @@ class AgentSet extends Array
     breeds = breeds.split(" ")
     @asSet (o for o in @ when o.breed.name not in breeds)
 
-  # A generalized, but complex, flood fill, designed to work on any
-  # agentset type. To see a simpler version, look at the gridpath model.
-  #
-  # Floodfill arguments:
-  #
-  # * aset: initial array of agents, often a single agent: [a]
-  # * fCandidate(a, asetLast) -> true if a is elegible to be added to the set
-  # * fJoin(a, asetLast) -> adds a to the agentset, often by setting a variable
-  # * fNeighbors(a) -> returns the neighbors of this agent
-  # * asetLast: the array of the last set of agents to join the flood.
-  floodFill: (aset, fCandidate, fJoin, fNeighbors, asetLast=[]) ->
-    floodFunc = @floodFillOnce(aset, fCandidate, fJoin, fNeighbors, asetLast)
-    floodFunc = floodFunc() while floodFunc
-
-  # Move one step forward in a floodfill.
-  # floodFillOnce() returns a function that performs the next step of the flood.
-  # This is useful if you want to watch your flood progress as an animation.
-  floodFillOnce: (aset, fCandidate, fJoin, fNeighbors, asetLast=[]) ->
-    fJoin p, asetLast for p in aset
-    asetNext = []
-    for p in aset
-      for n in fNeighbors(p) when fCandidate n, aset
-        asetNext.push n if asetNext.indexOf(n) < 0
-    if asetNext.length is 0
-      null
-    else
-      () => @floodFillOnce asetNext, fCandidate, fJoin, fNeighbors, aset
-
   # Remove adjacent duplicates, by reference, in a sorted agentset.
   # Use `sortById` first if agentset not sorted.
   #
