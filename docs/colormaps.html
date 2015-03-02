@@ -115,11 +115,11 @@ GitHub <a href="https://github.com/bpostlethwaite/colormap">ColorMap Project</a>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
-              <p>Convert rgb versions of the stops to css strings</p>
+              <p>Convert the color stops to css strings</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    stops = (Color.arrayToColor a, <span class="hljs-string">"css"</span> <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> stops) <span class="hljs-keyword">if</span> u.isArray stops[<span class="hljs-number">0</span>]</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    stops = (Color.convertColor c, <span class="hljs-string">"css"</span> <span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> stops)</pre></div></div>
             
         </li>
         
@@ -599,13 +599,12 @@ by passing a size parameter.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
-              <p>Create a map with a random set of colors.</p>
+              <p>Create a map with a random set of colors.
+randomColorMap: (nColors, type=”typed”, indexToo=false) -&gt;
+  array = (Color.randomRgb() for i in [0…nColors])
+  @basicColorMap array, type, indexToo</p>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">randomColorMap</span>: <span class="hljs-function"><span class="hljs-params">(nColors, type=<span class="hljs-string">"typed"</span>, indexToo=<span class="hljs-literal">false</span>)</span> -&gt;</span>
-    array = (Color.randomRgb() <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span>..nColors])
-    <span class="hljs-property">@basicColorMap</span> array, type, indexToo</pre></div></div>
             
         </li>
         
@@ -665,9 +664,11 @@ This easily creates all the MatLab colormaps.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">gradientColorMap</span>: <span class="hljs-function"><span class="hljs-params">(nColors, stops, locs, type=<span class="hljs-string">"typed"</span>, indexToo=<span class="hljs-literal">true</span>)</span> -&gt;</span>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">gradientColorMap</span>: <span class="hljs-function"><span class="hljs-params">(nColors, stops, locs, type=<span class="hljs-string">"typed"</span>, indexToo=<span class="hljs-literal">false</span>)</span> -&gt;</span>
     id = <span class="hljs-property">@gradientImageData</span>(nColors, stops, locs)
-    <span class="hljs-property">@colorMap</span> <span class="hljs-property">@uint8ArrayToColors</span>(id, type), indexToo</pre></div></div>
+    <span class="hljs-property">@colorMap</span> <span class="hljs-property">@uint8ArrayToColors</span>(id, type), indexToo
+  <span class="hljs-attribute">jetColors</span>: [ [<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">127</span>], [<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">255</span>], [<span class="hljs-number">0</span>,<span class="hljs-number">127</span>,<span class="hljs-number">255</span>], [<span class="hljs-number">0</span>,<span class="hljs-number">255</span>,<span class="hljs-number">255</span>],
+    [<span class="hljs-number">127</span>,<span class="hljs-number">255</span>,<span class="hljs-number">127</span>], [<span class="hljs-number">255</span>,<span class="hljs-number">255</span>,<span class="hljs-number">0</span>], [<span class="hljs-number">255</span>,<span class="hljs-number">127</span>,<span class="hljs-number">0</span>], [<span class="hljs-number">255</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>], [<span class="hljs-number">127</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>] ]</pre></div></div>
             
         </li>
         
@@ -688,6 +689,41 @@ with nOpacity opacity values, default to all 256</p>
     array = ( [r, g, b, a] <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> u.aIntRamp <span class="hljs-number">0</span>, <span class="hljs-number">255</span>, nOpacities )
     <span class="hljs-property">@colorMap</span> <span class="hljs-property">@arrayToColors</span>(array, type), indexToo
 }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-38">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-38">&#182;</a>
+              </div>
+              <p>shared global maps</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>ColorMaps.sharedGray    = ColorMaps.grayColorMap()
+ColorMaps.sharedRgb256  = ColorMaps.rgbColorMap(<span class="hljs-number">8</span>,<span class="hljs-number">8</span>,<span class="hljs-number">4</span>)
+ColorMaps.sharedRgb     = ColorMaps.rgbColorCube(<span class="hljs-number">16</span>)
+ColorMaps.sharedJet     = <span class="hljs-comment"># The popular MatLab jet gradient</span>
+  ColorMaps.gradientColorMap <span class="hljs-number">256</span>, ColorMaps.jetColors</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-39">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-39">&#182;</a>
+              </div>
+              <p>Use 256 gray/rgb color maps to return a random gray/rgb typedColor</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>ColorMaps.<span class="hljs-function"><span class="hljs-title">randomGray</span>    = -&gt;</span> ColorMaps.sharedGray.randomColor()
+ColorMaps.<span class="hljs-function"><span class="hljs-title">randomColor</span>   = -&gt;</span> ColorMaps.sharedRgb256.randomColor() <span class="hljs-comment"># sharedRgb?</span></pre></div></div>
             
         </li>
         

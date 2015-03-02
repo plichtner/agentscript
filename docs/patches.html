@@ -517,7 +517,7 @@ The top-left order simplifies finding pixels in data sets</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">pixelXYtoPatchXY</span>: <span class="hljs-function"><span class="hljs-params">(x,y)</span> -&gt;</span> [<span class="hljs-property">@minXcor</span>+(x<span class="hljs-regexp">/@size), @maxYcor-(y/</span><span class="hljs-property">@size</span>)]</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">pixelXYtoPatchXY</span>: <span class="hljs-function"><span class="hljs-params">(x,y)</span> -&gt;</span> [<span class="hljs-property">@minXcor</span>+(x / <span class="hljs-property">@size</span>), <span class="hljs-property">@maxYcor</span>-(y / <span class="hljs-property">@size</span>)]</pre></div></div>
             
         </li>
         
@@ -672,10 +672,7 @@ a drawimage</p>
       <span class="hljs-keyword">else</span> data[i] = (c[<span class="hljs-number">0</span>] &lt;&lt; <span class="hljs-number">24</span>) | (c[<span class="hljs-number">1</span>] &lt;&lt; <span class="hljs-number">16</span>) | (c[<span class="hljs-number">2</span>] &lt;&lt; <span class="hljs-number">8</span>) | a
     <span class="hljs-property">@pixelsCtx</span>.putImageData <span class="hljs-property">@pixelsImageData</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>
     <span class="hljs-keyword">return</span> <span class="hljs-keyword">if</span> <span class="hljs-property">@size</span> <span class="hljs-keyword">is</span> <span class="hljs-number">1</span>
-    ctx.drawImage <span class="hljs-property">@pixelsCtx</span>.canvas, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, ctx.canvas.width, ctx.canvas.height
-
-  <span class="hljs-attribute">floodFillOnce</span>: <span class="hljs-function"><span class="hljs-params">(aset, fCandidate, fJoin, fNeighbors=((p)-&gt;p.n), asetLast=[])</span> -&gt;</span>
-    <span class="hljs-keyword">super</span> aset, fCandidate, fJoin, fNeighbors, asetLast</pre></div></div>
+    ctx.drawImage <span class="hljs-property">@pixelsCtx</span>.canvas, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, ctx.canvas.width, ctx.canvas.height</pre></div></div>
             
         </li>
         
@@ -742,10 +739,29 @@ less than 8 neighbors, return the extra to the patch.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> @
+            <div class="content"><div class='highlight'><pre>    minVal = Infinity; maxVal
+    <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> @
       p[v] = p._diffuseNext
-      p._diffuseNext = <span class="hljs-number">0</span>
-      p.scaleColor c, p[v] <span class="hljs-keyword">if</span> c
+      p._diffuseNext = <span class="hljs-number">0</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-41">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-41">&#182;</a>
+              </div>
+              <p>p.scaleColor c, p[v] if c</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">if</span> c
+        map = p.colorMap ? ColorMaps.sharedJet
+        p.color = map.scaleColor p[v],
+        <span class="hljs-attribute">scaleColor</span>: <span class="hljs-function"><span class="hljs-params">(number, min, max, minColor = <span class="hljs-number">0</span>, maxColor = <span class="hljs-property">@length</span>-<span class="hljs-number">1</span>)</span> -&gt;</span>
+
     <span class="hljs-literal">null</span> <span class="hljs-comment"># avoid returning copy of @</span></pre></div></div>
             
         </li>

@@ -30,9 +30,9 @@
               <p>Experimental: A function performing a dynamic mixin for a new color.
 To add a new color to a class, like “labelColor”, the following is created:</p>
 <ul>
-<li>labelColor: A defineProperty which uses a setter/getter method pair:</li>
+<li>labelColor: A defineProperty which calls a setter/getter method pair:</li>
 <li>setLableColor/getLabelColor: (will not be overridden if present)</li>
-<li>labelColorProp: the property used by set/get, defaulted to colorDefault</li>
+<li>labelColorProp: the property used by set/get method, default to colorDefault</li>
 <li>labelColorMap: The colormap property, labelColorMap, w/ no setter/getter</li>
 <li>colorType: the type associated with labelColor, private within the closure</li>
 </ul>
@@ -103,7 +103,8 @@ We don’t add colorType, its in this closure.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  proto[colorPropName] = Color.convertColor colorDefault, colorType
+            <div class="content"><div class='highlight'><pre>  proto[colorPropName] =
+    <span class="hljs-keyword">if</span> colorDefault <span class="hljs-keyword">then</span> Color.convertColor colorDefault, colorType <span class="hljs-keyword">else</span> <span class="hljs-literal">null</span>
   proto[colorMapName] = colorMap
   <span class="hljs-keyword">unless</span> proto[setterName]
     proto[setterName] = <span class="hljs-function"><span class="hljs-params">(r,g,b,a=<span class="hljs-number">255</span>)</span> -&gt;</span></pre></div></div>

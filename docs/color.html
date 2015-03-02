@@ -757,9 +757,16 @@ thus shared and take no space in the color itself.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
-              <p>REMIND: WHY Color. RATHER THAN @??</p>
+              <p>Return the color type of a given color, null if not a color.
+null useful for testing if color <em>is</em> a color.</p>
 
             </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">colorType</span>: <span class="hljs-function"><span class="hljs-params">(color)</span> -&gt;</span>
+    <span class="hljs-keyword">if</span> color.pixelArray  <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-string">"typed"</span>
+    <span class="hljs-keyword">if</span> u.isString color  <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-string">"css"</span>
+    <span class="hljs-keyword">if</span> u.isInteger color <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-string">"pixel"</span>
+    <span class="hljs-literal">null</span></pre></div></div>
             
         </li>
         
@@ -770,16 +777,20 @@ thus shared and take no space in the color itself.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-43">&#182;</a>
               </div>
-              <p>Return the color type of a given color, null if not a color.
-null useful for testing if color <em>is</em> a color.</p>
+              <p>Return new color of the given type, given an r,g,b,(a) array,
+where a defaults to opaque (255).
+The array can be a JavaScript Array, a TypedArray, or a TypedColor.
+Use randomRgb &amp; randomGrayRgb arrays to create random valid colors.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">colorType</span>: <span class="hljs-function"><span class="hljs-params">(color)</span> -&gt;</span>
-    <span class="hljs-keyword">if</span> u.isString color  <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-string">"css"</span>
-    <span class="hljs-keyword">if</span> u.isInteger color <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-string">"pixel"</span>
-    <span class="hljs-keyword">if</span> color.pixelArray  <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-string">"typed"</span>
-    <span class="hljs-literal">null</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">arrayToColor</span>: <span class="hljs-function"><span class="hljs-params">(array, type = <span class="hljs-string">"typed"</span>)</span> -&gt;</span>
+    <span class="hljs-keyword">switch</span> type
+      <span class="hljs-keyword">when</span> <span class="hljs-string">"css"</span>   <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-property">@triString</span> array...
+      <span class="hljs-keyword">when</span> <span class="hljs-string">"pixel"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-property">@rgbaToPixel</span> array...
+      <span class="hljs-keyword">when</span> <span class="hljs-string">"typed"</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">if</span> array.buffer <span class="hljs-keyword">then</span> <span class="hljs-property">@typedColor</span> array <span class="hljs-keyword">else</span> <span class="hljs-property">@typedColor</span> array...
+    u.error <span class="hljs-string">"arrayToColor: incorrect type: <span class="hljs-subst">#{type}</span>"</span></pre></div></div>
             
         </li>
         
@@ -790,20 +801,17 @@ null useful for testing if color <em>is</em> a color.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-44">&#182;</a>
               </div>
-              <p>Return new color of the given type, given an r,g,b,(a) array,
-where a defaults to opaque (255).
-The array can be a JavaScript Array, a TypedArray, or a TypedColor.
-Use randomRgb &amp; randomGrayRgb arrays to create random valid colors.</p>
+              <p>Return rgba array (either typed or Array) representing the color.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">arrayToColor</span>: <span class="hljs-function"><span class="hljs-params">(array, type = <span class="hljs-string">"typed"</span>)</span> -&gt;</span>
-    <span class="hljs-keyword">switch</span> type
-      <span class="hljs-keyword">when</span> <span class="hljs-string">"css"</span>   <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> Color.triString array...
-      <span class="hljs-keyword">when</span> <span class="hljs-string">"pixel"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> Color.rgbaToPixel array...
-      <span class="hljs-keyword">when</span> <span class="hljs-string">"typed"</span>
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">if</span> array.buffer <span class="hljs-keyword">then</span> <span class="hljs-property">@typedColor</span> array <span class="hljs-keyword">else</span> <span class="hljs-property">@typedColor</span> array...
-    u.error <span class="hljs-string">"arrayToColor: incorrect type: <span class="hljs-subst">#{type}</span>"</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">colorToArray</span>: <span class="hljs-function"><span class="hljs-params">(color)</span> -&gt;</span>
+    <span class="hljs-keyword">switch</span> <span class="hljs-property">@colorType</span>(color)
+      <span class="hljs-keyword">when</span> <span class="hljs-string">"css"</span>   <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-property">@stringToUint8s</span> color
+      <span class="hljs-keyword">when</span> <span class="hljs-string">"pixel"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-property">@pixelToUint8s</span> color
+      <span class="hljs-keyword">when</span> <span class="hljs-string">"typed"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> color <span class="hljs-comment"># already a (typed) array</span>
+    <span class="hljs-keyword">return</span> color <span class="hljs-keyword">if</span> u.isArray(color) <span class="hljs-keyword">or</span> color.buffer
+    u.error <span class="hljs-string">"colorToArray: bad color: <span class="hljs-subst">#{color}</span>"</span></pre></div></div>
             
         </li>
         
@@ -814,17 +822,22 @@ Use randomRgb &amp; randomGrayRgb arrays to create random valid colors.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-45">&#182;</a>
               </div>
-              <p>Return rgba array (either typed or Array) representing the color.</p>
+              <p>Given a color or rgba array and a type, return color of that type.
+Return color if color is already of type.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">colorToArray</span>: <span class="hljs-function"><span class="hljs-params">(color)</span> -&gt;</span>
-    <span class="hljs-keyword">switch</span> <span class="hljs-property">@colorType</span>(color)
-      <span class="hljs-keyword">when</span> <span class="hljs-string">"css"</span>   <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> Color.stringToUint8s color
-      <span class="hljs-keyword">when</span> <span class="hljs-string">"pixel"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> Color.pixelToUint8s color
-      <span class="hljs-keyword">when</span> <span class="hljs-string">"typed"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> color <span class="hljs-comment"># already a (typed) array</span>
-    <span class="hljs-keyword">return</span> color <span class="hljs-keyword">if</span> u.isArray(color) <span class="hljs-keyword">or</span> color.buffer
-    u.error <span class="hljs-string">"colorToArray: bad color: <span class="hljs-subst">#{color}</span>"</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">convertColor</span>: <span class="hljs-function"><span class="hljs-params">(color, type)</span> -&gt;</span>
+    type0 = <span class="hljs-property">@colorType</span>(color)
+    <span class="hljs-keyword">return</span> color <span class="hljs-keyword">if</span> type0 <span class="hljs-keyword">is</span> type
+    <span class="hljs-keyword">return</span> color[type] <span class="hljs-keyword">if</span> type0 <span class="hljs-keyword">is</span> <span class="hljs-string">"typed"</span>
+    <span class="hljs-property">@arrayToColor</span>(<span class="hljs-property">@colorToArray</span>(color), type)
+  <span class="hljs-attribute">rgbaToColor</span>: <span class="hljs-function"><span class="hljs-params">(r, g, b, a=<span class="hljs-number">255</span>, type=<span class="hljs-string">"typed"</span>)</span> -&gt;</span>
+    <span class="hljs-keyword">switch</span> type
+      <span class="hljs-keyword">when</span> <span class="hljs-string">"css"</span>   <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-property">@triString</span> r,g,b,a
+      <span class="hljs-keyword">when</span> <span class="hljs-string">"pixel"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-property">@rgbaToPixel</span> r,g,b,a
+      <span class="hljs-keyword">when</span> <span class="hljs-string">"typed"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-property">@typedColor</span> r,g,b,a
+    u.error <span class="hljs-string">"rgbaToColor: incorrect type: <span class="hljs-subst">#{type}</span>"</span></pre></div></div>
             
         </li>
         
@@ -835,21 +848,14 @@ Use randomRgb &amp; randomGrayRgb arrays to create random valid colors.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-46">&#182;</a>
               </div>
-              <p>Given a color or rgba array and a type, return color of that type.
-Return color if color is already of type.</p>
+              <p>Return true if two colors result in the same color
+Colors can be of different type:</p>
+<p>   Color.colorsEqual(“red”, [255,0,0]) returns <code>true</code></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">convertColor</span>: <span class="hljs-function"><span class="hljs-params">(color, type)</span> -&gt;</span>
-    <span class="hljs-keyword">return</span> color <span class="hljs-keyword">if</span> <span class="hljs-property">@colorType</span>(color) <span class="hljs-keyword">is</span> type
-    <span class="hljs-property">@arrayToColor</span>(<span class="hljs-property">@colorToArray</span>(color), type)
-  <span class="hljs-attribute">rgbaToColor</span>: <span class="hljs-function"><span class="hljs-params">(r, g, b, a=<span class="hljs-number">255</span>, type=<span class="hljs-string">"typed"</span>)</span> -&gt;</span>
-    <span class="hljs-keyword">switch</span> type
-      <span class="hljs-keyword">when</span> <span class="hljs-string">"css"</span>   <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> Color.triString r,g,b,a
-      <span class="hljs-keyword">when</span> <span class="hljs-string">"pixel"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> Color.rgbaToPixel r,g,b,a
-      <span class="hljs-keyword">when</span> <span class="hljs-string">"typed"</span> <span class="hljs-keyword">then</span> <span class="hljs-keyword">return</span> <span class="hljs-property">@typedColor</span> r,g,b,a
-    u.error <span class="hljs-string">"rgbaToColor: incorrect type: <span class="hljs-subst">#{type}</span>"</span>
-
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">colorsEqual</span>: <span class="hljs-function"><span class="hljs-params">(color1, color2)</span> -&gt;</span>
+    <span class="hljs-property">@convertColor</span>(color1, <span class="hljs-string">"pixel"</span>) <span class="hljs-keyword">is</span> <span class="hljs-property">@convertColor</span>(color2, <span class="hljs-string">"pixel"</span>)
 };
 Color.initSharedPixel() <span class="hljs-comment"># Initialize the shared buffer pixel/rgb view</span></pre></div></div>
             

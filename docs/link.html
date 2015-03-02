@@ -102,7 +102,7 @@ is called with patch coordinate transform installed.</p>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">draw</span>: <span class="hljs-function"><span class="hljs-params">(ctx)</span> -&gt;</span>
     ctx.save()
-    ctx.strokeStyle = u.colorStr <span class="hljs-property">@color</span>
+    ctx.strokeStyle = <span class="hljs-property">@color</span>.css <span class="hljs-comment"># u.colorStr @color</span>
     ctx.lineWidth = <span class="hljs-property">@model</span>.patches.fromBits <span class="hljs-property">@thickness</span>
     ctx.beginPath()
     <span class="hljs-keyword">if</span> !<span class="hljs-property">@model</span>.patches.isTorus
@@ -192,6 +192,22 @@ Assumes the given input <em>is</em> one of the link endpoint pairs!</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">otherEnd</span>: <span class="hljs-function"><span class="hljs-params">(a)</span> -&gt;</span> <span class="hljs-keyword">if</span> <span class="hljs-property">@end1</span> <span class="hljs-keyword">is</span> a <span class="hljs-keyword">then</span> <span class="hljs-property">@end2</span> <span class="hljs-keyword">else</span> <span class="hljs-property">@end1</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>use colorMixin to setup colors</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>colorMixin(Link, <span class="hljs-string">"color"</span>, [<span class="hljs-number">130</span>,<span class="hljs-number">130</span>,<span class="hljs-number">130</span>])
+colorMixin(Link, <span class="hljs-string">"labelColor"</span>, <span class="hljs-string">"black"</span>)</pre></div></div>
             
         </li>
         

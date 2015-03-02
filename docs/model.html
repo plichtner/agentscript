@@ -617,7 +617,7 @@ Use:</p>
 
   <span class="hljs-attribute">drawSpotlight</span>: <span class="hljs-function"><span class="hljs-params">(agent, ctx)</span> -&gt;</span>
     u.clearCtx ctx
-    u.fillCtx ctx, [<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0.6</span>]
+    u.fillCtx ctx, Color.typedColor(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">.6</span>*<span class="hljs-number">255</span>)
     ctx.beginPath()
     ctx.arc agent.x, agent.y, <span class="hljs-number">3</span>, <span class="hljs-number">0</span>, <span class="hljs-number">2</span>*Math.PI, <span class="hljs-literal">false</span>
     ctx.fill()</pre></div></div>
