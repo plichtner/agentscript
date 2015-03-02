@@ -31,3 +31,5 @@ class ABM.FloodFill
     if @nextFront.length is 0
       @done = true
   
+  go: () ->
+    @nextStep() while not @done
