@@ -12,11 +12,13 @@
 
 class ABM.FloodFill
   constructor: (startingSet, @fCandidate, @fJoin, @fNeighbors) ->
-    @nextStep = () => @floodFillOnce()
     @nextFront = startingSet
     @prevFront = []
+    @done = false
 
-  floodFillOnce: () =>
+  nextStep: () ->
+    if @done then return
+
     @fJoin p, @prevFront for p in @nextFront
     asetNext = []
     for p in @nextFront
@@ -27,13 +29,5 @@ class ABM.FloodFill
     @nextFront = asetNext
 
     if @nextFront.length is 0
-      @nextStep = null
-
-class ABM.Patches.FloodFill extends ABM.FloodFill
-  constructor: (startingSet, @fCandidate, @fJoin, @fNeighbors = ((patch) -> patch.n)) ->
-    super(startingSet, @fCandidate, @fJoin, @fNeighbors)
-
-# Link stub
-# class ABM.Links.FloodFill extends ABM.FloodFill
-#   constructor: (startingSet, @fCandidate, @fJoin, @fNeighbors = ((link) -> patch.n)) ->
-#     super(startingSet, @fCandidate, @fJoin, @fNeighbors)
+      @done = true
+  
