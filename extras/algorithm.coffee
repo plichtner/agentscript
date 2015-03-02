@@ -1,14 +1,23 @@
 # algorithm.coffee is a collection of algorithms useful in certain agent-based modeling contexts
 
-# A generalized, but complex, flood fill, designed to work on any
-# agentset type. To see a simpler version, look at the gridpath model.
+# A generalized flood fill, designed to work on any
+# agentset type. For a simpler version, take a look at [the gridpath model](../models/gridpath.html).
 #
 # Floodfill arguments:
 #
 # * startingSet: initial array of agents, often a single agent: [a]
-# * fCandidate(a, nextFront) -> true if a is elegible to be added to the set
-# * fJoin(a, prevFront) -> adds a to the agentset, usually by setting a variable
-# * fNeighbors(a) -> returns the neighbors of this agent (i.e. the agents to which this flood will spread)
+# * fCandidate(a, nextFront) -> true if a is elegible to be added to the set of flooded agents
+# * fJoin(a, prevFront) -> add a to the set of flooded agents (for example by setting a `flooded` flag)
+# * fNeighbors(a) -> returns the neighbors of this agent (i.e. the agents to which this flood will attempt to spread)
+#
+# To flood patches, you might want
+#
+#     fNeighbors = (patch) -> patch.n
+#
+# whereas to flood agents connected by links, you might want
+#
+#     fNeighbors = (agent) -> agent.linkNeighbors()
+#
 
 class ABM.FloodFill
   constructor: (startingSet, @fCandidate, @fJoin, @fNeighbors) ->
