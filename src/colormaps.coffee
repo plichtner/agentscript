@@ -33,8 +33,8 @@ ColorMaps  = {
   #   https://github.com/bpostlethwaite/colormap)
 
   gradientImageData: (nColors, stops, locs) ->
-    # Convert rgb versions of the stops to css strings
-    stops = (Color.arrayToColor a, "css" for a in stops) if u.isArray stops[0]
+    # Convert the color stops to css strings
+    stops = (Color.convertColor c, "css" for c in stops)
     # default locations for colors is equally spaced
     locs = u.aRamp 0, 1, stops.length if not locs?
     # create a nColors x 1 canvas context
@@ -187,9 +187,9 @@ ColorMaps  = {
     @basicColorMap array, type, indexToo
 
   # Create a map with a random set of colors.
-  randomColorMap: (nColors, type="typed", indexToo=false) ->
-    array = (Color.randomRgb() for i in [0...nColors])
-    @basicColorMap array, type, indexToo
+  # randomColorMap: (nColors, type="typed", indexToo=false) ->
+  #   array = (Color.randomRgb() for i in [0...nColors])
+  #   @basicColorMap array, type, indexToo
 
   # Create a colormap by permuted rgb values.
   #
@@ -216,9 +216,11 @@ ColorMaps  = {
 
   # Use gradient to build an rgba array, then convert to colormap.
   # This easily creates all the MatLab colormaps.
-  gradientColorMap: (nColors, stops, locs, type="typed", indexToo=true) ->
+  gradientColorMap: (nColors, stops, locs, type="typed", indexToo=false) ->
     id = @gradientImageData(nColors, stops, locs)
     @colorMap @uint8ArrayToColors(id, type), indexToo
+  jetColors: [ [0,0,127], [0,0,255], [0,127,255], [0,255,255],
+    [127,255,127], [255,255,0], [255,127,0], [255,0,0], [127,0,0] ]
 
   # Create alpha map of the given base r,g,b color,
   # with nOpacity opacity values, default to all 256
@@ -227,3 +229,12 @@ ColorMaps  = {
     array = ( [r, g, b, a] for a in u.aIntRamp 0, 255, nOpacities )
     @colorMap @arrayToColors(array, type), indexToo
 }
+# shared global maps
+ColorMaps.sharedGray    = ColorMaps.grayColorMap()
+ColorMaps.sharedRgb256  = ColorMaps.rgbColorMap(8,8,4)
+ColorMaps.sharedRgb     = ColorMaps.rgbColorCube(16)
+ColorMaps.sharedJet     = # The popular MatLab jet gradient
+  ColorMaps.gradientColorMap 256, ColorMaps.jetColors
+# Use 256 gray/rgb color maps to return a random gray/rgb typedColor
+ColorMaps.randomGray    = -> ColorMaps.sharedGray.randomColor()
+ColorMaps.randomColor   = -> ColorMaps.sharedRgb256.randomColor() # sharedRgb?

@@ -1,3 +1,4 @@
+
 # Class Agent instances represent the dynamic, behavioral element of modeling.
 # Each agent knows the patch it is on, and interacts with that and other
 # patches, as well as other agents.
@@ -76,7 +77,7 @@ class Agent
       @p.agents.push @
     if @penDown
       drawing = @model.drawing
-      drawing.strokeStyle = u.colorStr @color
+      drawing.strokeStyle = @color.css # u.colorStr @color
       drawing.lineWidth = @model.patches.fromBits @penSize
       drawing.beginPath()
       drawing.moveTo x0, y0; drawing.lineTo x, y # REMIND: euclidean
@@ -221,3 +222,8 @@ class Agent
   # Return other end of myOutinks
   outLinkNeighbors: ->
     l.end2 for l in @myLinks() when l.end1 is @
+
+# use colorMixin to setup colors
+colorMixin(Agent, "color", null)
+colorMixin(Agent, "strokeColor", null)
+colorMixin(Agent, "labelColor", "black")

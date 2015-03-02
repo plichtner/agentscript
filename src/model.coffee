@@ -215,7 +215,7 @@ class Model
 
   drawSpotlight: (agent, ctx) ->
     u.clearCtx ctx
-    u.fillCtx ctx, [0,0,0,0.6]
+    u.fillCtx ctx, Color.typedColor(0,0,0,.6*255)
     ctx.beginPath()
     ctx.arc agent.x, agent.y, 3, 0, 2*Math.PI, false
     ctx.fill()

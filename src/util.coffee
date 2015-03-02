@@ -16,19 +16,30 @@ Util = util = u = # TODO: "util" deprecated in favor of Util
   #     error("wtf? foo=#{foo}") if fooProblem
   error: (s) -> throw new Error s
 
+  # Alert for a deprecated function.
+  deprecatedMsgs: []
+  deprecated: (s) ->
+    if @deprecatedMsgs.length is 0
+      alert "Deprecated functions, see console.log"
+    if @deprecatedMsgs.indexOf(s) < 0
+      console.log "DEPRECATED - #{s}"
+      @deprecatedMsgs.push s
+    null
+
+
   # Two max/min int values. One for 2^53, largest int in float64, other for
   # bitwise ops which are 32 bit. See [discussion](http://goo.gl/WpAzT)
   MaxINT: Math.pow(2,53); MinINT: -Math.pow(2,53) # -@MaxINT fails, @ not defined yet
   MaxINT32: 0|0x7fffffff; MinINT32: 0|0x80000000
 
-  # Good replacements for Javascript's badly broken`typeof` and `instanceof`
-  # See [underscore.coffee](http://goo.gl/L0umK)
+  # Replacements for Javascript's iffy `typeof` and `instanceof`
+  # See [underscore docs](http://underscorejs.org/docs/underscore.html)
   isArray: Array.isArray or # returns a function that is then applied to arg.
-    (obj) -> !!(obj and obj.concat and obj.unshift and not obj.callee)
-  isFunction: (obj) ->
-    !!(obj and obj.constructor and obj.call and obj.apply)
-  isString: (obj) ->
-    !!(obj is '' or (obj and obj.charCodeAt and obj.substr))
+    (obj) -> toString.call(obj) is '[object Array]'
+  # Can use: !!(obj and obj.constructor and obj.call and obj.apply)
+  isFunction: (obj) -> typeof obj is "function"
+  # Can use: !!(obj is '' or (obj and obj.charCodeAt and obj.substr))
+  isString: (obj) -> typeof obj is 'string' || obj instanceof String
   isInteger: Number.isInteger or # like isArray
     (num) -> Math.floor(num) is num
 
@@ -84,23 +95,29 @@ Util = util = u = # TODO: "util" deprecated in favor of Util
 
   # Return a random RGB or gray color. Array passed to minimize garbage collection
   randomColor: (c = []) ->
-    c.str = null if c.str?
-    c[i] = @randomInt(256) for i in [0..2]
-    c
+    # c.str = null if c.str?
+    # c[i] = @randomInt(256) for i in [0..2]
+    # c
+    @deprecated "Util randomColor: use ColorMaps.randomColor"
+    ColorMaps.randomColor()
   # Note: if 2 args passed, assume they're min, max w/ default c
   randomGray: (c = [], min = 64, max = 192) ->
-    if arguments.length is 2 then return @randomGray null, c, min
-    c.str = null if c.str?
-    r=@randomInt2 min,max
-    c[i] = r for i in [0..2]
-    c
+    # if arguments.length is 2 then return @randomGray null, c, min
+    # c.str = null if c.str?
+    # r=@randomInt2 min,max
+    # c[i] = r for i in [0..2]
+    # c
+    @deprecated "Util randomGray: use ColorMaps.randomGray"
+    ColorMaps.randomGray()
   # Random color from a colormap set of r,g,b values.
   # Default is one of 125 (5^3) colors
   randomMapColor: (c = [], set = [0,63,127,191,255]) ->
-    @setColor c, @oneOf(set), @oneOf(set), @oneOf(set)
-  randomBrightColor: (c=[]) -> @randomMapColor c, [0,127,255]
-  randomHSBColor: (c=[]) ->
-    c = @hsbToRgb([@randomInt(51)*5,255,255])
+    @deprecated "Util randomMapColor: use ColorMaps.randomColor() or similar"
+    ColorMaps.randomColor()
+    # @setColor c, @oneOf(set), @oneOf(set), @oneOf(set)
+  # randomBrightColor: (c=[]) -> @randomMapColor c, [0,127,255]
+  # randomHSBColor: (c=[]) ->
+  #   c = @hsbToRgb([@randomInt(51)*5,255,255])
   # Modify an existing rgb or gray color.  Alpha optional, not set if not provided.
   # Modifying an existing array minimizes GC overhead
   setColor: (c, r, g, b, a) ->
@@ -123,15 +140,23 @@ Util = util = u = # TODO: "util" deprecated in favor of Util
 
   # Return HTML color as used by canvas element.  Can include Alpha
   colorStr: (c) ->
-    return s if (s = c.str)?
-    @error "alpha > 1" if c.length is 4 and c[3] > 1
-    c.str = if c.length is 3 then "rgb(#{c})" else "rgba(#{c})"
+    @deprecated "Util colorStr: use Color module or typedColor"
+    c.css ? Color.arrayToColor c, "css"
+    # return s if (s = c.str)?
+    # @error "alpha > 1" if c.length is 4 and c[3] > 1
+    # c.str = if c.length is 3 then "rgb(#{c})" else "rgba(#{c})"
   # Compare two colors.  Alas, there is no array.Equal operator.
-  colorsEqual: (c1, c2) -> c1.toString() is c2.toString()
+  colorsEqual: (c1, c2) ->
+    @deprecated "Util colorsEqual: use Color/ColorMaps or typedColor.pixel"
+    Color.colorsEqual c1, c2
+    # c1.toString() is c2.toString()
   # Convert r,g,b to a luminance float value (not color array).
   # Round for 0-255 int for gray color value.
   # [Good post on image filters](http://goo.gl/pE9cV8)
-  rgbToGray: (c) -> 0.2126*c[0] + 0.7152*c[1] + 0.0722*c[2]
+  rgbToGray: (c) ->
+    @deprecated "Util rgbToGray: use Color.rgbIntensity"
+    Color.rgbIntensity c...
+    # 0.2126*c[0] + 0.7152*c[1] + 0.0722*c[2]
   # RGB <> HSB (HSV) conversions.
   # RGB in [0-255], HSB in [0-1]
   # See [Wikipedia](http://en.wikipedia.org/wiki/HSV_color_space)
@@ -180,15 +205,15 @@ Util = util = u = # TODO: "util" deprecated in favor of Util
   # Use the canvas gradient feature to create nColors.
   # This is a really sophisticated technique, see:
   #  https://developer.mozilla.org/en-US/docs/Web/CSS/linear-gradient
-  gradientMap: (nColors, stops, locs) ->
-    locs = (i/(stops.length-1) for i in [0...stops.length]) if not locs?
-    ctx = @createCtx nColors, 1
-    grad = ctx.createLinearGradient 0, 0, nColors, 0
-    grad.addColorStop locs[i], @colorStr stops[i] for i in [0...stops.length]
-    ctx.fillStyle = grad
-    ctx.fillRect 0, 0, nColors, 1
-    id = @ctxToImageData(ctx).data
-    ([id[i], id[i+1], id[i+2]] for i in [0...id.length] by 4)
+  # gradientMap: (nColors, stops, locs) ->
+  #   locs = (i/(stops.length-1) for i in [0...stops.length]) if not locs?
+  #   ctx = @createCtx nColors, 1
+  #   grad = ctx.createLinearGradient 0, 0, nColors, 0
+  #   grad.addColorStop locs[i], @colorStr stops[i] for i in [0...stops.length]
+  #   ctx.fillStyle = grad
+  #   ctx.fillRect 0, 0, nColors, 1
+  #   id = @ctxToImageData(ctx).data
+  #   ([id[i], id[i+1], id[i+2]] for i in [0...id.length] by 4)
 
   # Return little/big endian-ness of hardware.
   # See Mozilla pixel [manipulation article](http://goo.gl/Lxliq)
@@ -710,7 +735,7 @@ Util = util = u = # TODO: "util" deprecated in favor of Util
   fillCtx: (ctx, color) ->
     if ctx.fillStyle? # test for 2D ctx
       @setIdentity ctx
-      ctx.fillStyle = @colorStr(color)
+      ctx.fillStyle = color.css ? Color.convertColor color, "css" # @colorStr(color)
       ctx.fillRect 0, 0, ctx.canvas.width, ctx.canvas.height
       ctx.restore()
     else # 3D
@@ -718,9 +743,10 @@ Util = util = u = # TODO: "util" deprecated in favor of Util
       ctx.clear ctx.COLOR_BUFFER_BIT | ctx.DEPTH_BUFFER_BIT
   # Draw string of the given color at the xy location, in ctx pixel coords.
   # Use setIdentity .. reset if a transform is being used by caller.
-  ctxDrawText: (ctx, string, x, y, color = [0,0,0], setIdentity = true) ->
+  ctxDrawText: (ctx, string, x, y, color, setIdentity = true) ->
     @setIdentity(ctx) if setIdentity
-    ctx.fillStyle = @colorStr color;  ctx.fillText(string, x, y)
+    ctx.fillStyle = color.css # @colorStr color
+    ctx.fillText(string, x, y)
     ctx.restore() if setIdentity
   # Set the element text align and baseline drawing parameters
   #

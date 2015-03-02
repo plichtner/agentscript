@@ -130,7 +130,6 @@ Color = {
   # Round to 0-255 int for gray values.
   rgbIntensity: (r, g, b) -> 0.2126*r + 0.7152*g + 0.0722*b
 
-
   # Convert h,s,l to r,g,b TypedArray
   hslToRgb: (h, s, l) ->
     str = @hslString(h, s, l)
@@ -244,14 +243,12 @@ Color = {
 #
 # Utilities for color types: css, pixel, typed
 
-# REMIND: WHY Color. RATHER THAN @??
-
   # Return the color type of a given color, null if not a color.
   # null useful for testing if color *is* a color.
   colorType: (color) ->
+    if color.pixelArray  then return "typed"
     if u.isString color  then return "css"
     if u.isInteger color then return "pixel"
-    if color.pixelArray  then return "typed"
     null
   # Return new color of the given type, given an r,g,b,(a) array,
   # where a defaults to opaque (255).
@@ -259,31 +256,38 @@ Color = {
   # Use randomRgb & randomGrayRgb arrays to create random valid colors.
   arrayToColor: (array, type = "typed") ->
     switch type
-      when "css"   then return Color.triString array...
-      when "pixel" then return Color.rgbaToPixel array...
+      when "css"   then return @triString array...
+      when "pixel" then return @rgbaToPixel array...
       when "typed"
         return if array.buffer then @typedColor array else @typedColor array...
     u.error "arrayToColor: incorrect type: #{type}"
   # Return rgba array (either typed or Array) representing the color.
   colorToArray: (color) ->
     switch @colorType(color)
-      when "css"   then return Color.stringToUint8s color
-      when "pixel" then return Color.pixelToUint8s color
+      when "css"   then return @stringToUint8s color
+      when "pixel" then return @pixelToUint8s color
       when "typed" then return color # already a (typed) array
     return color if u.isArray(color) or color.buffer
     u.error "colorToArray: bad color: #{color}"
   # Given a color or rgba array and a type, return color of that type.
   # Return color if color is already of type.
   convertColor: (color, type) ->
-    return color if @colorType(color) is type
+    type0 = @colorType(color)
+    return color if type0 is type
+    return color[type] if type0 is "typed"
     @arrayToColor(@colorToArray(color), type)
   rgbaToColor: (r, g, b, a=255, type="typed") ->
     switch type
-      when "css"   then return Color.triString r,g,b,a
-      when "pixel" then return Color.rgbaToPixel r,g,b,a
+      when "css"   then return @triString r,g,b,a
+      when "pixel" then return @rgbaToPixel r,g,b,a
       when "typed" then return @typedColor r,g,b,a
     u.error "rgbaToColor: incorrect type: #{type}"
-
+  # Return true if two colors result in the same color
+  # Colors can be of different type:
+  #
+  #    Color.colorsEqual("red", [255,0,0]) returns `true`
+  colorsEqual: (color1, color2) ->
+    @convertColor(color1, "pixel") is @convertColor(color2, "pixel")
 };
 Color.initSharedPixel() # Initialize the shared buffer pixel/rgb view
 

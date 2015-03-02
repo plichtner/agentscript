@@ -190,8 +190,10 @@ window.quadColors = quadColors
 
 # {Red:[255,0,0]} vs FF0000Red vs ["Red",255,0,0] vs ["Red","FF0000"]
 
-window.jetColors = [ [0,0,127], [0,0,255], [0,127,255], [0,255,255],
-  [127,255,127], [255,255,0], [255,127,0], [255,0,0], [127,0,0] ]
+window.jetColors = ABM.ColorMaps.jetColors
+# window.jetColors =
+#   [ [0,0,127], [0,0,255], [0,127,255], [0,255,255],
+#   [127,255,127], [255,255,0], [255,127,0], [255,0,0], [127,0,0] ]
 window.jetColors1 = [ [0,0,131], [0,60,170], [5,255,255], [255,255,0],
   [250,0,0], [128,0,0] ]
 window.jetLocs1 = [0, 0.125, 0.373, 0.625, 0.875, 1]
@@ -247,8 +249,8 @@ console.log k,v for k,v of flags
 
 # Color.basicColorMap = (array) -> new Color.ColorMap array
 
-ABM.colorMixin(ABM.Patch, "fooColor", "black")
-console.log ABM.Patch.prototype
+# ABM.colorMixin(ABM.Patch, "fooColor", "black")
+# console.log ABM.Patch.prototype
 
 class ColorTestModel extends ABM.Model
   startup: ->

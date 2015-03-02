@@ -54,6 +54,13 @@ gulp.task('watch', function() {
     gulp.src(event.path)
     .pipe(coffeeTasks());
   });
+  gulp.watch('models/*.coffee', ['models']);
+  // function(event) {
+  //   console.log(event);
+  //   gulp.src(event.path)
+  //   .pipe(coffee)
+  //   .gulp.pipe(gulp.dest('models'))
+  // });
 });
 
 // Build any models not embedded in html file:

@@ -118,7 +118,7 @@ shapes = Shapes = do -> # TODO: Shapes is external name
   draw: (ctx, shape, x, y, size, rad, color, strokeColor) ->
     if shape.shortcut?
       unless shape.img?
-        ctx.fillStyle = u.colorStr color
+        ctx.fillStyle = color.css # u.colorStr color
       shape.shortcut ctx,x,y,size
     else
       ctx.save()
@@ -128,9 +128,9 @@ shapes = Shapes = do -> # TODO: Shapes is external name
       if shape.img? # is an image, not a path function
         shape.draw ctx
       else
-        ctx.fillStyle = u.colorStr color
+        ctx.fillStyle = color.css # u.colorStr color
         if strokeColor
-          ctx.strokeStyle = u.colorStr strokeColor
+          ctx.strokeStyle = strokeColor.css # u.colorStr strokeColor
           ctx.lineWidth = 0.05
         ctx.save()
         ctx.beginPath(); shape.draw ctx; ctx.closePath()
@@ -157,7 +157,8 @@ shapes = Shapes = do -> # TODO: Shapes is external name
     strokePadding = 4
     slotSize = spriteSize + strokePadding
     shape = @[name]
-    index = if shape.img? then name else "#{name}-#{u.colorStr(color)}"
+    # index = if shape.img? then name else "#{name}-#{u.colorStr(color)}"
+    index = if shape.img? then name else "#{name}-#{color.css}"
     ctx = spriteSheets[slotSize]
     # Create sheet for this bit size if it does not yet exist
     unless ctx?
@@ -181,9 +182,9 @@ shapes = Shapes = do -> # TODO: Shapes is external name
       ctx.save()
       ctx.translate (ctx.nextX+0.5)*(slotSize), (ctx.nextY+0.5)*(slotSize)
       ctx.scale spriteSize, spriteSize
-      ctx.fillStyle = u.colorStr color
+      ctx.fillStyle = color.css # u.colorStr color
       if strokeColor
-        ctx.strokeStyle = u.colorStr strokeColor
+        ctx.strokeStyle = strokeColor.css # u.colorStr strokeColor
         ctx.lineWidth = 0.05
       ctx.save()
       ctx.beginPath(); shape.draw ctx; ctx.closePath()
