@@ -32,7 +32,9 @@ See: <a href="http://goo.gl/dq0nN">addEventListener</a></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ABM</span>.<span class="hljs-title">Mouse</span></span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>u = ABM.util
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ABM</span>.<span class="hljs-title">Mouse</span></span></pre></div></div>
             
         </li>
         
@@ -52,6 +54,7 @@ See: <a href="http://goo.gl/dq0nN">addEventListener</a></p>
     <span class="hljs-property">@div</span> = <span class="hljs-property">@model</span>.div
     <span class="hljs-property">@lastAgentsHovered</span> = []
     <span class="hljs-property">@draggingAgents</span> = []
+    <span class="hljs-property">@divOffset</span> = <span class="hljs-property">@model</span>.div.getBoundingClientRect()
     <span class="hljs-property">@start</span>()</pre></div></div>
             
         </li>
@@ -115,9 +118,37 @@ more standard down/up enabling move events.</p>
     <span class="hljs-property">@delegateEventsToAllAgents</span>(eventTypes, e)
     <span class="hljs-property">@callback</span>(e) <span class="hljs-keyword">if</span> <span class="hljs-property">@callback</span>?
 
+  <span class="hljs-attribute">getEventPos</span>: <span class="hljs-function"><span class="hljs-params">(e)</span> -&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>modified from <a href="http://www.quirksmode.org/js/events_properties.html">http://www.quirksmode.org/js/events_properties.html</a>
+previously used e.offsetX, e.offsetY, which was less robust
+(failed in tiledroplets.html, for example)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    xPos = <span class="hljs-number">0</span>
+    yPos = <span class="hljs-number">0</span>
+    <span class="hljs-keyword">if</span> (e.pageX <span class="hljs-keyword">or</span> e.pageY)
+      xPos = e.pageX
+      yPos = e.pageY
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (e.clientX <span class="hljs-keyword">or</span> e.clientY)
+      xPos = e.clientX + <span class="hljs-built_in">document</span>.body.scrollLeft + <span class="hljs-built_in">document</span>.documentElement.scrollLeft
+      yPos = e.clientY + <span class="hljs-built_in">document</span>.body.scrollTop + <span class="hljs-built_in">document</span>.documentElement.scrollTop
+    <span class="hljs-keyword">return</span> { <span class="hljs-attribute">x</span>: xPos - <span class="hljs-property">@divOffset</span>.left, <span class="hljs-attribute">y</span>: yPos - <span class="hljs-property">@divOffset</span>.top }
+
   <span class="hljs-attribute">setXY</span>: <span class="hljs-function"><span class="hljs-params">(e)</span> -&gt;</span>
+    eventPos = <span class="hljs-property">@getEventPos</span>(e)
     <span class="hljs-property">@lastX</span> = <span class="hljs-property">@x</span>; <span class="hljs-property">@lastY</span> = <span class="hljs-property">@y</span>
-    <span class="hljs-property">@pixX</span> = e.offsetX; <span class="hljs-property">@pixY</span> = e.offsetY
+    <span class="hljs-property">@pixX</span> = eventPos.x; <span class="hljs-property">@pixY</span> = eventPos.y
     [<span class="hljs-property">@x</span>, <span class="hljs-property">@y</span>] = <span class="hljs-property">@model</span>.patches.pixelXYtoPatchXY(<span class="hljs-property">@pixX</span>,<span class="hljs-property">@pixY</span>)
     <span class="hljs-property">@dx</span> = <span class="hljs-property">@lastX</span> - <span class="hljs-property">@x</span>; <span class="hljs-property">@dy</span> = <span class="hljs-property">@lastY</span> - <span class="hljs-property">@y</span>
 
@@ -163,11 +194,11 @@ more standard down/up enabling move events.</p>
         </li>
         
         
-        <li id="section-5">
+        <li id="section-6">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-5">&#182;</a>
+                <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
               <p>iterate through all agents in this patch and its neighbors</p>
 
@@ -214,11 +245,11 @@ more standard down/up enabling move events.</p>
         </li>
         
         
-        <li id="section-6">
+        <li id="section-7">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-6">&#182;</a>
+                <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
               <p>mouseover</p>
 
@@ -234,11 +265,11 @@ more standard down/up enabling move events.</p>
         </li>
         
         
-        <li id="section-7">
+        <li id="section-8">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-7">&#182;</a>
+                <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
               <p>mouseout</p>
 
