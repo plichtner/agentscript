@@ -1,5 +1,7 @@
 # A NetLogo-like mouse handler.
 # See: [addEventListener](http://goo.gl/dq0nN)
+u = ABM.util
+
 class ABM.Mouse
   # Create and start mouse obj, args: a model, and a callback method.
   constructor: (@model, @callback) ->
@@ -7,6 +9,7 @@ class ABM.Mouse
     @div = @model.div
     @lastAgentsHovered = []
     @draggingAgents = []
+    @divOffset = @model.div.getBoundingClientRect()
     @start()
   # Start/stop the mouseListeners.  Note that NetLogo's model is to have
   # mouse move events always on, rather than starting/stopping them
@@ -44,9 +47,24 @@ class ABM.Mouse
     @delegateEventsToAllAgents(eventTypes, e)
     @callback(e) if @callback?
 
+  getEventPos: (e) ->
+    # modified from http://www.quirksmode.org/js/events_properties.html
+    # previously used e.offsetX, e.offsetY, which was less robust
+    # (failed in tiledroplets.html, for example)
+    xPos = 0
+    yPos = 0
+    if (e.pageX or e.pageY)
+      xPos = e.pageX
+      yPos = e.pageY
+    else if (e.clientX or e.clientY)
+      xPos = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft
+      yPos = e.clientY + document.body.scrollTop + document.documentElement.scrollTop
+    return { x: xPos - @divOffset.left, y: yPos - @divOffset.top }
+
   setXY: (e) ->
+    eventPos = @getEventPos(e)
     @lastX = @x; @lastY = @y
-    @pixX = e.offsetX; @pixY = e.offsetY
+    @pixX = eventPos.x; @pixY = eventPos.y
     [@x, @y] = @model.patches.pixelXYtoPatchXY(@pixX,@pixY)
     @dx = @lastX - @x; @dy = @lastY - @y
 
