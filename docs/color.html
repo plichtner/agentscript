@@ -869,13 +869,7 @@ Colors can be of different type:</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">colorsEqual</span>: <span class="hljs-function"><span class="hljs-params">(color1, color2)</span> -&gt;</span>
-    <span class="hljs-property">@convertColor</span>(color1, <span class="hljs-string">"pixel"</span>) <span class="hljs-keyword">is</span> <span class="hljs-property">@convertColor</span>(color2, <span class="hljs-string">"pixel"</span>)
-
-  <span class="hljs-attribute">scaleColor</span>: <span class="hljs-function"><span class="hljs-params">(color, number, min=<span class="hljs-number">0</span>, max=<span class="hljs-number">1</span>)</span> -&gt;</span>
-
-
-};
-Color.initSharedPixel() <span class="hljs-comment"># Initialize the shared buffer pixel/rgb view</span></pre></div></div>
+    <span class="hljs-property">@convertColor</span>(color1, <span class="hljs-string">"pixel"</span>) <span class="hljs-keyword">is</span> <span class="hljs-property">@convertColor</span>(color2, <span class="hljs-string">"pixel"</span>)</pre></div></div>
             
         </li>
         
@@ -885,6 +879,24 @@ Color.initSharedPixel() <span class="hljs-comment"># Initialize the shared buffe
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-48">&#182;</a>
+              </div>
+              <p>scaleColor: (color, number, min=0, max=1) -&gt;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+
+};
+Color.initSharedPixel() <span class="hljs-comment"># Initialize the shared buffer pixel/rgb view</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-49">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-49">&#182;</a>
               </div>
               <p>Here are the 140 case insensitive legal color names (the X11 set)
 To include them in your model, use:</p>

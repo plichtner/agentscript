@@ -290,7 +290,7 @@ Color = {
   colorsEqual: (color1, color2) ->
     @convertColor(color1, "pixel") is @convertColor(color2, "pixel")
 
-  scaleColor: (color, number, min=0, max=1) ->
+  # scaleColor: (color, number, min=0, max=1) ->
 
 
 };
