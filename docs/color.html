@@ -232,10 +232,7 @@ If you need a JavaScript Array, use uint8sToRgba below</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">stringToUint8s</span>: <span class="hljs-function"><span class="hljs-params">(string)</span> -&gt;</span>
-    <span class="hljs-property">@sharedCtx1x1</span>.fillStyle = string
-    <span class="hljs-property">@sharedCtx1x1</span>.fillRect <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>
-    <span class="hljs-property">@sharedCtx1x1</span>.getImageData(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>).data</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">stringToUint8s</span>: <span class="hljs-function"><span class="hljs-params">(string)</span> -&gt;</span></pre></div></div>
             
         </li>
         
@@ -246,9 +243,13 @@ If you need a JavaScript Array, use uint8sToRgba below</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
-              <h3 id="pixel-colors-">Pixel Colors.</h3>
+              <p>@sharedCtx1x1.clearRect 0, 0, 1, 1 # is this needed?</p>
 
             </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-property">@sharedCtx1x1</span>.fillStyle = string
+    <span class="hljs-property">@sharedCtx1x1</span>.fillRect <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>
+    <span class="hljs-property">@sharedCtx1x1</span>.getImageData(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>).data</pre></div></div>
             
         </li>
         
@@ -258,6 +259,19 @@ If you need a JavaScript Array, use uint8sToRgba below</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <h3 id="pixel-colors-">Pixel Colors.</h3>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
               <p>Primitive Rgba &lt;-&gt; Pixel manipulation.</p>
 <p>These use two views onto a 4 byte TypedArray buffer.</p>
@@ -275,11 +289,11 @@ see why at <a href="http://goo.gl/qrHXwB">Stack Overflow</a></p>
         </li>
         
         
-        <li id="section-15">
+        <li id="section-16">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-15">&#182;</a>
+                <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
               <p>Convert r,g,b,a to a single Uint32 pixel, correct endian format.</p>
 
@@ -292,11 +306,11 @@ see why at <a href="http://goo.gl/qrHXwB">Stack Overflow</a></p>
         </li>
         
         
-        <li id="section-16">
+        <li id="section-17">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-16">&#182;</a>
+                <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
               <p>Convert a pixel to Uint8s via the shared typed views.
 sharedOK = true returns the sharedUint8s, useful
@@ -312,11 +326,11 @@ Default is to clone the sharedUint8s.</p>
         </li>
         
         
-        <li id="section-17">
+        <li id="section-18">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-17">&#182;</a>
+                <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
               <h3 id="color-conversion-and-scaling-functions-">Color Conversion and Scaling Functions.</h3>
 
@@ -325,11 +339,11 @@ Default is to clone the sharedUint8s.</p>
         </li>
         
         
-        <li id="section-18">
+        <li id="section-19">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-18">&#182;</a>
+                <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
               <p>Return rgb array with 3 random ints in 0-255.
 Convert to random cssString or pixel via functions above
@@ -342,11 +356,11 @@ or arrayToColor below</p>
         </li>
         
         
-        <li id="section-19">
+        <li id="section-20">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-19">&#182;</a>
+                <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
               <p>Return random gray color, with intensities in [min,max).</p>
 
@@ -359,11 +373,11 @@ or arrayToColor below</p>
         </li>
         
         
-        <li id="section-20">
+        <li id="section-21">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-20">&#182;</a>
+                <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
               <p>Convert Uint8s to Array.
 Useful after pixelToUint8s, stringToUint8s, hslToRgb.
@@ -376,11 +390,11 @@ Useful after pixelToUint8s, stringToUint8s, hslToRgb.
         </li>
         
         
-        <li id="section-21">
+        <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
               <p>Return the gray/intensity float value for a given r,g,b color.
 Round to 0-255 int for gray values.</p>
@@ -392,11 +406,11 @@ Round to 0-255 int for gray values.</p>
         </li>
         
         
-        <li id="section-22">
+        <li id="section-23">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
               <p>Convert h,s,l to r,g,b TypedArray</p>
 
@@ -409,11 +423,11 @@ Round to 0-255 int for gray values.</p>
         </li>
         
         
-        <li id="section-23">
+        <li id="section-24">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
               <p>Return a <a href="http://www.compuphase.com/cmetric.htm">distance metric</a> between two colors.
 Max distance is roughly 765 (3*255), for black &amp; white.</p>
@@ -428,11 +442,11 @@ Max distance is roughly 765 (3*255), for black &amp; white.</p>
         </li>
         
         
-        <li id="section-24">
+        <li id="section-25">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
+                <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
               <p>Scale a data value to an rgb color.
 value is in [min max], rgb’s are two colors.</p>
@@ -441,18 +455,18 @@ gradientColorMap for complex, MatLab-like, gradients.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">rgbLerp</span>: <span class="hljs-function"><span class="hljs-params">(value, min, max, rgb1, rgb0 = [<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>])</span> -&gt;</span>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">rgbLerp</span>: <span class="hljs-function"><span class="hljs-params">(rgb1, value, min = <span class="hljs-number">0</span>, max = <span class="hljs-number">1</span>, rgb0 = [<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>])</span> -&gt;</span>
     scale = u.lerpScale value, min, max <span class="hljs-comment">#(value - min)/(max - min)</span>
     (Math.round(u.lerp(rgb0[i], rgb1[i], scale)) <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">0.</span><span class="hljs-number">.2</span>])</pre></div></div>
             
         </li>
         
         
-        <li id="section-25">
+        <li id="section-26">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-25">&#182;</a>
+                <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
               <h3 id="typed-color">Typed Color</h3>
 <p>A typedColor is a 4 element Uint8ClampedArray, with two properties:</p>
@@ -471,11 +485,11 @@ WebGL colors (4 rgba floats in 0-1), and in images.</p>
         </li>
         
         
-        <li id="section-26">
+        <li id="section-27">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
+                <a class="pilcrow" href="#section-27">&#182;</a>
               </div>
               <p>Return a 4 element typedColor.</p>
 <p>Any change to the typedColor r,g,b,a elements will dynamically change
@@ -490,11 +504,11 @@ If r is not a number but a TypedArray, use it for the typedColor.</p>
         </li>
         
         
-        <li id="section-27">
+        <li id="section-28">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
+                <a class="pilcrow" href="#section-28">&#182;</a>
               </div>
               <p>Experimental: The map &amp; index are for possible colormap use.</p>
 
@@ -510,11 +524,11 @@ If r is not a number but a TypedArray, use it for the typedColor.</p>
         </li>
         
         
-        <li id="section-28">
+        <li id="section-29">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
+                <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
               <p>Make this an instance of TypedColorProto</p>
 
@@ -526,11 +540,11 @@ If r is not a number but a TypedArray, use it for the typedColor.</p>
         </li>
         
         
-        <li id="section-29">
+        <li id="section-30">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-30">&#182;</a>
               </div>
               <p>Prototypal Inheritance: TypedColorProto has an Uint8ClampedArray
 prototype. This allows TypedArrays to have prototype setters/getters,
@@ -543,11 +557,11 @@ including Object.defineProperties without enlarging the typedColor.</p>
         </li>
         
         
-        <li id="section-30">
+        <li id="section-31">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
+                <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
               <p>Set TypedColorProto prototype to Uint8ClampedArray’s prototype</p>
 
@@ -558,11 +572,11 @@ including Object.defineProperties without enlarging the typedColor.</p>
         </li>
         
         
-        <li id="section-31">
+        <li id="section-32">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-31">&#182;</a>
+                <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
               <p>Set the TypedArray; no need for getColor, it <em>is</em> the typed Uint8 array</p>
 
@@ -576,11 +590,11 @@ including Object.defineProperties without enlarging the typedColor.</p>
         </li>
         
         
-        <li id="section-32">
+        <li id="section-33">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-32">&#182;</a>
+                <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
               <p>Set the pixel view, changing the shared array (Uint8) view too</p>
 
@@ -593,11 +607,11 @@ including Object.defineProperties without enlarging the typedColor.</p>
         </li>
         
         
-        <li id="section-33">
+        <li id="section-34">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
+                <a class="pilcrow" href="#section-34">&#182;</a>
               </div>
               <p>Get the pixel value</p>
 
@@ -608,11 +622,11 @@ including Object.defineProperties without enlarging the typedColor.</p>
         </li>
         
         
-        <li id="section-34">
+        <li id="section-35">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
               <p>Set pixel/rgba values to equivalent of the css string.</p>
 <p>Does <em>not</em> set the chached @string, which will be lazily evaluated
@@ -629,11 +643,11 @@ css string will return the triString #f00 value.</p>
         </li>
         
         
-        <li id="section-35">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
               <p>Return the triString for this typedColor, cached in the @string value</p>
 
@@ -647,11 +661,11 @@ css string will return the triString #f00 value.</p>
         </li>
         
         
-        <li id="section-36">
+        <li id="section-37">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
               <p>Experiment: Sugar for converting getter/setters into properties.
 Frequent rgba property setter very poor performance due to GC overhead.
@@ -665,11 +679,11 @@ thus shared and take no space in the color itself.</p>
         </li>
         
         
-        <li id="section-37">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
               <p>pixel: get/set typedColor.pixelArray[0] via pixel property</p>
 
@@ -683,11 +697,11 @@ thus shared and take no space in the color itself.</p>
         </li>
         
         
-        <li id="section-38">
+        <li id="section-39">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-38">&#182;</a>
+                <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
               <p>rgba: set Uint8 values via JavaScript or TypedArray. Getter not needed.</p>
 
@@ -701,11 +715,11 @@ thus shared and take no space in the color itself.</p>
         </li>
         
         
-        <li id="section-39">
+        <li id="section-40">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-39">&#182;</a>
+                <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
               <p>css: get/set typedColor.str via @string property. Updates TypedArrays.</p>
 
@@ -719,11 +733,11 @@ thus shared and take no space in the color itself.</p>
         </li>
         
         
-        <li id="section-40">
+        <li id="section-41">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-40">&#182;</a>
+                <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
               <p>str: Legacy usage, identical to css getter property, will remove asap</p>
 
@@ -737,11 +751,11 @@ thus shared and take no space in the color itself.</p>
         </li>
         
         
-        <li id="section-41">
+        <li id="section-42">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-41">&#182;</a>
+                <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
               <h3 id="color-types">Color Types</h3>
 <p>Utilities for color types: css, pixel, typed</p>
@@ -751,11 +765,11 @@ thus shared and take no space in the color itself.</p>
         </li>
         
         
-        <li id="section-42">
+        <li id="section-43">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-42">&#182;</a>
+                <a class="pilcrow" href="#section-43">&#182;</a>
               </div>
               <p>Return the color type of a given color, null if not a color.
 null useful for testing if color <em>is</em> a color.</p>
@@ -771,11 +785,11 @@ null useful for testing if color <em>is</em> a color.</p>
         </li>
         
         
-        <li id="section-43">
+        <li id="section-44">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-43">&#182;</a>
+                <a class="pilcrow" href="#section-44">&#182;</a>
               </div>
               <p>Return new color of the given type, given an r,g,b,(a) array,
 where a defaults to opaque (255).
@@ -795,11 +809,11 @@ Use randomRgb &amp; randomGrayRgb arrays to create random valid colors.</p>
         </li>
         
         
-        <li id="section-44">
+        <li id="section-45">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-44">&#182;</a>
+                <a class="pilcrow" href="#section-45">&#182;</a>
               </div>
               <p>Return rgba array (either typed or Array) representing the color.</p>
 
@@ -816,11 +830,11 @@ Use randomRgb &amp; randomGrayRgb arrays to create random valid colors.</p>
         </li>
         
         
-        <li id="section-45">
+        <li id="section-46">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-45">&#182;</a>
+                <a class="pilcrow" href="#section-46">&#182;</a>
               </div>
               <p>Given a color or rgba array and a type, return color of that type.
 Return color if color is already of type.</p>
@@ -842,11 +856,11 @@ Return color if color is already of type.</p>
         </li>
         
         
-        <li id="section-46">
+        <li id="section-47">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-46">&#182;</a>
+                <a class="pilcrow" href="#section-47">&#182;</a>
               </div>
               <p>Return true if two colors result in the same color
 Colors can be of different type:</p>
@@ -856,17 +870,21 @@ Colors can be of different type:</p>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">colorsEqual</span>: <span class="hljs-function"><span class="hljs-params">(color1, color2)</span> -&gt;</span>
     <span class="hljs-property">@convertColor</span>(color1, <span class="hljs-string">"pixel"</span>) <span class="hljs-keyword">is</span> <span class="hljs-property">@convertColor</span>(color2, <span class="hljs-string">"pixel"</span>)
+
+  <span class="hljs-attribute">scaleColor</span>: <span class="hljs-function"><span class="hljs-params">(color, number, min=<span class="hljs-number">0</span>, max=<span class="hljs-number">1</span>)</span> -&gt;</span>
+
+
 };
 Color.initSharedPixel() <span class="hljs-comment"># Initialize the shared buffer pixel/rgb view</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-47">
+        <li id="section-48">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-47">&#182;</a>
+                <a class="pilcrow" href="#section-48">&#182;</a>
               </div>
               <p>Here are the 140 case insensitive legal color names (the X11 set)
 To include them in your model, use:</p>

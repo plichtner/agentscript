@@ -104,6 +104,17 @@ pw=64&ph=1&ps=10&map=hsl&args=[[43],64,[255]]
 pw=64&ph=1&ps=10&map=hsl&args=[[43],[255],64]
 pw=32&ph=32&ps=16&map=hsl&args=[256,1,3]
 pw=16&ph=16&ps=32&map=hsl&args=[256,1,1]
+
+pw=10&ps=24&map=NetLogo
+pw=6&ps=24&map=Safe
+
+pw=10&ps=24&map=netLogo&args=[flags.pw,false]
+pw=11&ps=24&map=netLogo&args=flags.pw
+pw=17&ps=24&map=netLogo&args=flags.pw
+pw=17&ps=24&map=netLogo&args=[flags.pw,false]
+pw=25&ps=24&map=netLogo&args=[flags.pw,false]
+
+
 ###
 u = ABM.Util # static variables
 window.c = window.Color = ABM.Color
@@ -190,7 +201,7 @@ window.quadColors = quadColors
 
 # {Red:[255,0,0]} vs FF0000Red vs ["Red",255,0,0] vs ["Red","FF0000"]
 
-window.jetColors = ABM.ColorMaps.jetColors
+window.jetColors = ColorMaps.jetColors
 # window.jetColors =
 #   [ [0,0,127], [0,0,255], [0,127,255], [0,255,255],
 #   [127,255,127], [255,255,0], [255,127,0], [255,0,0], [127,0,0] ]
@@ -214,7 +225,7 @@ window.namedRainbowArray = ["red", "orange", "yellow", "green", "blue", "indigo"
 # randomColorMap: (nColors)
 window.flags =
   pw: 64
-  ph: 1
+  ph: null
   ps: 12
   map: "gradient"
   args: [64,[[255,255,0],[0,255,255]]]
@@ -244,7 +255,13 @@ flags.args.push null if (flags.map is "gradient") and (flags.args.length is 2)
 if flags.args.length is 1 and flags.map is "rgb"
   cube = flags.args[0]
   flags.args = [cube, cube, cube]
-flags.map = flags.map + "ColorMap"
+# flags.map = flags.map + "ColorMap" unless ABM.ColorMap.
+window.map =
+  if shared = ColorMaps.Maps[flags.map]
+    shared
+  else
+    ColorMaps[flags.map+"ColorMap"] flags.args..., flags.type, flags.index
+flags.ph = Math.ceil map.length/flags.pw unless flags.ph
 console.log k,v for k,v of flags
 
 # Color.basicColorMap = (array) -> new Color.ColorMap array
@@ -259,8 +276,12 @@ class ColorTestModel extends ABM.Model
     @refreshPatches = false # just paint once
     @patches.setDefault "color", [0,0,0,0] # default: transparent
 
-    window.map = @map =
-      ColorMaps[flags.map] flags.args..., flags.type, flags.index
+    # window.map = @map =
+    #   if shared = ColorMaps.shared[flags.map]
+    #     shared
+    #   else
+    #     ColorMaps[flags.map+"ColorMap"] flags.args..., flags.type, flags.index
+    @map = map
     @map.sort(flags.sortFcns[flags.key]) if flags.sort
     if flags.compare
       @compareRandomColors()

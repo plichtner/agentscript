@@ -684,13 +684,13 @@ a drawimage</p>
                 <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
               <p>Diffuse the value of patch variable <code>p.v</code> by distributing <code>rate</code> percent
-of each patch’s value of <code>v</code> to its neighbors. If a color <code>c</code> is given,
-scale the patch’s color to be <code>p.v</code> of <code>c</code>. If the patch has
-less than 8 neighbors, return the extra to the patch.</p>
+of each patch’s value of <code>v</code> to its neighbors.
+If a color map <code>cMap</code> is given, scale the patch color via variable’s value
+If the patch has less than 8 neighbors, return the extra to the patch.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">diffuse</span>: <span class="hljs-function"><span class="hljs-params">(v, rate, c)</span> -&gt;</span> <span class="hljs-comment"># variable name, diffusion rate, max color (optional)</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">diffuse</span>: <span class="hljs-function"><span class="hljs-params">(v, rate, cMap)</span> -&gt;</span> <span class="hljs-comment"># variable name, diffusion rate, cMap (optional)</span></pre></div></div>
             
         </li>
         
@@ -721,10 +721,18 @@ less than 8 neighbors, return the extra to the patch.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> @
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> cMap
+      minVal = Infinity; maxVal = -Infinity
+      <span class="hljs-keyword">unless</span> cMap.scaleColor
+        u.deprecated <span class="hljs-string">"Patch.diffuse: convert to ColorMap usage, using Jet"</span>
+        cMap = ColorMaps.Maps.Jet
+    <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> @
       dv = p[v]*rate; dv8 = dv/<span class="hljs-number">8</span>; nn = p.n.length
       p._diffuseNext += p[v] - dv + (<span class="hljs-number">8</span>-nn)*dv8
-      n._diffuseNext += dv8 <span class="hljs-keyword">for</span> n <span class="hljs-keyword">in</span> p.n</pre></div></div>
+      n._diffuseNext += dv8 <span class="hljs-keyword">for</span> n <span class="hljs-keyword">in</span> p.n
+      <span class="hljs-keyword">if</span> cMap
+        minVal = Math.min minVal, p[v]
+        maxVal = Math.max maxVal, p[v]</pre></div></div>
             
         </li>
         
@@ -739,28 +747,10 @@ less than 8 neighbors, return the extra to the patch.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    minVal = Infinity; maxVal
-    <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> @
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> @
       p[v] = p._diffuseNext
-      p._diffuseNext = <span class="hljs-number">0</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-41">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-41">&#182;</a>
-              </div>
-              <p>p.scaleColor c, p[v] if c</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">if</span> c
-        map = p.colorMap ? ColorMaps.sharedJet
-        p.color = map.scaleColor p[v],
-        <span class="hljs-attribute">scaleColor</span>: <span class="hljs-function"><span class="hljs-params">(number, min, max, minColor = <span class="hljs-number">0</span>, maxColor = <span class="hljs-property">@length</span>-<span class="hljs-number">1</span>)</span> -&gt;</span>
+      p._diffuseNext = <span class="hljs-number">0</span>
+      p.color = cMap.scaleColor p[v], minVal, maxVal <span class="hljs-keyword">if</span> cMap
 
     <span class="hljs-literal">null</span> <span class="hljs-comment"># avoid returning copy of @</span></pre></div></div>
             

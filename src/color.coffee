@@ -79,6 +79,7 @@ Color = {
   # Convert css string to TypedArray.
   # If you need a JavaScript Array, use uint8sToRgba below
   stringToUint8s: (string) ->
+    # @sharedCtx1x1.clearRect 0, 0, 1, 1 # is this needed?
     @sharedCtx1x1.fillStyle = string
     @sharedCtx1x1.fillRect 0, 0, 1, 1
     @sharedCtx1x1.getImageData(0, 0, 1, 1).data
@@ -148,7 +149,7 @@ Color = {
   #
   # See ColorMap's scaleColor for related scaling method and
   # gradientColorMap for complex, MatLab-like, gradients.
-  rgbLerp: (value, min, max, rgb1, rgb0 = [0,0,0]) ->
+  rgbLerp: (rgb1, value, min = 0, max = 1, rgb0 = [0,0,0]) ->
     scale = u.lerpScale value, min, max #(value - min)/(max - min)
     (Math.round(u.lerp(rgb0[i], rgb1[i], scale)) for i in [0..2])
 
@@ -288,6 +289,10 @@ Color = {
   #    Color.colorsEqual("red", [255,0,0]) returns `true`
   colorsEqual: (color1, color2) ->
     @convertColor(color1, "pixel") is @convertColor(color2, "pixel")
+
+  scaleColor: (color, number, min=0, max=1) ->
+
+
 };
 Color.initSharedPixel() # Initialize the shared buffer pixel/rgb view
 

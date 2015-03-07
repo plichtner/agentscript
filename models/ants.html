@@ -14,14 +14,14 @@
         @patches.usePixels() # 24fps
         # @patches.cacheAgentsHere() # 9-10fps, not needed & modest overhead
         # two: 27fps, now static colors larger percent of faster patches.
-        @agents.setUseSprites() # 24->46-48fps!
+        # @agents.setUseSprites() # 24->46-48fps!
 
         # @anim.setRate 25, true # normal: let agents step faster than drawing
         @anim.setRate 60, false # speed test
 
         # globals
-        @nestColor = [255,255,0]  # yellow
-        @foodColor = [0,0,255]    # blue
+        @nestColor = [255, 255, 0]  # yellow
+        @foodColor = [0, 0, 255]    # blue
 
         # defaults
         @agents.setDefault "shape", "bug"
@@ -51,8 +51,10 @@
           p.isNest = false ; p.isFood = false
           # REMIND: agentsOwn etc; NL defaults to 0
           p.foodPheromone = 0; p.nestPheromone = 0
-        (p.isNest=true;p.color=@nestColor) for p in @patchRect @patches.maxX-6,0,3,3
-        (p.isFood=true;p.color=@foodColor) for p in @patchRect @patches.minX+6,0,3,3
+        for p in @patchRect(@patches.maxX-6, 0, 3, 3)
+          p.isNest=true; p.color=@nestColor
+        for p in @patchRect(@patches.minX+6, 0, 3, 3)
+          p.isFood=true; p.color=@foodColor
         null
       setupAgents: -> # a is agent
         @agents.create @population, (a) => # fat arrow for @patches etc
@@ -72,8 +74,8 @@
 
       updateAgents: ->
         for a in @agents when a.id < @anim.ticks # gradually leave nest
-            @wiggleUphill a
-            @dropPheromone a
+          @wiggleUphill a
+          @dropPheromone a
         null # needed to avoid returning an absurd comprehension
       wiggleUphill: (a) ->
         if a.p.isOnEdge()

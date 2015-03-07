@@ -46,7 +46,7 @@ class Agent
   constructor: -> # called by agentSets create factory, not user
     @x = @y = 0
     @p = @model.patches.patch @x, @y
-    @color = u.randomColor() unless @color? # promote color if default not set
+    @color = u.randomColor() unless @color? # or breed.useSprites
     @heading = u.randomFloat(Math.PI*2) unless @heading?
     @p.agents.push @ if @p.agents? # @model.patches.cacheAgentsHere
     @links = [] if @cacheLinks

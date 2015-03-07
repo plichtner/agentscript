@@ -82,9 +82,10 @@ Util = util = u = <span class="hljs-comment"># TODO: "util" deprecated in favor 
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">deprecatedMsgs</span>: []
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">deprecatedAlert</span>: <span class="hljs-literal">false</span>
+  <span class="hljs-attribute">deprecatedMsgs</span>: []
   <span class="hljs-attribute">deprecated</span>: <span class="hljs-function"><span class="hljs-params">(s)</span> -&gt;</span>
-    <span class="hljs-keyword">if</span> <span class="hljs-property">@deprecatedMsgs</span>.length <span class="hljs-keyword">is</span> <span class="hljs-number">0</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-property">@deprecatedMsgs</span>.length <span class="hljs-keyword">is</span> <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> <span class="hljs-property">@deprecatedAlert</span>
       alert <span class="hljs-string">"Deprecated functions, see console.log"</span>
     <span class="hljs-keyword">if</span> <span class="hljs-property">@deprecatedMsgs</span>.indexOf(s) &lt; <span class="hljs-number">0</span>
       <span class="hljs-built_in">console</span>.log <span class="hljs-string">"DEPRECATED - <span class="hljs-subst">#{s}</span>"</span>
@@ -472,7 +473,7 @@ c</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="hljs-property">@deprecated</span> <span class="hljs-string">"Util randomGray: use ColorMaps.randomGray"</span>
-    ColorMaps.randomGray()</pre></div></div>
+    ColorMaps.randomGray(min, max)</pre></div></div>
             
         </li>
         

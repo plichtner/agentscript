@@ -102,7 +102,7 @@ This can be a huge savings in memory.</p>
   <span class="hljs-attribute">constructor</span>:<span class="hljs-function"> -&gt;</span> <span class="hljs-comment"># called by agentSets create factory, not user</span>
     <span class="hljs-property">@x</span> = <span class="hljs-property">@y</span> = <span class="hljs-number">0</span>
     <span class="hljs-property">@p</span> = <span class="hljs-property">@model</span>.patches.patch <span class="hljs-property">@x</span>, <span class="hljs-property">@y</span>
-    <span class="hljs-property">@color</span> = u.randomColor() <span class="hljs-keyword">unless</span> <span class="hljs-property">@color</span>? <span class="hljs-comment"># promote color if default not set</span>
+    <span class="hljs-property">@color</span> = u.randomColor() <span class="hljs-keyword">unless</span> <span class="hljs-property">@color</span>? <span class="hljs-comment"># or breed.useSprites</span>
     <span class="hljs-property">@heading</span> = u.randomFloat(Math.PI*<span class="hljs-number">2</span>) <span class="hljs-keyword">unless</span> <span class="hljs-property">@heading</span>?
     <span class="hljs-property">@p</span>.agents.push @ <span class="hljs-keyword">if</span> <span class="hljs-property">@p</span>.agents? <span class="hljs-comment"># @model.patches.cacheAgentsHere</span>
     <span class="hljs-property">@links</span> = [] <span class="hljs-keyword">if</span> <span class="hljs-property">@cacheLinks</span></pre></div></div>

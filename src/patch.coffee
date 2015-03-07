@@ -44,8 +44,11 @@ class Patch
   #
   # Promotes color if currently using the default.
   scaleColor: (c, s) ->
-    @color = u.clone @color unless @.hasOwnProperty("color")
-    u.scaleColor c, s, @color
+    # @color = u.clone @color unless @hasOwnProperty("color")
+    # u.scaleColor c, s, @color
+    u.deprecated "Patch.scaleColor use ColorMap ramps"
+    @color = Color.rgbLerp c, s
+
 
   scaleOpacity: (c, s) ->
     @color = u.clone @color unless @.hasOwnProperty("color")

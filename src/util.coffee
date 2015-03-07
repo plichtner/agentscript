@@ -17,9 +17,10 @@ Util = util = u = # TODO: "util" deprecated in favor of Util
   error: (s) -> throw new Error s
 
   # Alert for a deprecated function.
+  deprecatedAlert: false
   deprecatedMsgs: []
   deprecated: (s) ->
-    if @deprecatedMsgs.length is 0
+    if @deprecatedMsgs.length is 0 and @deprecatedAlert
       alert "Deprecated functions, see console.log"
     if @deprecatedMsgs.indexOf(s) < 0
       console.log "DEPRECATED - #{s}"
@@ -108,7 +109,7 @@ Util = util = u = # TODO: "util" deprecated in favor of Util
     # c[i] = r for i in [0..2]
     # c
     @deprecated "Util randomGray: use ColorMaps.randomGray"
-    ColorMaps.randomGray()
+    ColorMaps.randomGray(min, max)
   # Random color from a colormap set of r,g,b values.
   # Default is one of 125 (5^3) colors
   randomMapColor: (c = [], set = [0,63,127,191,255]) ->

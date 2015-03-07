@@ -13,23 +13,24 @@ colorMixin = (obj, colorName, colorDefault, colorMap=null, colorType="typed") ->
   colorTitle = u.upperCamelCase colorName
   # Names we're adding to the prototype.
   # We don't add colorType, its in this closure.
-  colorPropName = colorName+"Prop"
-  colorMapName = colorName + "Map"
+  colorPropName = colorName + "Prop"
+  colorMapName  = colorName + "Map"
   getterName = "get#{colorTitle}"
   setterName = "set#{colorTitle}"
   # Add names to proto.
   proto[colorPropName] =
     if colorDefault then Color.convertColor colorDefault, colorType else null
-  proto[colorMapName] = colorMap
+  proto[colorMapName] = colorMap # must be in proto, not instance
   unless proto[setterName]
     proto[setterName] = (r,g,b,a=255) ->
       # Setter: If a single argument given, convert to a valid color
       if g is undefined
         color = Color.convertColor r, colorType # type check/conversion
-      else if @[colorMapName]
+      # else if map = proto[colorMapName] # @[colorMapName]
+      else if colorMap # @[colorMapName]
         # If a colormap exists, use the closest map color.
         # Assume map is of correct colorType.
-        color = @[colorMapName].findClosestColor r, g, b, a
+        color = colorMap.findClosestColor r, g, b, a
       else
         # If no colormap, set the color to the r,g,b,a values
         if @hasOwnProperty(colorPropName) and colorType is "typed"
@@ -47,4 +48,8 @@ colorMixin = (obj, colorName, colorDefault, colorMap=null, colorType="typed") ->
   Object.defineProperty proto, colorName,
     get: -> @[getterName]()
     set: (val) -> @[setterName](val)
+  # get/set this closure's colorMap
+  Object.defineProperty proto, colorMapName,
+    get: -> colorMap
+    set: (val) -> colorMap = val
   proto

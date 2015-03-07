@@ -142,10 +142,10 @@ ColorMaps  = {
     # Return the map index or color proportional to the value between min, max.
     # This is a linear interpolation based on the map indices.
     # The optional minColor, maxColor args are for using a subset of the map.
-    scaleIndex: (number, min, max, minColor = 0, maxColor = @length-1) ->
+    scaleIndex: (number, min=0, max=1, minColor = 0, maxColor = @length-1) ->
       scale = u.lerpScale number, min, max # (number-min)/(max-min)
       Math.round(u.lerp minColor, maxColor, scale)
-    scaleColor: (number, min, max, minColor = 0, maxColor = @length-1) ->
+    scaleColor: (number, min=0, max=1, minColor = 0, maxColor = @length-1) ->
       @[ @scaleIndex number, min, max, minColor, maxColor ]
 
     # Find the index/color closest to this r,g,b,a.
@@ -219,8 +219,40 @@ ColorMaps  = {
   gradientColorMap: (nColors, stops, locs, type="typed", indexToo=false) ->
     id = @gradientImageData(nColors, stops, locs)
     @colorMap @uint8ArrayToColors(id, type), indexToo
+  # The most popular MatLab gradient, "jet":
   jetColors: [ [0,0,127], [0,0,255], [0,127,255], [0,255,255],
     [127,255,127], [255,255,0], [255,127,0], [255,0,0], [127,0,0] ]
+  basicColors: ["gray", "red", "orange", "brown", "yellow", "green", "lime",
+    "turquoise", "cyan", "skyblue", "blue", "violet", "magenta", "pink"]
+
+  # Ramp of a single color from black to color and to white if whiteToo
+  rampStops: (color, whiteToo) ->
+    if whiteToo then ["black", color, "white"] else ["black", color]
+  rampColorMap: (color, width, whiteToo = false) ->
+    @gradientColorMap width, @rampStops(color, whiteToo)
+
+  # [NetLogo maps](http://ccl.northwestern.edu/netlogo/docs/)
+  # are sets of color ramps for the basic colors, but with
+  # slightly different r,g,b values designed for good color ballance.
+  # They typically go from black to near white shades. We provide
+  # an alternative to ramp from black to full color as well.
+  netLogoColorMap: (width = 10, whiteToo = true) ->
+    map = []; maps = {}
+    for name, color of @netLogoColors
+      maps[name] = @rampColorMap color, width, whiteToo
+      map = map.concat maps[name]
+    map = @basicColorMap map
+    window.maps = maps
+    map[k] = v for k, v of maps
+    map
+  netLogoColors:
+    gray: [141, 141, 141],      red: [215, 50, 41]
+    orange: [241, 106, 21],     brown: [157, 110, 72]
+    yellow: [237, 237, 49],     green: [89, 176, 60]
+    lime: [44, 209, 59],        turquoise: [29, 159, 120]
+    cyan: [84, 196, 196],       sky: [45, 141, 190]
+    blue: [52, 93, 169],        violet: [124, 80, 164]
+    magenta: [167, 27, 106],    pink: [224, 127, 150]
 
   # Create alpha map of the given base r,g,b color,
   # with nOpacity opacity values, default to all 256
@@ -228,13 +260,19 @@ ColorMaps  = {
     [r, g, b] = rgb
     array = ( [r, g, b, a] for a in u.aIntRamp 0, 255, nOpacities )
     @colorMap @arrayToColors(array, type), indexToo
+
+  # Create shared maps and utilities
+  Maps: {}
+  createSharedMaps: (whiteToo = true) ->
+    @Maps.Gray    = @grayColorMap()
+    @Maps.Rgb256  = @rgbColorMap(8,8,4)
+    @Maps.Rgb     = @rgbColorCube(16)
+    @Maps.Safe    = @rgbColorCube(6)
+    # The popular MatLab jet gradient
+    @Maps.Jet     = @gradientColorMap 256, @jetColors
+    @Maps.NetLogo = @netLogoColorMap 10
+    @Maps.Ramps   = @netLogoColorMap 18, false
+  randomGray: (min, max) -> @Maps.Gray.randomColor(min, max)
+  randomColor: -> @Maps.Rgb256.randomColor() # sharedRgb?
 }
-# shared global maps
-ColorMaps.sharedGray    = ColorMaps.grayColorMap()
-ColorMaps.sharedRgb256  = ColorMaps.rgbColorMap(8,8,4)
-ColorMaps.sharedRgb     = ColorMaps.rgbColorCube(16)
-ColorMaps.sharedJet     = # The popular MatLab jet gradient
-  ColorMaps.gradientColorMap 256, ColorMaps.jetColors
-# Use 256 gray/rgb color maps to return a random gray/rgb typedColor
-ColorMaps.randomGray    = -> ColorMaps.sharedGray.randomColor()
-ColorMaps.randomColor   = -> ColorMaps.sharedRgb256.randomColor() # sharedRgb?
+ColorMaps.createSharedMaps()
