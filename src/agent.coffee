@@ -41,26 +41,29 @@ class Agent
   penSize: 1          # the pen thickness in pixels
   heading: null       # the direction I'm pointed in, in radians
   sprite: null        # an image of me for optimized drawing
+  useSprites: false   # should I use sprites?
   cacheLinks: false   # should I keep links to/from me in links array?.
   links: null         # array of links to/from me as an endpoint; init by ctor
   constructor: -> # called by agentSets create factory, not user
     @x = @y = 0
     @p = @model.patches.patch @x, @y
-    @color = u.randomColor() unless @color? # or breed.useSprites
+    @color = u.randomColor() unless @color? # or @useSprites or @hidden
     @heading = u.randomFloat(Math.PI*2) unless @heading?
     @p.agents.push @ if @p.agents? # @model.patches.cacheAgentsHere
     @links = [] if @cacheLinks
 
-
-
   # Set agent color to `c` scaled by `s`. Usage: see patch.scaleColor
   scaleColor: (c, s) ->
-    @color = u.clone @color unless @hasOwnProperty "color" # promote color to inst var
-    u.scaleColor c, s, @color
+    u.deprecated "Agent.scaleColor: use ColorMaps ramps or closestColor"
+    @color = ColorMaps.scaleColor(c, s)
+    # @color = u.clone @color unless @hasOwnProperty "color" # promote color to inst var
+    # u.scaleColor c, s, @color
 
   scaleOpacity: (c, s) ->
-    @color = u.clone @color unless @hasOwnProperty "color"
-    u.scaleOpacity c, s, @color
+    u.deprecated "Agent.scaleOpacity: use ColorMaps ramps"
+    @color = u.scaleOpacity c, s, @color
+    # @color = u.clone @color unless @hasOwnProperty "color"
+    # u.scaleOpacity c, s, @color
 
   # Return a string representation of the agent.
   toString: -> "{id:#{@id} xy:#{u.aToFixed [@x,@y]} c:#{@color} h: #{h=@heading.toFixed 2}/#{Math.round(u.radToDeg(h))}}"
@@ -101,22 +104,25 @@ class Agent
   draw: (ctx) ->
     shape = Shapes[@shape]
     rad = if shape.rotate then @heading else 0 # radians
-    if @sprite? or @breed.useSprites
+    if @sprite? or @useSprites # @breed.useSprites
       @setSprite() unless @sprite? # lazy evaluation of useSprites
       Shapes.drawSprite ctx, @sprite, @x, @y, @size, rad
     else
       Shapes.draw ctx, shape, @x, @y, @size, rad, @color, @strokeColor
     if @label?
       [x,y] = @model.patches.patchXYtoPixelXY @x, @y
-      u.ctxDrawText ctx, @label, x+@labelOffset[0], y+@labelOffset[1], @labelColor
+      u.ctxDrawText ctx, @label,
+        x+@labelOffset[0], y+@labelOffset[1], @labelColor
 
   # Set an individual agent's sprite, synching its color, shape, size
   setSprite: (sprite)->
     if (s=sprite)?
-      @sprite = s; @color = s.color; @strokeColor = s.strokeColor; @shape = s.shape; @size = s.size
+      @sprite = s; @color = s.color; @strokeColor = s.strokeColor
+      @shape = s.shape; @size = @model.patches.fromBits(s.size)
     else
-      @color = u.randomColor() unless @color?
-      @sprite = Shapes.shapeToSprite @shape, @color, @model.patches.toBits(@size), @strokeColor
+      # @color = u.randomColor() unless @color? # not needed if lazy evaluation
+      @sprite = Shapes.shapeToSprite @shape, @color,
+        @model.patches.toBits(@size), @strokeColor
 
   # Draw the agent on the drawing layer, leaving permanent image.
   stamp: -> @draw @model.drawing

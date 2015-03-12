@@ -131,7 +131,7 @@ Color = {
   # Round to 0-255 int for gray values.
   rgbIntensity: (r, g, b) -> 0.2126*r + 0.7152*g + 0.0722*b
 
-  # Convert h,s,l to r,g,b TypedArray
+  # Convert h,s,l to r,g,b Uint8 TypedArray
   hslToRgb: (h, s, l) ->
     str = @hslString(h, s, l)
     @stringToUint8s(str).subarray(0,3) # a 3 byte view onto the 4 byte buffer.
@@ -145,7 +145,7 @@ Color = {
     Math.sqrt (((512+rMean)*dr*dr)>>8) + (4*dg*dg) + (((767-rMean)*db*db)>>8)
 
   # Scale a data value to an rgb color.
-  # value is in [min max], rgb's are two colors.
+  # Value is in [min max], rgb's are two JS arrays.
   #
   # See ColorMap's scaleColor for related scaling method and
   # gradientColorMap for complex, MatLab-like, gradients.
@@ -210,8 +210,8 @@ Color = {
       setString: (string) ->
         @setColor(Color.stringToUint8s(string)...)
       # Return the triString for this typedColor, cached in the @string value
-      getString: (string) ->
-        @string = Color.triString(@...) unless @string
+      getString: () ->
+        @string = Color.triString(@...) unless @string?
         @string
     }
     # Experiment: Sugar for converting getter/setters into properties.
@@ -274,7 +274,7 @@ Color = {
   # Return color if color is already of type.
   convertColor: (color, type) ->
     type0 = @colorType(color)
-    return color if type0 is type
+    return color if type0 is type and type isnt "css" # convert to triColor
     return color[type] if type0 is "typed"
     @arrayToColor(@colorToArray(color), type)
   rgbaToColor: (r, g, b, a=255, type="typed") ->
@@ -289,10 +289,6 @@ Color = {
   #    Color.colorsEqual("red", [255,0,0]) returns `true`
   colorsEqual: (color1, color2) ->
     @convertColor(color1, "pixel") is @convertColor(color2, "pixel")
-
-  # scaleColor: (color, number, min=0, max=1) ->
-
-
 };
 Color.initSharedPixel() # Initialize the shared buffer pixel/rgb view
 

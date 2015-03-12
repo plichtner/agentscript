@@ -106,7 +106,7 @@ We don’t add colorType, its in this closure.</p>
             <div class="content"><div class='highlight'><pre>  proto[colorPropName] =
     <span class="hljs-keyword">if</span> colorDefault <span class="hljs-keyword">then</span> Color.convertColor colorDefault, colorType <span class="hljs-keyword">else</span> <span class="hljs-literal">null</span>
   proto[colorMapName] = colorMap <span class="hljs-comment"># must be in proto, not instance</span>
-  <span class="hljs-keyword">unless</span> proto[setterName]
+  <span class="hljs-keyword">unless</span> proto[setterName]?
     proto[setterName] = <span class="hljs-function"><span class="hljs-params">(r,g,b,a=<span class="hljs-number">255</span>)</span> -&gt;</span></pre></div></div>
             
         </li>
@@ -204,7 +204,7 @@ Assume map is of correct colorType.</p>
             
             <div class="content"><div class='highlight'><pre>          color = Color.rgbaToColor r, g, b, a, colorType
       @[colorPropName] = color
-  <span class="hljs-keyword">unless</span> proto[getterName]</pre></div></div>
+  <span class="hljs-keyword">unless</span> proto[getterName]?</pre></div></div>
             
         </li>
         

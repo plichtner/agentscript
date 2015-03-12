@@ -690,7 +690,7 @@ If the patch has less than 8 neighbors, return the extra to the patch.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">diffuse</span>: <span class="hljs-function"><span class="hljs-params">(v, rate, cMap)</span> -&gt;</span> <span class="hljs-comment"># variable name, diffusion rate, cMap (optional)</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">diffuse</span>: <span class="hljs-function"><span class="hljs-params">(v, rate, color)</span> -&gt;</span> <span class="hljs-comment"># variable name, diffusion rate, cMap (optional)</span></pre></div></div>
             
         </li>
         
@@ -717,22 +717,19 @@ If the patch has less than 8 neighbors, return the extra to the patch.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
-              <p>pass 1: calculate contribution of all patches to themselves and neighbors</p>
+              <p>pass 1: calculate contribution of all patches to themselves and neighbors
+if cMap
+  minVal = Infinity; maxVal = -Infinity
+  unless cMap.scaleColor?
+    u.deprecated “Patch.diffuse: convert to ColorMap usage, using Jet”
+    cMap = ColorMaps.Jet</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> cMap
-      minVal = Infinity; maxVal = -Infinity
-      <span class="hljs-keyword">unless</span> cMap.scaleColor
-        u.deprecated <span class="hljs-string">"Patch.diffuse: convert to ColorMap usage, using Jet"</span>
-        cMap = ColorMaps.Maps.Jet
-    <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> @
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> @
       dv = p[v]*rate; dv8 = dv/<span class="hljs-number">8</span>; nn = p.n.length
       p._diffuseNext += p[v] - dv + (<span class="hljs-number">8</span>-nn)*dv8
-      n._diffuseNext += dv8 <span class="hljs-keyword">for</span> n <span class="hljs-keyword">in</span> p.n
-      <span class="hljs-keyword">if</span> cMap
-        minVal = Math.min minVal, p[v]
-        maxVal = Math.max maxVal, p[v]</pre></div></div>
+      n._diffuseNext += dv8 <span class="hljs-keyword">for</span> n <span class="hljs-keyword">in</span> p.n</pre></div></div>
             
         </li>
         
@@ -743,14 +740,17 @@ If the patch has less than 8 neighbors, return the extra to the patch.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
-              <p>pass 2: set new value for all patches, zero temp, modify color if c given</p>
+              <p>if cMap
+  minVal = Math.min minVal, p[v]
+  maxVal = Math.max maxVal, p[v]
+pass 2: set new value for all patches, zero temp, modify color if c given</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> @
       p[v] = p._diffuseNext
       p._diffuseNext = <span class="hljs-number">0</span>
-      p.color = cMap.scaleColor p[v], minVal, maxVal <span class="hljs-keyword">if</span> cMap
+      p.color = ColorMaps.scaleColor color, p[v] <span class="hljs-keyword">if</span> color?
 
     <span class="hljs-literal">null</span> <span class="hljs-comment"># avoid returning copy of @</span></pre></div></div>
             

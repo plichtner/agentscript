@@ -21,7 +21,7 @@ colorMixin = (obj, colorName, colorDefault, colorMap=null, colorType="typed") ->
   proto[colorPropName] =
     if colorDefault then Color.convertColor colorDefault, colorType else null
   proto[colorMapName] = colorMap # must be in proto, not instance
-  unless proto[setterName]
+  unless proto[setterName]?
     proto[setterName] = (r,g,b,a=255) ->
       # Setter: If a single argument given, convert to a valid color
       if g is undefined
@@ -41,7 +41,7 @@ colorMixin = (obj, colorName, colorDefault, colorMap=null, colorType="typed") ->
           # .. otherwise create a new one
           color = Color.rgbaToColor r, g, b, a, colorType
       @[colorPropName] = color
-  unless proto[getterName]
+  unless proto[getterName]?
     # Getter: return the colorPropName's value
     proto[getterName] = -> @[colorPropName]
   # define the color property

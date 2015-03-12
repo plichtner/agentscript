@@ -89,7 +89,11 @@ class AgentSet extends Array
     @
 
   # Set the default value of an agent class, return agentset
-  setDefault: (name, value) -> @agentClass::[name] = value; @
+  setDefault: (name, value) ->
+    if name.match(/color/i) and u.isArray value
+      value = ColorMaps.Rgb.findClosestColor value...
+    @agentClass::[name] = value # ; @
+  getDefault: (name) -> @agentClass::[name]
   # Declare variables of an agent class.
   # Vars = a string of space separated names or an array of name strings
   # Return agentset.

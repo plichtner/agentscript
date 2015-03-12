@@ -153,12 +153,14 @@ shapes = Shapes = do -> # TODO: Shapes is external name
   # Convert a shape to a sprite by allocating a sprite sheet "slot" and drawing
   # the shape to fit it. Return existing sprite if duplicate.
   shapeToSprite: (name, color, size, strokeColor) ->
+    colorCss = Color.convertColor color, "css"
+    strokeCss = Color.convertColor strokeColor, "css" if strokeColor?
     spriteSize = Math.ceil size
     strokePadding = 4
     slotSize = spriteSize + strokePadding
     shape = @[name]
     # index = if shape.img? then name else "#{name}-#{u.colorStr(color)}"
-    index = if shape.img? then name else "#{name}-#{color.css}"
+    index = if shape.img? then name else "#{name}-#{colorCss}"
     ctx = spriteSheets[slotSize]
     # Create sheet for this bit size if it does not yet exist
     unless ctx?
@@ -182,9 +184,9 @@ shapes = Shapes = do -> # TODO: Shapes is external name
       ctx.save()
       ctx.translate (ctx.nextX+0.5)*(slotSize), (ctx.nextY+0.5)*(slotSize)
       ctx.scale spriteSize, spriteSize
-      ctx.fillStyle = color.css # u.colorStr color
+      ctx.fillStyle = colorCss # u.colorStr color
       if strokeColor
-        ctx.strokeStyle = strokeColor.css # u.colorStr strokeColor
+        ctx.strokeStyle = strokeCss # u.colorStr strokeColor
         ctx.lineWidth = 0.05
       ctx.save()
       ctx.beginPath(); shape.draw ctx; ctx.closePath()

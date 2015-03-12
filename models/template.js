@@ -47,7 +47,7 @@
       _ref = this.patches;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         p = _ref[_i];
-        p.color = Maps.randomGray();
+        p.color = Maps.randomGray(0, 100);
         if (p.x === 0 || p.y === 0) {
           p.color = "blue";
         }

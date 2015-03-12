@@ -412,7 +412,7 @@ Round to 0-255 int for gray values.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
-              <p>Convert h,s,l to r,g,b TypedArray</p>
+              <p>Convert h,s,l to r,g,b Uint8 TypedArray</p>
 
             </div>
             
@@ -449,7 +449,7 @@ Max distance is roughly 765 (3*255), for black &amp; white.</p>
                 <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
               <p>Scale a data value to an rgb color.
-value is in [min max], rgb’s are two colors.</p>
+Value is in [min max], rgb’s are two JS arrays.</p>
 <p>See ColorMap’s scaleColor for related scaling method and
 gradientColorMap for complex, MatLab-like, gradients.</p>
 
@@ -653,8 +653,8 @@ css string will return the triString #f00 value.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      <span class="hljs-attribute">getString</span>: <span class="hljs-function"><span class="hljs-params">(string)</span> -&gt;</span>
-        <span class="hljs-property">@string</span> = Color.triString(@...) <span class="hljs-keyword">unless</span> <span class="hljs-property">@string</span>
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-attribute">getString</span>: <span class="hljs-function"><span class="hljs-params">()</span> -&gt;</span>
+        <span class="hljs-property">@string</span> = Color.triString(@...) <span class="hljs-keyword">unless</span> <span class="hljs-property">@string</span>?
         <span class="hljs-property">@string</span>
     }</pre></div></div>
             
@@ -843,7 +843,7 @@ Return color if color is already of type.</p>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">convertColor</span>: <span class="hljs-function"><span class="hljs-params">(color, type)</span> -&gt;</span>
     type0 = <span class="hljs-property">@colorType</span>(color)
-    <span class="hljs-keyword">return</span> color <span class="hljs-keyword">if</span> type0 <span class="hljs-keyword">is</span> type
+    <span class="hljs-keyword">return</span> color <span class="hljs-keyword">if</span> type0 <span class="hljs-keyword">is</span> type <span class="hljs-keyword">and</span> type <span class="hljs-keyword">isnt</span> <span class="hljs-string">"css"</span> <span class="hljs-comment"># convert to triColor</span>
     <span class="hljs-keyword">return</span> color[type] <span class="hljs-keyword">if</span> type0 <span class="hljs-keyword">is</span> <span class="hljs-string">"typed"</span>
     <span class="hljs-property">@arrayToColor</span>(<span class="hljs-property">@colorToArray</span>(color), type)
   <span class="hljs-attribute">rgbaToColor</span>: <span class="hljs-function"><span class="hljs-params">(r, g, b, a=<span class="hljs-number">255</span>, type=<span class="hljs-string">"typed"</span>)</span> -&gt;</span>
@@ -869,7 +869,9 @@ Colors can be of different type:</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">colorsEqual</span>: <span class="hljs-function"><span class="hljs-params">(color1, color2)</span> -&gt;</span>
-    <span class="hljs-property">@convertColor</span>(color1, <span class="hljs-string">"pixel"</span>) <span class="hljs-keyword">is</span> <span class="hljs-property">@convertColor</span>(color2, <span class="hljs-string">"pixel"</span>)</pre></div></div>
+    <span class="hljs-property">@convertColor</span>(color1, <span class="hljs-string">"pixel"</span>) <span class="hljs-keyword">is</span> <span class="hljs-property">@convertColor</span>(color2, <span class="hljs-string">"pixel"</span>)
+};
+Color.initSharedPixel() <span class="hljs-comment"># Initialize the shared buffer pixel/rgb view</span></pre></div></div>
             
         </li>
         
@@ -879,24 +881,6 @@ Colors can be of different type:</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-48">&#182;</a>
-              </div>
-              <p>scaleColor: (color, number, min=0, max=1) -&gt;</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>
-
-};
-Color.initSharedPixel() <span class="hljs-comment"># Initialize the shared buffer pixel/rgb view</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-49">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-49">&#182;</a>
               </div>
               <p>Here are the 140 case insensitive legal color names (the X11 set)
 To include them in your model, use:</p>

@@ -350,7 +350,7 @@ add properties for map and index in map.</p>
             <div class="content"><div class='highlight'><pre>    <span class="hljs-attribute">init</span>: <span class="hljs-function"><span class="hljs-params">(indexToo = <span class="hljs-literal">false</span>)</span> -&gt;</span>
       <span class="hljs-property">@type</span> = Color.colorType @[<span class="hljs-number">0</span>]
       <span class="hljs-property">@index</span> = {} <span class="hljs-keyword">if</span> indexToo
-      u.error <span class="hljs-string">"ColorMap type error"</span> <span class="hljs-keyword">unless</span> <span class="hljs-property">@type</span>
+      u.error <span class="hljs-string">"ColorMap type error"</span> <span class="hljs-keyword">unless</span> <span class="hljs-property">@type</span>?
       <span class="hljs-keyword">if</span> <span class="hljs-property">@type</span> <span class="hljs-keyword">is</span> <span class="hljs-string">"typed"</span>
         <span class="hljs-keyword">for</span> color,i <span class="hljs-keyword">in</span> @ <span class="hljs-keyword">then</span> color.ix = i; color.map = @
       <span class="hljs-property">@index</span>[ <span class="hljs-property">@indexKey</span>(color) ] = i <span class="hljs-keyword">for</span> color,i <span class="hljs-keyword">in</span> @ <span class="hljs-keyword">if</span> <span class="hljs-property">@index</span>
@@ -492,6 +492,21 @@ Note: slow for large maps unless color cube or exact match.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-27">&#182;</a>
               </div>
+              <p>convert r to r,g,b,a if g not set</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      [r, g, b, a] = Color.colorToArray r <span class="hljs-keyword">unless</span> g?</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-28">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
               <p>First directly find if rgb cube</p>
 
             </div>
@@ -504,11 +519,11 @@ Note: slow for large maps unless color cube or exact match.</p>
         </li>
         
         
-        <li id="section-28">
+        <li id="section-29">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
+                <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
               <p>Then check if is exact match. Only use of alpha for opacity maps</p>
 
@@ -519,11 +534,11 @@ Note: slow for large maps unless color cube or exact match.</p>
         </li>
         
         
-        <li id="section-29">
+        <li id="section-30">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-30">&#182;</a>
               </div>
               <p>Finally use color distance to find closest color</p>
 
@@ -541,11 +556,11 @@ Note: slow for large maps unless color cube or exact match.</p>
         </li>
         
         
-        <li id="section-30">
+        <li id="section-31">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
+                <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
               <h3 id="colormap-utilities">ColorMap Utilities</h3>
 <p>Utilities for creating color arrays and associated maps. This is not
@@ -556,11 +571,11 @@ exhaustive, you can follow these examples for your own use.</p>
         </li>
         
         
-        <li id="section-31">
+        <li id="section-32">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-31">&#182;</a>
+                <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
               <p>Convert any array of rgb(a) or color values into colormap.
 Good for converting css names, pixels/image data</p>
@@ -574,11 +589,11 @@ Good for converting css names, pixels/image data</p>
         </li>
         
         
-        <li id="section-32">
+        <li id="section-33">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-32">&#182;</a>
+                <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
               <p>Create a gray map (gray: r=g=b)
 These are typically 256 entries but can be smaller
@@ -593,11 +608,11 @@ by passing a size parameter.</p>
         </li>
         
         
-        <li id="section-33">
+        <li id="section-34">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
+                <a class="pilcrow" href="#section-34">&#182;</a>
               </div>
               <p>Create a map with a random set of colors.
 randomColorMap: (nColors, type=”typed”, indexToo=false) -&gt;
@@ -609,11 +624,11 @@ randomColorMap: (nColors, type=”typed”, indexToo=false) -&gt;
         </li>
         
         
-        <li id="section-34">
+        <li id="section-35">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
               <p>Create a colormap by permuted rgb values.</p>
 <p>R, G, B can be either a number, (the number of steps beteen 0-255),
@@ -634,18 +649,18 @@ R=G=B=4, the resulting map has <code>4*4*4=64</code> colors.</p>
         </li>
         
         
-        <li id="section-35">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
               <p>Create an hsl map, inputs similar to above.  Convert the
-HSL values to css, default to bright hue ramp.</p>
+HSL values to typedColors, default to bright hue ramp (L=50).</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">hslColorMap</span>: <span class="hljs-function"><span class="hljs-params">(H, S=<span class="hljs-number">1</span>, L=<span class="hljs-number">1</span>, type=<span class="hljs-string">"css"</span>, indexToo=<span class="hljs-literal">false</span>)</span> -&gt;</span>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">hslColorMap</span>: <span class="hljs-function"><span class="hljs-params">(H, S=<span class="hljs-number">1</span>, L=<span class="hljs-number">1</span>, type=<span class="hljs-string">"typed"</span>, indexToo=<span class="hljs-literal">false</span>)</span> -&gt;</span>
     hslArray = <span class="hljs-property">@permuteColors</span>(H, S, L, [<span class="hljs-number">359</span>,<span class="hljs-number">100</span>,<span class="hljs-number">50</span>])
     array = (Color.hslString a... <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> hslArray)
     <span class="hljs-property">@colorMap</span> <span class="hljs-property">@arrayToColors</span>(array, type), indexToo</pre></div></div>
@@ -653,11 +668,11 @@ HSL values to css, default to bright hue ramp.</p>
         </li>
         
         
-        <li id="section-36">
+        <li id="section-37">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
               <p>Use gradient to build an rgba array, then convert to colormap.
 This easily creates all the MatLab colormaps.</p>
@@ -671,38 +686,18 @@ This easily creates all the MatLab colormaps.</p>
         </li>
         
         
-        <li id="section-37">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
-              </div>
-              <p>The most popular MatLab gradient, “jet”:</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">jetColors</span>: [ [<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">127</span>], [<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">255</span>], [<span class="hljs-number">0</span>,<span class="hljs-number">127</span>,<span class="hljs-number">255</span>], [<span class="hljs-number">0</span>,<span class="hljs-number">255</span>,<span class="hljs-number">255</span>],
-    [<span class="hljs-number">127</span>,<span class="hljs-number">255</span>,<span class="hljs-number">127</span>], [<span class="hljs-number">255</span>,<span class="hljs-number">255</span>,<span class="hljs-number">0</span>], [<span class="hljs-number">255</span>,<span class="hljs-number">127</span>,<span class="hljs-number">0</span>], [<span class="hljs-number">255</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>], [<span class="hljs-number">127</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>] ]
-  <span class="hljs-attribute">basicColors</span>: [<span class="hljs-string">"gray"</span>, <span class="hljs-string">"red"</span>, <span class="hljs-string">"orange"</span>, <span class="hljs-string">"brown"</span>, <span class="hljs-string">"yellow"</span>, <span class="hljs-string">"green"</span>, <span class="hljs-string">"lime"</span>,
-    <span class="hljs-string">"turquoise"</span>, <span class="hljs-string">"cyan"</span>, <span class="hljs-string">"skyblue"</span>, <span class="hljs-string">"blue"</span>, <span class="hljs-string">"violet"</span>, <span class="hljs-string">"magenta"</span>, <span class="hljs-string">"pink"</span>]</pre></div></div>
-            
-        </li>
-        
-        
         <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
-              <p>Ramp of a single color from black to color and to white if whiteToo</p>
+              <p>The most popular MatLab gradient, “jet”:</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">rampStops</span>: <span class="hljs-function"><span class="hljs-params">(color, whiteToo)</span> -&gt;</span>
-    <span class="hljs-keyword">if</span> whiteToo <span class="hljs-keyword">then</span> [<span class="hljs-string">"black"</span>, color, <span class="hljs-string">"white"</span>] <span class="hljs-keyword">else</span> [<span class="hljs-string">"black"</span>, color]
-  <span class="hljs-attribute">rampColorMap</span>: <span class="hljs-function"><span class="hljs-params">(color, width, whiteToo = <span class="hljs-literal">false</span>)</span> -&gt;</span>
-    <span class="hljs-property">@gradientColorMap</span> width, <span class="hljs-property">@rampStops</span>(color, whiteToo)</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">jetColors</span>: [ [<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">127</span>], [<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">255</span>], [<span class="hljs-number">0</span>,<span class="hljs-number">127</span>,<span class="hljs-number">255</span>], [<span class="hljs-number">0</span>,<span class="hljs-number">255</span>,<span class="hljs-number">255</span>],
+    [<span class="hljs-number">127</span>,<span class="hljs-number">255</span>,<span class="hljs-number">127</span>], [<span class="hljs-number">255</span>,<span class="hljs-number">255</span>,<span class="hljs-number">0</span>], [<span class="hljs-number">255</span>,<span class="hljs-number">127</span>,<span class="hljs-number">0</span>], [<span class="hljs-number">255</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>], [<span class="hljs-number">127</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>] ]</pre></div></div>
             
         </li>
         
@@ -713,31 +708,15 @@ This easily creates all the MatLab colormaps.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
-              <p><a href="http://ccl.northwestern.edu/netlogo/docs/">NetLogo maps</a>
-are sets of color ramps for the basic colors, but with
-slightly different r,g,b values designed for good color ballance.
-They typically go from black to near white shades. We provide
-an alternative to ramp from black to full color as well.</p>
+              <p>Ramp of a single color from black to color and to white if whiteToo
+rampStops: (color, whiteToo) -&gt;
+  if whiteToo then [“black”, color, “white”] else [“black”, color]</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">netLogoColorMap</span>: <span class="hljs-function"><span class="hljs-params">(width = <span class="hljs-number">10</span>, whiteToo = <span class="hljs-literal">true</span>)</span> -&gt;</span>
-    map = []; maps = {}
-    <span class="hljs-keyword">for</span> name, color <span class="hljs-keyword">of</span> <span class="hljs-property">@netLogoColors</span>
-      maps[name] = <span class="hljs-property">@rampColorMap</span> color, width, whiteToo
-      map = map.concat maps[name]
-    map = <span class="hljs-property">@basicColorMap</span> map
-    <span class="hljs-built_in">window</span>.maps = maps
-    map[k] = v <span class="hljs-keyword">for</span> k, v <span class="hljs-keyword">of</span> maps
-    map
-  <span class="hljs-attribute">netLogoColors</span>:
-    <span class="hljs-attribute">gray</span>: [<span class="hljs-number">141</span>, <span class="hljs-number">141</span>, <span class="hljs-number">141</span>],      <span class="hljs-attribute">red</span>: [<span class="hljs-number">215</span>, <span class="hljs-number">50</span>, <span class="hljs-number">41</span>]
-    <span class="hljs-attribute">orange</span>: [<span class="hljs-number">241</span>, <span class="hljs-number">106</span>, <span class="hljs-number">21</span>],     <span class="hljs-attribute">brown</span>: [<span class="hljs-number">157</span>, <span class="hljs-number">110</span>, <span class="hljs-number">72</span>]
-    <span class="hljs-attribute">yellow</span>: [<span class="hljs-number">237</span>, <span class="hljs-number">237</span>, <span class="hljs-number">49</span>],     <span class="hljs-attribute">green</span>: [<span class="hljs-number">89</span>, <span class="hljs-number">176</span>, <span class="hljs-number">60</span>]
-    <span class="hljs-attribute">lime</span>: [<span class="hljs-number">44</span>, <span class="hljs-number">209</span>, <span class="hljs-number">59</span>],        <span class="hljs-attribute">turquoise</span>: [<span class="hljs-number">29</span>, <span class="hljs-number">159</span>, <span class="hljs-number">120</span>]
-    <span class="hljs-attribute">cyan</span>: [<span class="hljs-number">84</span>, <span class="hljs-number">196</span>, <span class="hljs-number">196</span>],       <span class="hljs-attribute">sky</span>: [<span class="hljs-number">45</span>, <span class="hljs-number">141</span>, <span class="hljs-number">190</span>]
-    <span class="hljs-attribute">blue</span>: [<span class="hljs-number">52</span>, <span class="hljs-number">93</span>, <span class="hljs-number">169</span>],        <span class="hljs-attribute">violet</span>: [<span class="hljs-number">124</span>, <span class="hljs-number">80</span>, <span class="hljs-number">164</span>]
-    <span class="hljs-attribute">magenta</span>: [<span class="hljs-number">167</span>, <span class="hljs-number">27</span>, <span class="hljs-number">106</span>],    <span class="hljs-attribute">pink</span>: [<span class="hljs-number">224</span>, <span class="hljs-number">127</span>, <span class="hljs-number">150</span>]</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">rampColorMap</span>: <span class="hljs-function"><span class="hljs-params">(color, width, whiteToo = <span class="hljs-literal">false</span>)</span> -&gt;</span>
+    stops = <span class="hljs-keyword">if</span> whiteToo <span class="hljs-keyword">then</span> [<span class="hljs-string">"black"</span>, color, <span class="hljs-string">"white"</span>] <span class="hljs-keyword">else</span> [<span class="hljs-string">"black"</span>, color]
+    <span class="hljs-property">@gradientColorMap</span> width, stops <span class="hljs-comment"># @rampStops(color, whiteToo)</span></pre></div></div>
             
         </li>
         
@@ -748,15 +727,28 @@ an alternative to ramp from black to full color as well.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
-              <p>Create alpha map of the given base r,g,b color,
-with nOpacity opacity values, default to all 256</p>
+              <p><a href="http://ccl.northwestern.edu/netlogo/docs/">NetLogo maps</a>
+are sets of color ramps for the basic colors, but with
+slightly different r,g,b values designed for good color ballance.
+They typically go from black to near white shades. We provide
+an alternative to ramp from black to full color as well.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">alphaColorMap</span>: <span class="hljs-function"><span class="hljs-params">(rgb, nOpacities = <span class="hljs-number">256</span>, type=<span class="hljs-string">"typed"</span>, indexToo=<span class="hljs-literal">false</span>)</span> -&gt;</span>
-    [r, g, b] = rgb
-    array = ( [r, g, b, a] <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> u.aIntRamp <span class="hljs-number">0</span>, <span class="hljs-number">255</span>, nOpacities )
-    <span class="hljs-property">@colorMap</span> <span class="hljs-property">@arrayToColors</span>(array, type), indexToo</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">netLogoColorMap</span>: <span class="hljs-function"><span class="hljs-params">(width = <span class="hljs-number">10</span>, whiteToo = <span class="hljs-literal">true</span>)</span> -&gt;</span>
+    <span class="hljs-property">@namedColorMap</span> <span class="hljs-property">@netLogoColors</span>, width, whiteToo
+  <span class="hljs-attribute">cssBasicColorMap</span>: <span class="hljs-function"><span class="hljs-params">(width=<span class="hljs-number">18</span>, whiteToo=<span class="hljs-literal">false</span>)</span> -&gt;</span>
+    <span class="hljs-property">@namedColorMap</span> <span class="hljs-property">@basicCssColors</span>, width, whiteToo
+
+  <span class="hljs-attribute">namedColorMap</span>: <span class="hljs-function"><span class="hljs-params">(names, width, whiteToo)</span> -&gt;</span>
+    map = []; ramps = {}
+    <span class="hljs-keyword">if</span> u.isArray names <span class="hljs-comment"># convert array of named colors to object of name: name</span>
+      o = {}; o[n] = n <span class="hljs-keyword">for</span> n <span class="hljs-keyword">in</span> names; names = o
+    <span class="hljs-keyword">for</span> name, color <span class="hljs-keyword">of</span> names
+      ramps[name] = <span class="hljs-property">@rampColorMap</span> color, width, whiteToo
+      map = map.concat ramps[name]
+    map = <span class="hljs-property">@basicColorMap</span> map
+    map[k] = v <span class="hljs-keyword">for</span> k, v <span class="hljs-keyword">of</span> ramps</pre></div></div>
             
         </li>
         
@@ -767,16 +759,12 @@ with nOpacity opacity values, default to all 256</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
-              <p>Create shared maps and utilities</p>
+              <p>Hack: will remove; helps migration of agent/patch.scaleColor</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">Maps</span>: {}
-  <span class="hljs-attribute">createSharedMaps</span>: <span class="hljs-function"><span class="hljs-params">(whiteToo = <span class="hljs-literal">true</span>)</span> -&gt;</span>
-    <span class="hljs-property">@Maps</span>.Gray    = <span class="hljs-property">@grayColorMap</span>()
-    <span class="hljs-property">@Maps</span>.Rgb256  = <span class="hljs-property">@rgbColorMap</span>(<span class="hljs-number">8</span>,<span class="hljs-number">8</span>,<span class="hljs-number">4</span>)
-    <span class="hljs-property">@Maps</span>.Rgb     = <span class="hljs-property">@rgbColorCube</span>(<span class="hljs-number">16</span>)
-    <span class="hljs-property">@Maps</span>.Safe    = <span class="hljs-property">@rgbColorCube</span>(<span class="hljs-number">6</span>)</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    map[Color.convertColor k, <span class="hljs-string">"css"</span>] = v <span class="hljs-keyword">for</span> k, v <span class="hljs-keyword">of</span> ramps
+    map</pre></div></div>
             
         </li>
         
@@ -787,15 +775,198 @@ with nOpacity opacity values, default to all 256</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
+              <p>Our basic css named color strings</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">basicCssColors</span>: [<span class="hljs-string">"gray"</span>, <span class="hljs-string">"red"</span>, <span class="hljs-string">"orange"</span>, <span class="hljs-string">"brown"</span>, <span class="hljs-string">"yellow"</span>, <span class="hljs-string">"green"</span>, <span class="hljs-string">"lime"</span>,
+    <span class="hljs-string">"turquoise"</span>, <span class="hljs-string">"cyan"</span>, <span class="hljs-string">"skyblue"</span>, <span class="hljs-string">"blue"</span>, <span class="hljs-string">"violet"</span>, <span class="hljs-string">"magenta"</span>, <span class="hljs-string">"pink"</span>]</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-43">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-43">&#182;</a>
+              </div>
+              <p>Netlogo’s basic named colors. NOTE: sky -&gt; skyblue; css legal named color.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">netLogoColors</span>:
+    <span class="hljs-attribute">gray</span>: [<span class="hljs-number">141</span>, <span class="hljs-number">141</span>, <span class="hljs-number">141</span>],      <span class="hljs-attribute">red</span>: [<span class="hljs-number">215</span>, <span class="hljs-number">50</span>, <span class="hljs-number">41</span>]
+    <span class="hljs-attribute">orange</span>: [<span class="hljs-number">241</span>, <span class="hljs-number">106</span>, <span class="hljs-number">21</span>],     <span class="hljs-attribute">brown</span>: [<span class="hljs-number">157</span>, <span class="hljs-number">110</span>, <span class="hljs-number">72</span>]
+    <span class="hljs-attribute">yellow</span>: [<span class="hljs-number">237</span>, <span class="hljs-number">237</span>, <span class="hljs-number">49</span>],     <span class="hljs-attribute">green</span>: [<span class="hljs-number">89</span>, <span class="hljs-number">176</span>, <span class="hljs-number">60</span>]
+    <span class="hljs-attribute">lime</span>: [<span class="hljs-number">44</span>, <span class="hljs-number">209</span>, <span class="hljs-number">59</span>],        <span class="hljs-attribute">turquoise</span>: [<span class="hljs-number">29</span>, <span class="hljs-number">159</span>, <span class="hljs-number">120</span>]
+    <span class="hljs-attribute">cyan</span>: [<span class="hljs-number">84</span>, <span class="hljs-number">196</span>, <span class="hljs-number">196</span>],       <span class="hljs-attribute">skyblue</span>: [<span class="hljs-number">45</span>, <span class="hljs-number">141</span>, <span class="hljs-number">190</span>]
+    <span class="hljs-attribute">blue</span>: [<span class="hljs-number">52</span>, <span class="hljs-number">93</span>, <span class="hljs-number">169</span>],        <span class="hljs-attribute">violet</span>: [<span class="hljs-number">124</span>, <span class="hljs-number">80</span>, <span class="hljs-number">164</span>]
+    <span class="hljs-attribute">magenta</span>: [<span class="hljs-number">167</span>, <span class="hljs-number">27</span>, <span class="hljs-number">106</span>],    <span class="hljs-attribute">pink</span>: [<span class="hljs-number">224</span>, <span class="hljs-number">127</span>, <span class="hljs-number">150</span>]</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-44">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-44">&#182;</a>
+              </div>
+              <p>Create opacity map of the given base r,g,b color,
+with nOpacity opacity values, default to all 256</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">opacityColorMap</span>: <span class="hljs-function"><span class="hljs-params">(rgb, nOpacities = <span class="hljs-number">256</span>, type=<span class="hljs-string">"typed"</span>, indexToo=<span class="hljs-literal">false</span>)</span> -&gt;</span>
+    [r, g, b] = rgb
+    array = ( [r, g, b, a] <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> u.aIntRamp <span class="hljs-number">0</span>, <span class="hljs-number">255</span>, nOpacities )
+    <span class="hljs-property">@colorMap</span> <span class="hljs-property">@arrayToColors</span>(array, type), indexToo</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-45">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-45">&#182;</a>
+              </div>
+              <p>Create shared maps and utilities</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">createSharedMaps</span>: <span class="hljs-function"><span class="hljs-params">(whiteToo = <span class="hljs-literal">true</span>)</span> -&gt;</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-46">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-46">&#182;</a>
+              </div>
+              <p>A map of all 256 gray colors</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-property">@Gray</span>    = <span class="hljs-property">@grayColorMap</span>()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-47">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-47">&#182;</a>
+              </div>
+              <p>A popular rgb map of the best 256 colors</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-property">@Rgb256</span>  = <span class="hljs-property">@rgbColorMap</span>(<span class="hljs-number">8</span>,<span class="hljs-number">8</span>,<span class="hljs-number">4</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-48">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-48">&#182;</a>
+              </div>
+              <p>A large 4K color map with good matches for most colors</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-property">@Rgb</span>     = <span class="hljs-property">@rgbColorCube</span>(<span class="hljs-number">16</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-49">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-49">&#182;</a>
+              </div>
+              <p>The HTML <a href="http://websafecolors.info/">“web safe colors”</a></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-property">@Safe</span>    = <span class="hljs-property">@rgbColorCube</span>(<span class="hljs-number">6</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-50">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-50">&#182;</a>
+              </div>
               <p>The popular MatLab jet gradient</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-property">@Maps</span>.Jet     = <span class="hljs-property">@gradientColorMap</span> <span class="hljs-number">256</span>, <span class="hljs-property">@jetColors</span>
-    <span class="hljs-property">@Maps</span>.NetLogo = <span class="hljs-property">@netLogoColorMap</span> <span class="hljs-number">10</span>
-    <span class="hljs-property">@Maps</span>.Ramps   = <span class="hljs-property">@netLogoColorMap</span> <span class="hljs-number">18</span>, <span class="hljs-literal">false</span>
-  <span class="hljs-attribute">randomGray</span>: <span class="hljs-function"><span class="hljs-params">(min, max)</span> -&gt;</span> <span class="hljs-property">@Maps</span>.Gray.randomColor(min, max)
-  <span class="hljs-attribute">randomColor</span>:<span class="hljs-function"> -&gt;</span> <span class="hljs-property">@Maps</span>.Rgb256.randomColor() <span class="hljs-comment"># sharedRgb?</span>
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-property">@Jet</span>     = <span class="hljs-property">@gradientColorMap</span> <span class="hljs-number">256</span>, <span class="hljs-property">@jetColors</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-51">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-51">&#182;</a>
+              </div>
+              <p>The netlogo map. NetLogo.yellow etc are individual netlogo hue ramps</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-property">@NetLogo</span> = <span class="hljs-property">@netLogoColorMap</span> <span class="hljs-number">10</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-52">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-52">&#182;</a>
+              </div>
+              <p>Like above but largest &lt; 256 map (252). Does not diminish to white.
+Ramps.yellow is thus a ramp from black to brightest NetLogo yellow hue</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-property">@NetLogoRamps</span> = <span class="hljs-property">@netLogoColorMap</span> <span class="hljs-number">18</span>, <span class="hljs-literal">false</span>
+    <span class="hljs-property">@CssRamps</span>     = <span class="hljs-property">@cssBasicColorMap</span> <span class="hljs-number">18</span>, <span class="hljs-literal">false</span>
+  <span class="hljs-attribute">randomGray</span>: <span class="hljs-function"><span class="hljs-params">(min, max)</span> -&gt;</span> <span class="hljs-property">@Gray</span>.randomColor(min, max)
+  <span class="hljs-attribute">randomColor</span>:<span class="hljs-function"> -&gt;</span> <span class="hljs-property">@Rgb256</span>.randomColor() <span class="hljs-comment"># sharedRgb?</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-53">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-53">&#182;</a>
+              </div>
+              <p>Legacy/Temporary: replace util/patch/agent scaleColor</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">scaleColor</span>: <span class="hljs-function"><span class="hljs-params">(color, number, min=<span class="hljs-number">0</span>, max=<span class="hljs-number">1</span>)</span> -&gt;</span>
+    <span class="hljs-keyword">if</span> color.scaleColor? <span class="hljs-comment"># colormap ramp</span>
+      <span class="hljs-keyword">return</span> color.scaleColor number, min, max
+    <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> ramp = <span class="hljs-property">@CssRamps</span>[Color.convertColor color, <span class="hljs-string">"css"</span>]
+      <span class="hljs-keyword">return</span> ramp.scaleColor number, min, max
+    <span class="hljs-keyword">else</span>
+      <span class="hljs-keyword">return</span> <span class="hljs-property">@Rgb</span>.findClosestColor Color.rgbLerp(color, number, min, max)
 }
 ColorMaps.createSharedMaps()</pre></div></div>
             

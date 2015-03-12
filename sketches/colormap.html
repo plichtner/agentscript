@@ -107,6 +107,12 @@ pw=16&ph=16&ps=32&map=hsl&args=[256,1,1]
 
 pw=10&ps=24&map=NetLogo
 pw=6&ps=24&map=Safe
+pw=18&ps=24&map=NetLogoRamps
+pw=18&ps=24&map=CssRamps
+
+
+pw=18&ps=24&map=cssBasic&args=[flags.pw,true]
+pw=18&ps=24&map=cssBasic&args=[flags.pw,false]
 
 pw=10&ps=24&map=netLogo&args=[flags.pw,false]
 pw=11&ps=24&map=netLogo&args=flags.pw
@@ -217,6 +223,9 @@ window.rgbRainbowColors = [ [150,0,90], [0,0,200], [0,25,255], [0,152,255],
 # namedRainbowArray = (v for k,v of namedRainbowObj)
 window.namedRainbowArray = ["red", "orange", "yellow", "green", "blue", "indigo"]
 
+window.basicArrays = (Color.colorToArray color for color in ColorMaps.basicCssColor)
+window.basicTriColors = (Color.triString color... for color in basicArrays)
+
 # Map Types
 # grayColorMap: (size = 256)
 # rgbColorMap: (R,G=R,B=R)
@@ -257,11 +266,11 @@ if flags.args.length is 1 and flags.map is "rgb"
   flags.args = [cube, cube, cube]
 # flags.map = flags.map + "ColorMap" unless ABM.ColorMap.
 window.map =
-  if shared = ColorMaps.Maps[flags.map]
+  if shared = ColorMaps[flags.map]
     shared
   else
     ColorMaps[flags.map+"ColorMap"] flags.args..., flags.type, flags.index
-flags.ph = Math.ceil map.length/flags.pw unless flags.ph
+flags.ph = Math.ceil map.length/flags.pw unless flags.ph?
 console.log k,v for k,v of flags
 
 # Color.basicColorMap = (array) -> new Color.ColorMap array

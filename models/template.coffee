@@ -64,7 +64,7 @@ class MyModel extends ABM.Model
     # our model needs. In this case, we set the built-in color to a
     # random gray value.
     for p in @patches
-      p.color = Maps.randomGray()
+      p.color = Maps.randomGray(0,100)
       # Set x,y axes different color
       p.color = "blue" if p.x is 0 or p.y is 0
 

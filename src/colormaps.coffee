@@ -105,7 +105,7 @@ ColorMaps  = {
     init: (indexToo = false) ->
       @type = Color.colorType @[0]
       @index = {} if indexToo
-      u.error "ColorMap type error" unless @type
+      u.error "ColorMap type error" unless @type?
       if @type is "typed"
         for color,i in @ then color.ix = i; color.map = @
       @index[ @indexKey(color) ] = i for color,i in @ if @index
@@ -152,6 +152,8 @@ ColorMaps  = {
     # Alpha only used for exact lookup optimization.
     # Note: slow for large maps unless color cube or exact match.
     findClosestIndex: (r, g, b, a=255) -> # alpha not in rgbDistance function
+      # convert r to r,g,b,a if g not set
+      [r, g, b, a] = Color.colorToArray r unless g?
       # First directly find if rgb cube
       if @cube
         step = 255/(@cube-1)
@@ -208,8 +210,8 @@ ColorMaps  = {
     @rgbColorMap cubeSide, cubeSide, cubeSide, type, indexToo
 
   # Create an hsl map, inputs similar to above.  Convert the
-  # HSL values to css, default to bright hue ramp.
-  hslColorMap: (H, S=1, L=1, type="css", indexToo=false) ->
+  # HSL values to typedColors, default to bright hue ramp (L=50).
+  hslColorMap: (H, S=1, L=1, type="typed", indexToo=false) ->
     hslArray = @permuteColors(H, S, L, [359,100,50])
     array = (Color.hslString a... for a in hslArray)
     @colorMap @arrayToColors(array, type), indexToo
@@ -222,14 +224,13 @@ ColorMaps  = {
   # The most popular MatLab gradient, "jet":
   jetColors: [ [0,0,127], [0,0,255], [0,127,255], [0,255,255],
     [127,255,127], [255,255,0], [255,127,0], [255,0,0], [127,0,0] ]
-  basicColors: ["gray", "red", "orange", "brown", "yellow", "green", "lime",
-    "turquoise", "cyan", "skyblue", "blue", "violet", "magenta", "pink"]
 
   # Ramp of a single color from black to color and to white if whiteToo
-  rampStops: (color, whiteToo) ->
-    if whiteToo then ["black", color, "white"] else ["black", color]
+  # rampStops: (color, whiteToo) ->
+  #   if whiteToo then ["black", color, "white"] else ["black", color]
   rampColorMap: (color, width, whiteToo = false) ->
-    @gradientColorMap width, @rampStops(color, whiteToo)
+    stops = if whiteToo then ["black", color, "white"] else ["black", color]
+    @gradientColorMap width, stops # @rampStops(color, whiteToo)
 
   # [NetLogo maps](http://ccl.northwestern.edu/netlogo/docs/)
   # are sets of color ramps for the basic colors, but with
@@ -237,42 +238,71 @@ ColorMaps  = {
   # They typically go from black to near white shades. We provide
   # an alternative to ramp from black to full color as well.
   netLogoColorMap: (width = 10, whiteToo = true) ->
-    map = []; maps = {}
-    for name, color of @netLogoColors
-      maps[name] = @rampColorMap color, width, whiteToo
-      map = map.concat maps[name]
+    @namedColorMap @netLogoColors, width, whiteToo
+  cssBasicColorMap: (width=18, whiteToo=false) ->
+    @namedColorMap @basicCssColors, width, whiteToo
+
+  namedColorMap: (names, width, whiteToo) ->
+    map = []; ramps = {}
+    if u.isArray names # convert array of named colors to object of name: name
+      o = {}; o[n] = n for n in names; names = o
+    for name, color of names
+      ramps[name] = @rampColorMap color, width, whiteToo
+      map = map.concat ramps[name]
     map = @basicColorMap map
-    window.maps = maps
-    map[k] = v for k, v of maps
+    map[k] = v for k, v of ramps
+    # Hack: will remove; helps migration of agent/patch.scaleColor
+    map[Color.convertColor k, "css"] = v for k, v of ramps
     map
+
+  # Our basic css named color strings
+  basicCssColors: ["gray", "red", "orange", "brown", "yellow", "green", "lime",
+    "turquoise", "cyan", "skyblue", "blue", "violet", "magenta", "pink"]
+  # Netlogo's basic named colors. NOTE: sky -> skyblue; css legal named color.
   netLogoColors:
     gray: [141, 141, 141],      red: [215, 50, 41]
     orange: [241, 106, 21],     brown: [157, 110, 72]
     yellow: [237, 237, 49],     green: [89, 176, 60]
     lime: [44, 209, 59],        turquoise: [29, 159, 120]
-    cyan: [84, 196, 196],       sky: [45, 141, 190]
+    cyan: [84, 196, 196],       skyblue: [45, 141, 190]
     blue: [52, 93, 169],        violet: [124, 80, 164]
     magenta: [167, 27, 106],    pink: [224, 127, 150]
 
-  # Create alpha map of the given base r,g,b color,
+  # Create opacity map of the given base r,g,b color,
   # with nOpacity opacity values, default to all 256
-  alphaColorMap: (rgb, nOpacities = 256, type="typed", indexToo=false) ->
+  opacityColorMap: (rgb, nOpacities = 256, type="typed", indexToo=false) ->
     [r, g, b] = rgb
     array = ( [r, g, b, a] for a in u.aIntRamp 0, 255, nOpacities )
     @colorMap @arrayToColors(array, type), indexToo
 
   # Create shared maps and utilities
-  Maps: {}
   createSharedMaps: (whiteToo = true) ->
-    @Maps.Gray    = @grayColorMap()
-    @Maps.Rgb256  = @rgbColorMap(8,8,4)
-    @Maps.Rgb     = @rgbColorCube(16)
-    @Maps.Safe    = @rgbColorCube(6)
+    # A map of all 256 gray colors
+    @Gray    = @grayColorMap()
+    # A popular rgb map of the best 256 colors
+    @Rgb256  = @rgbColorMap(8,8,4)
+    # A large 4K color map with good matches for most colors
+    @Rgb     = @rgbColorCube(16)
+    # The HTML ["web safe colors"](http://websafecolors.info/)
+    @Safe    = @rgbColorCube(6)
     # The popular MatLab jet gradient
-    @Maps.Jet     = @gradientColorMap 256, @jetColors
-    @Maps.NetLogo = @netLogoColorMap 10
-    @Maps.Ramps   = @netLogoColorMap 18, false
-  randomGray: (min, max) -> @Maps.Gray.randomColor(min, max)
-  randomColor: -> @Maps.Rgb256.randomColor() # sharedRgb?
+    @Jet     = @gradientColorMap 256, @jetColors
+    # The netlogo map. NetLogo.yellow etc are individual netlogo hue ramps
+    @NetLogo = @netLogoColorMap 10
+    # Like above but largest < 256 map (252). Does not diminish to white.
+    # Ramps.yellow is thus a ramp from black to brightest NetLogo yellow hue
+    @NetLogoRamps = @netLogoColorMap 18, false
+    @CssRamps     = @cssBasicColorMap 18, false
+  randomGray: (min, max) -> @Gray.randomColor(min, max)
+  randomColor: -> @Rgb256.randomColor() # sharedRgb?
+
+  # Legacy/Temporary: replace util/patch/agent scaleColor
+  scaleColor: (color, number, min=0, max=1) ->
+    if color.scaleColor? # colormap ramp
+      return color.scaleColor number, min, max
+    else if ramp = @CssRamps[Color.convertColor color, "css"]
+      return ramp.scaleColor number, min, max
+    else
+      return @Rgb.findClosestColor Color.rgbLerp(color, number, min, max)
 }
 ColorMaps.createSharedMaps()

@@ -220,27 +220,27 @@ class Patches extends AgentSet
   # of each patch's value of `v` to its neighbors.
   # If a color map `cMap` is given, scale the patch color via variable's value
   # If the patch has less than 8 neighbors, return the extra to the patch.
-  diffuse: (v, rate, cMap) -> # variable name, diffusion rate, cMap (optional)
+  diffuse: (v, rate, color) -> # variable name, diffusion rate, cMap (optional)
     # zero temp variable if not yet set
     unless @[0]._diffuseNext?
       p._diffuseNext = 0 for p in @
     # pass 1: calculate contribution of all patches to themselves and neighbors
-    if cMap
-      minVal = Infinity; maxVal = -Infinity
-      unless cMap.scaleColor
-        u.deprecated "Patch.diffuse: convert to ColorMap usage, using Jet"
-        cMap = ColorMaps.Maps.Jet
+    # if cMap
+    #   minVal = Infinity; maxVal = -Infinity
+    #   unless cMap.scaleColor?
+    #     u.deprecated "Patch.diffuse: convert to ColorMap usage, using Jet"
+    #     cMap = ColorMaps.Jet
     for p in @
       dv = p[v]*rate; dv8 = dv/8; nn = p.n.length
       p._diffuseNext += p[v] - dv + (8-nn)*dv8
       n._diffuseNext += dv8 for n in p.n
-      if cMap
-        minVal = Math.min minVal, p[v]
-        maxVal = Math.max maxVal, p[v]
+      # if cMap
+      #   minVal = Math.min minVal, p[v]
+      #   maxVal = Math.max maxVal, p[v]
     # pass 2: set new value for all patches, zero temp, modify color if c given
     for p in @
       p[v] = p._diffuseNext
       p._diffuseNext = 0
-      p.color = cMap.scaleColor p[v], minVal, maxVal if cMap
+      p.color = ColorMaps.scaleColor color, p[v] if color?
 
     null # avoid returning copy of @

@@ -318,6 +318,8 @@ the shape to fit it. Return existing sprite if duplicate.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">shapeToSprite</span>: <span class="hljs-function"><span class="hljs-params">(name, color, size, strokeColor)</span> -&gt;</span>
+    colorCss = Color.convertColor color, <span class="hljs-string">"css"</span>
+    strokeCss = Color.convertColor strokeColor, <span class="hljs-string">"css"</span> <span class="hljs-keyword">if</span> strokeColor?
     spriteSize = Math.ceil size
     strokePadding = <span class="hljs-number">4</span>
     slotSize = spriteSize + strokePadding
@@ -336,7 +338,7 @@ the shape to fit it. Return existing sprite if duplicate.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    index = <span class="hljs-keyword">if</span> shape.img? <span class="hljs-keyword">then</span> name <span class="hljs-keyword">else</span> <span class="hljs-string">"<span class="hljs-subst">#{name}</span>-<span class="hljs-subst">#{color.css}</span>"</span>
+            <div class="content"><div class='highlight'><pre>    index = <span class="hljs-keyword">if</span> shape.img? <span class="hljs-keyword">then</span> name <span class="hljs-keyword">else</span> <span class="hljs-string">"<span class="hljs-subst">#{name}</span>-<span class="hljs-subst">#{colorCss}</span>"</span>
     ctx = spriteSheets[slotSize]</pre></div></div>
             
         </li>
@@ -425,9 +427,9 @@ the shape to fit it. Return existing sprite if duplicate.</p>
       ctx.save()
       ctx.translate (ctx.nextX+<span class="hljs-number">0.5</span>)*(slotSize), (ctx.nextY+<span class="hljs-number">0.5</span>)*(slotSize)
       ctx.scale spriteSize, spriteSize
-      ctx.fillStyle = color.css <span class="hljs-comment"># u.colorStr color</span>
+      ctx.fillStyle = colorCss <span class="hljs-comment"># u.colorStr color</span>
       <span class="hljs-keyword">if</span> strokeColor
-        ctx.strokeStyle = strokeColor.css <span class="hljs-comment"># u.colorStr strokeColor</span>
+        ctx.strokeStyle = strokeCss <span class="hljs-comment"># u.colorStr strokeColor</span>
         ctx.lineWidth = <span class="hljs-number">0.05</span>
       ctx.save()
       ctx.beginPath(); shape.draw ctx; ctx.closePath()

@@ -46,13 +46,14 @@ class Patch
   scaleColor: (c, s) ->
     # @color = u.clone @color unless @hasOwnProperty("color")
     # u.scaleColor c, s, @color
-    u.deprecated "Patch.scaleColor use ColorMap ramps"
-    @color = Color.rgbLerp c, s
-
+    u.deprecated "Patch.scaleColor: use ColorMaps ramps or closestColor"
+    @color = ColorMaps.scaleColor(c, s)
 
   scaleOpacity: (c, s) ->
-    @color = u.clone @color unless @.hasOwnProperty("color")
-    u.scaleOpacity c, s, @color
+    u.deprecated "Patch.scaleOpacity: use ColorMaps ramps"
+    @color = u.scaleOpacity c, s, @color
+    # @color = u.clone @color unless @.hasOwnProperty("color")
+    # u.scaleOpacity c, s, @color
 
   # Draw the patch and its text label if there is one.
   draw: (ctx) ->
