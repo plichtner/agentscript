@@ -3,7 +3,7 @@
 # virtual/abstract methods: `setup()` and `step()`
 
 # ### Class Model
-# test
+
 class Model
   # Class variable for layers parameters.
   # Can be added to by programmer to modify/create layers, **before** starting your own model.
