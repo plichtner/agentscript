@@ -1,0 +1,68 @@
+<html>
+  <head>
+    <title>Diffusion-Limited Aggregation Model</title>
+    <script src="../lib/agentscript.js"></script>
+    <script src="../tools/coffee-script.js"></script>
+    <script type="text/coffeescript">
+      u = ABM.Util
+
+      class MyModel extends ABM.Model
+        setup: ->
+          @anim.setRate(60)
+          @patches.setDefault('color', 'white')
+          @refreshPatches = false
+          @agentBreeds("stationary moving")
+          
+          @moving.setDefault("shape", "circle")
+
+        step: ->
+          @spawnNewParticle()
+          for a in @moving
+            @moveParticle(a)
+
+        spawnNewParticle: ->
+          @moving.create(1, (agent) =>
+            agent.setXY(u.randomCentered(@world.numX), @world.maxYcor)
+            agent.heading = 3*Math.PI/2
+          )
+
+        moveParticle: (agent) ->
+          if agent.stuck
+            return
+          
+          neighbors = agent.inCone(@agents, Math.PI, 2*agent.size)
+          stuckNeighbors = neighbors.filter((n) -> return n.stuck)
+          if (stuckNeighbors.length > 0)
+            agent.stuck = true
+            agent.color = ABM.ColorMaps.Jet.scaleColor(@anim.ticks, 0, 1500)
+            if (agent.y is @world.maxYcor)
+              @stop()
+            # @stationary.setBreed(agent)
+            return
+
+          if (agent.y is @world.minYcor)
+            agent.stuck = true
+            agent.color = ABM.ColorMaps.Jet.scaleColor(@anim.ticks, 0, 1500)
+            # @stationary.setBreed(agent)
+            return
+
+          agent.forward(1)
+
+
+      window.model = new MyModel {
+        div: "layers",
+        size: 6,
+        minX: -40,
+        maxX: 40,
+        minY: -40,
+        maxY: 40
+      }
+
+      model.start()
+    </script>
+  </head>
+  </head>
+  <body>
+    <div id="layers"></div>
+  </body>
+</html>
